@@ -12,7 +12,7 @@ const (
 )
 
 func main() {
-	game := new(Game)
+	game := newGame()
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Ssnake")
