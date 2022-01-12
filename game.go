@@ -72,7 +72,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		// Draw unit
-		ebitenutil.DrawRect(screen, curUnit.posX, curUnit.posY, float64(unitLength), float64(unitLength), unitColor)
+		ebitenutil.DrawRect(screen, curUnit.posX, curUnit.posY, unitLength, unitLength, unitColor)
 	}
 }
 
