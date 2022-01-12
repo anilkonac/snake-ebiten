@@ -38,13 +38,12 @@ func newSnake(posX float64, posY float64, direction uint8, speed uint8, length u
 
 	// Generate units of the snake
 	snake.units = make([]Unit, length, math.MaxUint8)
-	iLength := int(length)
-	for i := 0; i < iLength; i++ {
+	for i := uint8(0); i < length; i++ {
 		curUnit := &snake.units[i]
 		curUnit.direction = direction
 
 		// Compute position of current unit
-		distanceToHead := float64(i * unitLength)
+		distanceToHead := float64(i) * unitLength
 		switch direction {
 		case directionUp:
 			curUnit.posX = posX
