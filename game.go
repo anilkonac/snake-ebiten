@@ -34,19 +34,19 @@ func (g *Game) Update() error {
 	g.tps = ebiten.CurrentTPS()
 
 	// Update snake position
-	snakeSpeed := float64(g.snake.speed)
 	for indexUnit := 0; indexUnit < len(g.snake.units); indexUnit++ {
 		curUnit := &g.snake.units[indexUnit]
 
+		travelDistance := float64(g.snake.speed) * deltaTime
 		switch curUnit.direction {
 		case directionRight:
-			curUnit.posX += snakeSpeed * deltaTime
+			curUnit.posX += travelDistance
 		case directionLeft:
-			curUnit.posX -= snakeSpeed * deltaTime
+			curUnit.posX -= travelDistance
 		case directionUp:
-			curUnit.posY -= snakeSpeed * deltaTime
+			curUnit.posY -= travelDistance
 		case directionDown:
-			curUnit.posY += snakeSpeed * deltaTime
+			curUnit.posY += travelDistance
 		}
 	}
 
