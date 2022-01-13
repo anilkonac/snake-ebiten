@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	snakeHeadCenterX = screenWidth - 15
-	snakeHeadCenterY = screenHeight / 2.0
-	snakeSpeed       = 1
-	snakeLength      = 5
+	snakeHeadCenterX = 5
+	snakeHeadCenterY = 5
+	snakeSpeed       = 0
+	snakeLength      = 1
+	unitLength       = 40
 	deltaTime        = 1.0 / 60.0
 )
 
@@ -43,7 +44,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Print TPS
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", g.tps))
 	head := &g.snake.units[0]
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.posX, head.posY), 0, 15)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
 
 	// Draw snake
 	for indexUnit := 0; indexUnit < len(g.snake.units); indexUnit++ {
@@ -58,8 +59,53 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			unitColor = color.RGBA{R: 255, G: 0, B: 0, A: 255}
 		}
 
-		// Draw unit
-		ebitenutil.DrawRect(screen, curUnit.posX-centerOffset, curUnit.posY-centerOffset, unitLength, unitLength, unitColor)
+		mirrorX, mirrorY, locCenterX, locCenterY := curUnit.checkOffScreen()
+		if mirrorX && mirrorY {
+			var rectTopLeft, rectTopRight, rectBottomLeft, rectBottomRight screenRect
+			widthBigger := curUnit.centerX + halfUnitLength
+			widthSmaller := halfUnitLength - curUnit.centerX
+			heightBigger := curUnit.centerY + halfUnitLength
+			heightSmaller := halfUnitLength - curUnit.centerY
+
+			switch {
+			case locCenterX == directionLeft && locCenterY == directionUp:
+				// Define rectangles
+				rectTopLeft = screenRect{
+					x:      0,
+					y:      0,
+					width:  widthBigger,
+					height: heightBigger,
+				}
+				rectTopRight = screenRect{
+					x:      screenWidth - widthSmaller,
+					y:      0,
+					width:  widthSmaller,
+					height: heightBigger,
+				}
+				rectBottomLeft = screenRect{
+					x:      0,
+					y:      screenHeight - heightSmaller,
+					width:  widthBigger,
+					height: heightSmaller,
+				}
+				rectBottomRight = screenRect{
+					x:      screenWidth - widthSmaller,
+					y:      screenHeight - heightSmaller,
+					width:  widthSmaller,
+					height: heightSmaller,
+				}
+
+			}
+
+			// Draw rectangles
+			rectTopLeft.draw(screen, unitColor)
+			rectTopRight.draw(screen, unitColor)
+			rectBottomLeft.draw(screen, unitColor)
+			rectBottomRight.draw(screen, unitColor)
+		}
+
+		// // Draw unit
+		// ebitenutil.DrawRect(screen, curUnit.centerX-halfUnitLength, curUnit.centerY-halfUnitLength, unitLength, unitLength, unitColor)
 	}
 }
 

@@ -11,13 +11,12 @@ const (
 )
 
 const (
-	unitLength   = 20
-	centerOffset = unitLength / 2.0
+	halfUnitLength = unitLength / 2.0
 )
 
 type unit struct {
-	posX      float64
-	posY      float64
+	centerX   float64
+	centerY   float64
 	direction uint8
 }
 
@@ -49,17 +48,17 @@ func newSnake(centerX float64, centerY float64, direction uint8, speed uint8, le
 		distanceToHead := float64(i) * unitLength
 		switch direction {
 		case directionUp:
-			curUnit.posX = centerX
-			curUnit.posY = centerY - distanceToHead
+			curUnit.centerX = centerX
+			curUnit.centerY = centerY - distanceToHead
 		case directionDown:
-			curUnit.posX = centerX
-			curUnit.posY = centerY + distanceToHead
+			curUnit.centerX = centerX
+			curUnit.centerY = centerY + distanceToHead
 		case directionRight:
-			curUnit.posX = centerX - distanceToHead
-			curUnit.posY = centerY
+			curUnit.centerX = centerX - distanceToHead
+			curUnit.centerY = centerY
 		case directionLeft:
-			curUnit.posX = centerX + distanceToHead
-			curUnit.posY = centerY
+			curUnit.centerX = centerX + distanceToHead
+			curUnit.centerY = centerY
 		}
 	}
 
@@ -86,29 +85,59 @@ func (s *snake) update() {
 }
 
 func (u *unit) moveUp(dist float64) {
-	u.posY -= dist
-	if u.posY < 0 {
-		u.posY += screenWidth
+	u.centerY -= dist
+
+	// Teleport if center is off the screen
+	if u.centerY < 0 {
+		u.centerY += screenWidth
 	}
 }
 
 func (u *unit) moveDown(dist float64) {
-	u.posY += dist
-	if u.posY > screenHeight {
-		u.posY -= screenWidth
+	u.centerY += dist
+
+	// Teleport if center is off the screen
+	if u.centerY > screenHeight {
+		u.centerY -= screenWidth
 	}
 }
 
 func (u *unit) moveLeft(dist float64) {
-	u.posX -= dist
-	if u.posX < 0 {
-		u.posX += screenWidth
+	u.centerX -= dist
+
+	// Teleport if center is off the screen
+	if u.centerX < 0 {
+		u.centerX += screenWidth
 	}
 }
 
 func (u *unit) moveRight(dist float64) {
-	u.posX += dist
-	if u.posX > screenWidth {
-		u.posX -= screenWidth
+	u.centerX += dist
+
+	// Teleport if center is off the screen
+	if u.centerX > screenWidth {
+		u.centerX -= screenWidth
 	}
+}
+
+// Checks if unit should be mirrored
+// Returns which axes should be mirrored, and position of center on mirrored axes
+func (u unit) checkOffScreen() (x, y bool, locCenterX, locCenterY uint8) {
+	if u.centerX-halfUnitLength < 0 {
+		x = true
+		locCenterX = directionLeft
+	} else if u.centerX+halfUnitLength > screenWidth {
+		x = true
+		locCenterX = directionRight
+	}
+
+	if u.centerY-halfUnitLength < 0 {
+		y = true
+		locCenterY = directionUp
+	} else if u.centerY+halfUnitLength > screenHeight {
+		y = true
+		locCenterY = directionDown
+	}
+
+	return
 }
