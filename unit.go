@@ -140,8 +140,8 @@ func (u unit) draw(screen *ebiten.Image, color color.Color) {
 		} else {
 			panic("Horizontal slicing is not successful.")
 		}
-	} else { // Good unit!!
-		u.draw(screen, color)
+	} else { // unit is inside the screen
+		newScreenRect(u.centerX-halfUnitLength, u.centerY-halfUnitLength, unitLength, unitLength).draw(screen, color)
 	}
 }
 
