@@ -13,6 +13,10 @@ type screenRect struct {
 	height float64
 }
 
+func newScreenRect(x, y, width, height float64) *screenRect {
+	return &screenRect{x: x, y: y, width: width, height: height}
+}
+
 func (r screenRect) draw(dst *ebiten.Image, color color.Color) {
 	ebitenutil.DrawRect(dst, r.x, r.y, r.width, r.height, color)
 }

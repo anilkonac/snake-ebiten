@@ -10,16 +10,6 @@ const (
 	directionTotal
 )
 
-const (
-	halfUnitLength = unitLength / 2.0
-)
-
-type unit struct {
-	centerX   float64
-	centerY   float64
-	direction uint8
-}
-
 type snake struct {
 	speed uint8
 	units []unit
@@ -82,62 +72,4 @@ func (s *snake) update() {
 			curUnit.moveDown(travelDistance)
 		}
 	}
-}
-
-func (u *unit) moveUp(dist float64) {
-	u.centerY -= dist
-
-	// Teleport if center is off the screen
-	if u.centerY < 0 {
-		u.centerY += screenWidth
-	}
-}
-
-func (u *unit) moveDown(dist float64) {
-	u.centerY += dist
-
-	// Teleport if center is off the screen
-	if u.centerY > screenHeight {
-		u.centerY -= screenWidth
-	}
-}
-
-func (u *unit) moveLeft(dist float64) {
-	u.centerX -= dist
-
-	// Teleport if center is off the screen
-	if u.centerX < 0 {
-		u.centerX += screenWidth
-	}
-}
-
-func (u *unit) moveRight(dist float64) {
-	u.centerX += dist
-
-	// Teleport if center is off the screen
-	if u.centerX > screenWidth {
-		u.centerX -= screenWidth
-	}
-}
-
-// Checks if unit should be mirrored
-// Returns which axes should be mirrored, and position of center on mirrored axes
-func (u unit) checkOffScreen() (x, y bool, locCenterX, locCenterY uint8) {
-	if u.centerX-halfUnitLength < 0 {
-		x = true
-		locCenterX = directionLeft
-	} else if u.centerX+halfUnitLength > screenWidth {
-		x = true
-		locCenterX = directionRight
-	}
-
-	if u.centerY-halfUnitLength < 0 {
-		y = true
-		locCenterY = directionUp
-	} else if u.centerY+halfUnitLength > screenHeight {
-		y = true
-		locCenterY = directionDown
-	}
-
-	return
 }
