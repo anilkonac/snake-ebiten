@@ -39,10 +39,10 @@ func newSnake(centerX float64, centerY float64, direction uint8, speed uint8, le
 		switch direction {
 		case directionUp:
 			curUnit.centerX = centerX
-			curUnit.centerY = centerY - distanceToHead
+			curUnit.centerY = centerY + distanceToHead
 		case directionDown:
 			curUnit.centerX = centerX
-			curUnit.centerY = centerY + distanceToHead
+			curUnit.centerY = centerY - distanceToHead
 		case directionRight:
 			curUnit.centerX = centerX - distanceToHead
 			curUnit.centerY = centerY

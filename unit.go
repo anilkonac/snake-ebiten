@@ -21,7 +21,7 @@ func (u *unit) moveUp(dist float64) {
 
 	// Teleport if center is off the screen
 	if u.centerY < 0 {
-		u.centerY += screenWidth
+		u.centerY += screenHeight
 	}
 }
 
@@ -30,7 +30,7 @@ func (u *unit) moveDown(dist float64) {
 
 	// Teleport if center is off the screen
 	if u.centerY > screenHeight {
-		u.centerY -= screenWidth
+		u.centerY -= screenHeight
 	}
 }
 
