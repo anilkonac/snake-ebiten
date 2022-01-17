@@ -20,10 +20,10 @@ func newSnake(centerX float64, centerY float64, direction uint8, speed uint8, le
 		panic("direction parameter is invalid.")
 	}
 	if centerX > screenWidth {
-		panic("initial x position of the snake is out of screen.")
+		panic("Initial x position of the snake is out of the screen.")
 	}
 	if centerY > screenHeight {
-		panic("initial x position of the snake is out of screen.")
+		panic("Initial y position of the snake is out of the screen.")
 	}
 
 	snake := &snake{speed: speed}
@@ -56,7 +56,7 @@ func newSnake(centerX float64, centerY float64, direction uint8, speed uint8, le
 }
 
 func (s *snake) update() {
-	// Update snake position
+	// Update units' positions
 	for indexUnit := 0; indexUnit < len(s.units); indexUnit++ {
 		curUnit := &s.units[indexUnit]
 

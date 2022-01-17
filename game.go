@@ -9,19 +9,20 @@ import (
 )
 
 const (
-	snakeHeadCenterX = screenWidth - 20
+	snakeHeadCenterX = screenWidth / 2.0
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
-	snakeDirection   = directionDown
+	snakeDirection   = directionRight
 	snakeLength      = 3
-	unitLength       = 40
-	deltaTime        = 1.0 / 60.0
+	unitLength       = 25
 )
 
+const deltaTime = 1.0 / 60.0
+
 var (
-	tps    float64
-	mouseX int
-	mouseY int
+	tps float64
+	// mouseX int
+	// mouseY int
 )
 
 // game implements ebiten.game interface.
@@ -48,11 +49,7 @@ func (g *game) Update() error {
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *game) Draw(screen *ebiten.Image) {
-	// Print debug messages
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
-	head := &g.snake.units[0]
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
+	g.printDebugMsgs(screen)
 
 	// Draw snake
 	for indexUnit := 0; indexUnit < len(g.snake.units); indexUnit++ {
@@ -67,6 +64,7 @@ func (g *game) Draw(screen *ebiten.Image) {
 			unitColor = color.RGBA{R: 255, G: 0, B: 0, A: 255}
 		}
 
+		// Draw unit
 		curUnit.draw(screen, unitColor)
 	}
 }
@@ -74,4 +72,11 @@ func (g *game) Draw(screen *ebiten.Image) {
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
+}
+
+func (g *game) printDebugMsgs(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
+	head := &g.snake.units[0]
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 }

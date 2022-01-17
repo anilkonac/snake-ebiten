@@ -4,11 +4,10 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-const (
-	halfUnitLength = unitLength / 2.0
-)
+const halfUnitLength = unitLength / 2.0
 
 type unit struct {
 	centerX   float64
@@ -52,21 +51,21 @@ func (u *unit) moveRight(dist float64) {
 	}
 }
 
-// Checks if unit is off the screen
-// Returns which axes should be sliced, and position of center on sliced axes
-func (u unit) checkOffScreen() (slicedV, slicedH bool, locCenterX, locCenterY uint8) {
-	if u.centerX-halfUnitLength < 0 {
+// Checks if the unit is off the screen
+// Returns which axes should be sliced, and position of center on sliced axes.
+func (u *unit) checkOffScreen() (slicedV, slicedH bool, locCenterX, locCenterY uint8) {
+	if u.centerX-halfUnitLength < 0 { // Left side of the unit is off the screen.
 		slicedV = true
 		locCenterX = directionLeft
-	} else if u.centerX+halfUnitLength > screenWidth {
+	} else if u.centerX+halfUnitLength > screenWidth { // Right side of the unit is off the screen
 		slicedV = true
 		locCenterX = directionRight
 	}
 
-	if u.centerY-halfUnitLength < 0 {
+	if u.centerY-halfUnitLength < 0 { // Top side of the unit is off the screen.
 		slicedH = true
 		locCenterY = directionUp
-	} else if u.centerY+halfUnitLength > screenHeight {
+	} else if u.centerY+halfUnitLength > screenHeight { // Bottom side of the unit is off the screen.
 		slicedH = true
 		locCenterY = directionDown
 	}
@@ -74,7 +73,7 @@ func (u unit) checkOffScreen() (slicedV, slicedH bool, locCenterX, locCenterY ui
 	return
 }
 
-func (u unit) draw(screen *ebiten.Image, color color.Color) {
+func (u *unit) draw(screen *ebiten.Image, color color.Color) {
 	slicedV, slicedH, locCenterX, locCenterY := u.checkOffScreen()
 	if slicedV && slicedH { // unit is on one of the corner
 		var rectangles [4]*screenRect
@@ -98,11 +97,10 @@ func (u unit) draw(screen *ebiten.Image, color color.Color) {
 
 		// Draw rectangles
 		for _, rect := range rectangles {
-			if rect != nil {
-				rect.draw(screen, color)
-			} else {
+			if rect == nil {
 				panic("Slicing to 4 rectangles is not successful!")
 			}
+			rect.draw(screen, color)
 		}
 	} else if slicedV { // unit is on vertical edges
 		var rectLeft, rectRight *screenRect
@@ -116,12 +114,12 @@ func (u unit) draw(screen *ebiten.Image, color color.Color) {
 		}
 
 		// Draw rectangles
-		if rectLeft != nil && rectRight != nil {
-			rectLeft.draw(screen, color)
-			rectRight.draw(screen, color)
-		} else {
+		if rectLeft == nil || rectRight == nil {
 			panic("Vertical slicing is not successful.")
 		}
+		rectLeft.draw(screen, color)
+		rectRight.draw(screen, color)
+
 	} else if slicedH { // unit is on horizontal edges
 		var rectUp, rectDown *screenRect
 		switch locCenterY {
@@ -134,19 +132,19 @@ func (u unit) draw(screen *ebiten.Image, color color.Color) {
 		}
 
 		// Draw rectangles
-		if rectUp != nil && rectDown != nil {
-			rectUp.draw(screen, color)
-			rectDown.draw(screen, color)
-		} else {
+		if rectUp == nil || rectDown == nil {
 			panic("Horizontal slicing is not successful.")
 		}
+		rectUp.draw(screen, color)
+		rectDown.draw(screen, color)
+
 	} else { // unit is inside the screen
-		newScreenRect(u.centerX-halfUnitLength, u.centerY-halfUnitLength, unitLength, unitLength).draw(screen, color)
+		ebitenutil.DrawRect(screen, u.centerX-halfUnitLength, u.centerY-halfUnitLength, unitLength, unitLength, color)
 	}
 }
 
-// Slice unit whose center is near top left to 4 rectangles
-func (u unit) sliceTopLeft() (rects [4]*screenRect) {
+// Slice unit whose center is near top left corner to 4 rectangles.
+func (u *unit) sliceTopLeft() (rects [4]*screenRect) {
 	widthBigger := u.centerX + halfUnitLength
 	widthSmaller := halfUnitLength - u.centerX
 	heightBigger := u.centerY + halfUnitLength
@@ -161,8 +159,8 @@ func (u unit) sliceTopLeft() (rects [4]*screenRect) {
 	return
 }
 
-// Slice unit whose center is near top right to 4 rectangles
-func (u unit) sliceTopRight() (rects [4]*screenRect) {
+// Slice unit whose center is near top right corner to 4 rectangles.
+func (u *unit) sliceTopRight() (rects [4]*screenRect) {
 	widthBigger := halfUnitLength + screenWidth - u.centerX
 	widthSmaller := unitLength - widthBigger
 	heightBigger := u.centerY + halfUnitLength
@@ -177,8 +175,8 @@ func (u unit) sliceTopRight() (rects [4]*screenRect) {
 	return
 }
 
-// Slice unit whose center is near bottom left to 4 rectangles
-func (u unit) sliceBottomLeft() (rects [4]*screenRect) {
+// Slice unit whose center is near bottom left corner to 4 rectangles.
+func (u *unit) sliceBottomLeft() (rects [4]*screenRect) {
 	widthBigger := u.centerX + halfUnitLength
 	widthSmaller := halfUnitLength - u.centerX
 	heightBigger := halfUnitLength + screenHeight - u.centerY
@@ -193,8 +191,8 @@ func (u unit) sliceBottomLeft() (rects [4]*screenRect) {
 	return
 }
 
-// Slice unit whose center is near bottom right to 4 rectangles
-func (u unit) sliceBottomRight() (rects [4]*screenRect) {
+// Slice unit whose center is near bottom right corner to 4 rectangles.
+func (u *unit) sliceBottomRight() (rects [4]*screenRect) {
 	widthBigger := halfUnitLength + screenWidth - u.centerX
 	widthSmaller := unitLength - widthBigger
 	heightBigger := halfUnitLength + screenHeight - u.centerY
@@ -209,8 +207,8 @@ func (u unit) sliceBottomRight() (rects [4]*screenRect) {
 	return
 }
 
-// Divide unit to two rectangles if center is near left edge
-func (u unit) sliceLeft() (rectLeft, rectRight *screenRect) {
+// Divide the unit into two rectangles if center is near the left edge.
+func (u *unit) sliceLeft() (rectLeft, rectRight *screenRect) {
 	widthBigger := u.centerX + halfUnitLength
 	widthSmaller := unitLength - widthBigger
 	yLoc := u.centerY - halfUnitLength
@@ -220,8 +218,8 @@ func (u unit) sliceLeft() (rectLeft, rectRight *screenRect) {
 	return
 }
 
-// Divide unit to two rectangles if center is near right edge
-func (u unit) sliceRight() (rectLeft, rectRight *screenRect) {
+// Divide the unit into two rectangles if center is near the right edge.
+func (u *unit) sliceRight() (rectLeft, rectRight *screenRect) {
 	widthBigger := halfUnitLength + screenWidth - u.centerX
 	widthSmaller := unitLength - widthBigger
 	yLoc := u.centerY - halfUnitLength
@@ -231,8 +229,8 @@ func (u unit) sliceRight() (rectLeft, rectRight *screenRect) {
 	return
 }
 
-// Divide unit to two rectangles if center is near top edge
-func (u unit) sliceTop() (rectTop, rectBottom *screenRect) {
+// Divide the unit into two rectangles if center is near the top edge.
+func (u *unit) sliceTop() (rectTop, rectBottom *screenRect) {
 	heightBigger := u.centerY + halfUnitLength
 	heightSmaller := unitLength - heightBigger
 	xLoc := u.centerX - halfUnitLength
@@ -242,8 +240,8 @@ func (u unit) sliceTop() (rectTop, rectBottom *screenRect) {
 	return
 }
 
-// Divide unit to two rectangles if center is near bottom edge
-func (u unit) sliceBottom() (rectTop, rectBottom *screenRect) {
+// Divide the unit into two rectangles if center is near the bottom edge.
+func (u *unit) sliceBottom() (rectTop, rectBottom *screenRect) {
 	heightBigger := halfUnitLength + screenHeight - u.centerY
 	heightSmaller := unitLength - heightBigger
 	xLoc := u.centerX - halfUnitLength
