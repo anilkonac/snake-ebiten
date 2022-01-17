@@ -10,34 +10,26 @@ const (
 	directionTotal
 )
 
-const unitLength = 20
-
-type Unit struct {
-	posX      float64
-	posY      float64
-	direction uint8
-}
-
-type Snake struct {
+type snake struct {
 	speed uint8
-	units []Unit
+	units []unit
 }
 
-func newSnake(posX float64, posY float64, direction uint8, speed uint8, length uint8) *Snake {
+func newSnake(centerX float64, centerY float64, direction uint8, speed uint8, length uint8) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if posX > screenWidth {
-		panic("initial x position of the snake is out of screen.")
+	if centerX > screenWidth {
+		panic("Initial x position of the snake is out of the screen.")
 	}
-	if posY > screenHeight {
-		panic("initial x position of the snake is out of screen.")
+	if centerY > screenHeight {
+		panic("Initial y position of the snake is out of the screen.")
 	}
 
-	snake := &Snake{speed: speed}
+	snake := &snake{speed: speed}
 
 	// Generate units of the snake
-	snake.units = make([]Unit, length, math.MaxUint8)
+	snake.units = make([]unit, length, math.MaxUint8)
 	for i := uint8(0); i < length; i++ {
 		curUnit := &snake.units[i]
 		curUnit.direction = direction
@@ -46,19 +38,38 @@ func newSnake(posX float64, posY float64, direction uint8, speed uint8, length u
 		distanceToHead := float64(i) * unitLength
 		switch direction {
 		case directionUp:
-			curUnit.posX = posX
-			curUnit.posY = posY - distanceToHead
+			curUnit.centerX = centerX
+			curUnit.centerY = centerY + distanceToHead
 		case directionDown:
-			curUnit.posX = posX
-			curUnit.posY = posY + distanceToHead
+			curUnit.centerX = centerX
+			curUnit.centerY = centerY - distanceToHead
 		case directionRight:
-			curUnit.posX = posX - distanceToHead
-			curUnit.posY = posY
+			curUnit.centerX = centerX - distanceToHead
+			curUnit.centerY = centerY
 		case directionLeft:
-			curUnit.posX = posX + distanceToHead
-			curUnit.posY = posY
+			curUnit.centerX = centerX + distanceToHead
+			curUnit.centerY = centerY
 		}
 	}
 
 	return snake
+}
+
+func (s *snake) update() {
+	// Update units' positions
+	for indexUnit := 0; indexUnit < len(s.units); indexUnit++ {
+		curUnit := &s.units[indexUnit]
+
+		travelDistance := float64(s.speed) * deltaTime
+		switch curUnit.direction {
+		case directionRight:
+			curUnit.moveRight(travelDistance)
+		case directionLeft:
+			curUnit.moveLeft(travelDistance)
+		case directionUp:
+			curUnit.moveUp(travelDistance)
+		case directionDown:
+			curUnit.moveDown(travelDistance)
+		}
+	}
 }

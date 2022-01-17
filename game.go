@@ -9,54 +9,47 @@ import (
 )
 
 const (
-	snakeHeadPosX = 200
-	snakeHeadPosY = 200
-	snakeSpeed    = 200
-	snakeLength   = 5
-	deltaTime     = 1.0 / 60.0
+	snakeHeadCenterX = screenWidth / 2.0
+	snakeHeadCenterY = screenHeight / 2.0
+	snakeSpeed       = 200
+	snakeDirection   = directionRight
+	snakeLength      = 3
+	unitLength       = 25
 )
 
-// Game implements ebiten.Game interface.
-type Game struct {
-	tps   float64
-	snake *Snake
+const deltaTime = 1.0 / 60.0
+
+var (
+	tps float64
+	// mouseX int
+	// mouseY int
+)
+
+// game implements ebiten.game interface.
+type game struct {
+	snake *snake
 }
 
-func newGame() *Game {
-	game := new(Game)
-	game.snake = newSnake(snakeHeadPosX, snakeHeadPosY, directionRight, snakeSpeed, snakeLength)
+func newGame() *game {
+	game := new(game)
+	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, snakeDirection, snakeSpeed, snakeLength)
 
 	return game
 }
 
 // Update is called every tick (1/60 [s] by default).
-func (g *Game) Update() error {
-	g.tps = ebiten.CurrentTPS()
+func (g *game) Update() error {
+	tps = ebiten.CurrentTPS()
+	// mouseX, mouseY = ebiten.CursorPosition()
 
-	// Update snake position
-	for indexUnit := 0; indexUnit < len(g.snake.units); indexUnit++ {
-		curUnit := &g.snake.units[indexUnit]
-
-		travelDistance := float64(g.snake.speed) * deltaTime
-		switch curUnit.direction {
-		case directionRight:
-			curUnit.posX += travelDistance
-		case directionLeft:
-			curUnit.posX -= travelDistance
-		case directionUp:
-			curUnit.posY -= travelDistance
-		case directionDown:
-			curUnit.posY += travelDistance
-		}
-	}
+	g.snake.update()
 
 	return nil
 }
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
-func (g *Game) Draw(screen *ebiten.Image) {
-	// Print TPS
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", g.tps))
+func (g *game) Draw(screen *ebiten.Image) {
+	g.printDebugMsgs(screen)
 
 	// Draw snake
 	for indexUnit := 0; indexUnit < len(g.snake.units); indexUnit++ {
@@ -72,11 +65,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		// Draw unit
-		ebitenutil.DrawRect(screen, curUnit.posX, curUnit.posY, unitLength, unitLength, unitColor)
+		curUnit.draw(screen, unitColor)
 	}
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
+}
+
+func (g *game) printDebugMsgs(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
+	head := &g.snake.units[0]
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 }
