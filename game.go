@@ -20,6 +20,12 @@ const (
 const deltaTime = 1.0 / 60.0
 
 var (
+	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
+	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
+	colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
+)
+
+var (
 	tps float64
 	// mouseX int
 	// mouseY int
@@ -49,6 +55,7 @@ func (g *game) Update() error {
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *game) Draw(screen *ebiten.Image) {
+	screen.Fill(colorBackground) // Jet
 	g.printDebugMsgs(screen)
 
 	// Draw snake
@@ -59,9 +66,10 @@ func (g *game) Draw(screen *ebiten.Image) {
 		// Define color of the unit
 		var unitColor color.Color
 		if indexUnit%2 == 0 {
-			unitColor = color.White
+			unitColor = colorSnake1
+
 		} else {
-			unitColor = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+			unitColor = colorSnake2
 		}
 
 		// Draw unit
@@ -76,7 +84,7 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
-	head := &g.snake.units[0]
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
+	// head := &g.snake.units[0]
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 }
