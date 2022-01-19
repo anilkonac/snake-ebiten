@@ -17,12 +17,15 @@ const (
 	unitLength       = 25
 )
 
-const deltaTime = 1.0 / 60.0
+const (
+	deltaTime      = 1.0 / 60.0
+	halfUnitLength = unitLength / 2.0
+)
 
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
-	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
-	colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
+	colorSnake      = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
+	// colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
 var (
@@ -55,25 +58,26 @@ func (g *game) Update() error {
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *game) Draw(screen *ebiten.Image) {
-	screen.Fill(colorBackground) // Jet
+	screen.Fill(colorBackground)
 	g.printDebugMsgs(screen)
 
+	// Check if snake is on an edge
+
 	// Draw snake
-	for indexUnit := 0; indexUnit < len(g.snake.units); indexUnit++ {
-		// Get unit
-		curUnit := &g.snake.units[indexUnit]
-
-		// Define color of the unit
-		var unitColor color.Color
-		if indexUnit%2 == 0 {
-			unitColor = colorSnake1
-
-		} else {
-			unitColor = colorSnake2
-		}
-
-		// Draw unit
-		curUnit.draw(screen, unitColor)
+	snakeLengthf64 := float64(g.snake.length)
+	switch g.snake.direction {
+	case directionRight:
+		ebitenutil.DrawRect(screen, g.snake.headCenterX-unitLength*snakeLengthf64+halfUnitLength,
+			g.snake.headCenterY-halfUnitLength, unitLength*snakeLengthf64, unitLength, colorSnake)
+	case directionLeft:
+		ebitenutil.DrawRect(screen, g.snake.headCenterX-halfUnitLength,
+			g.snake.headCenterY-halfUnitLength, unitLength*snakeLengthf64, unitLength, colorSnake)
+	case directionUp:
+		ebitenutil.DrawRect(screen, g.snake.headCenterX-halfUnitLength,
+			g.snake.headCenterY-halfUnitLength, unitLength, unitLength*snakeLengthf64, colorSnake)
+	case directionDown:
+		ebitenutil.DrawRect(screen, g.snake.headCenterX-halfUnitLength,
+			g.snake.headCenterY-unitLength*snakeLengthf64+halfUnitLength, unitLength, unitLength*snakeLengthf64, colorSnake)
 	}
 }
 
@@ -84,7 +88,6 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
-	// head := &g.snake.units[0]
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", g.snake.headCenterX, g.snake.headCenterY), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 }

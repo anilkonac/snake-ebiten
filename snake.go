@@ -1,21 +1,34 @@
 package main
 
-import "math"
+type directionT uint8
+type snakeLengthT uint16
+
+const maxSnakeLength = 500
 
 const (
-	directionUp uint8 = iota
+	directionUp directionT = iota
 	directionDown
 	directionLeft
 	directionRight
 	directionTotal
 )
 
-type snake struct {
-	speed uint8
-	units []unit
+type rotation struct {
+	posX      float64
+	posY      float64
+	direction directionT
 }
 
-func newSnake(centerX float64, centerY float64, direction uint8, speed uint8, length uint8) *snake {
+type snake struct {
+	headCenterX float64
+	headCenterY float64
+	speed       uint8
+	direction   directionT
+	length      snakeLengthT
+	rotations   []rotation
+}
+
+func newSnake(centerX float64, centerY float64, direction directionT, speed uint8, length snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -26,50 +39,66 @@ func newSnake(centerX float64, centerY float64, direction uint8, speed uint8, le
 		panic("Initial y position of the snake is out of the screen.")
 	}
 
-	snake := &snake{speed: speed}
-
-	// Generate units of the snake
-	snake.units = make([]unit, length, math.MaxUint8)
-	for i := uint8(0); i < length; i++ {
-		curUnit := &snake.units[i]
-		curUnit.direction = direction
-
-		// Compute position of current unit
-		distanceToHead := float64(i) * unitLength
-		switch direction {
-		case directionUp:
-			curUnit.centerX = centerX
-			curUnit.centerY = centerY + distanceToHead
-		case directionDown:
-			curUnit.centerX = centerX
-			curUnit.centerY = centerY - distanceToHead
-		case directionRight:
-			curUnit.centerX = centerX - distanceToHead
-			curUnit.centerY = centerY
-		case directionLeft:
-			curUnit.centerX = centerX + distanceToHead
-			curUnit.centerY = centerY
-		}
+	snake := &snake{
+		headCenterX: centerX,
+		headCenterY: centerY,
+		speed:       speed,
+		direction:   direction,
+		length:      length,
+		rotations:   make([]rotation, 0, maxSnakeLength),
 	}
 
 	return snake
 }
 
 func (s *snake) update() {
-	// Update units' positions
-	for indexUnit := 0; indexUnit < len(s.units); indexUnit++ {
-		curUnit := &s.units[indexUnit]
+	// Update snake's head position
+	travelDistance := float64(s.speed) * deltaTime
+	switch s.direction {
+	case directionRight:
+		s.moveRight(travelDistance)
+	case directionLeft:
+		s.moveLeft(travelDistance)
+	case directionUp:
+		s.moveUp(travelDistance)
+	case directionDown:
+		s.moveDown(travelDistance)
+	}
 
-		travelDistance := float64(s.speed) * deltaTime
-		switch curUnit.direction {
-		case directionRight:
-			curUnit.moveRight(travelDistance)
-		case directionLeft:
-			curUnit.moveLeft(travelDistance)
-		case directionUp:
-			curUnit.moveUp(travelDistance)
-		case directionDown:
-			curUnit.moveDown(travelDistance)
-		}
+}
+
+func (s *snake) moveUp(dist float64) {
+	s.headCenterY += dist
+
+	// teleport if head center is offscreen.
+	if s.headCenterY < 0 {
+		s.headCenterY += screenHeight
+	}
+}
+
+func (s *snake) moveDown(dist float64) {
+	s.headCenterY += dist
+
+	// teleport if head center is offscreen.
+	if s.headCenterY > screenHeight {
+		s.headCenterY -= screenHeight
+	}
+}
+
+func (s *snake) moveRight(dist float64) {
+	s.headCenterX += dist
+
+	// teleport if head center is offscreen.
+	if s.headCenterX > screenWidth {
+		s.headCenterX -= screenWidth
+	}
+}
+
+func (s *snake) moveLeft(dist float64) {
+	s.headCenterX += dist
+
+	// teleport if head center is offscreen.
+	if s.headCenterX < 0 {
+		s.headCenterX += screenWidth
 	}
 }
