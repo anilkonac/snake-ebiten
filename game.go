@@ -13,7 +13,7 @@ const (
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
 	snakeDirection   = directionRight
-	snakeLength      = 3
+	snakeLength      = 4
 	unitLength       = 25
 )
 
@@ -64,20 +64,36 @@ func (g *game) Draw(screen *ebiten.Image) {
 	// Check if snake is on an edge
 
 	// Draw snake
-	snakeLengthf64 := float64(g.snake.length)
+	snakeLength64 := float64(g.snake.length)
 	switch g.snake.direction {
 	case directionRight:
-		ebitenutil.DrawRect(screen, g.snake.headCenterX-unitLength*snakeLengthf64+halfUnitLength,
-			g.snake.headCenterY-halfUnitLength, unitLength*snakeLengthf64, unitLength, colorSnake)
+		screenRect{
+			x:      g.snake.headCenterX - unitLength*snakeLength64 + halfUnitLength,
+			y:      g.snake.headCenterY - halfUnitLength,
+			width:  unitLength * snakeLength64,
+			height: unitLength,
+		}.draw(screen, colorSnake)
 	case directionLeft:
-		ebitenutil.DrawRect(screen, g.snake.headCenterX-halfUnitLength,
-			g.snake.headCenterY-halfUnitLength, unitLength*snakeLengthf64, unitLength, colorSnake)
+		screenRect{
+			x:      g.snake.headCenterX - halfUnitLength,
+			y:      g.snake.headCenterY - halfUnitLength,
+			width:  unitLength * snakeLength64,
+			height: unitLength,
+		}.draw(screen, colorSnake)
 	case directionUp:
-		ebitenutil.DrawRect(screen, g.snake.headCenterX-halfUnitLength,
-			g.snake.headCenterY-halfUnitLength, unitLength, unitLength*snakeLengthf64, colorSnake)
+		screenRect{
+			x:      g.snake.headCenterX - halfUnitLength,
+			y:      g.snake.headCenterY - halfUnitLength,
+			width:  unitLength,
+			height: unitLength * snakeLength64,
+		}.draw(screen, colorSnake)
 	case directionDown:
-		ebitenutil.DrawRect(screen, g.snake.headCenterX-halfUnitLength,
-			g.snake.headCenterY-unitLength*snakeLengthf64+halfUnitLength, unitLength, unitLength*snakeLengthf64, colorSnake)
+		screenRect{
+			x:      g.snake.headCenterX - halfUnitLength,
+			y:      g.snake.headCenterY - unitLength*snakeLength64 + halfUnitLength,
+			width:  unitLength,
+			height: unitLength * snakeLength64,
+		}.draw(screen, colorSnake)
 	}
 }
 

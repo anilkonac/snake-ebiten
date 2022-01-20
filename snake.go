@@ -68,7 +68,7 @@ func (s *snake) update() {
 }
 
 func (s *snake) moveUp(dist float64) {
-	s.headCenterY += dist
+	s.headCenterY -= dist
 
 	// teleport if head center is offscreen.
 	if s.headCenterY < 0 {
@@ -95,7 +95,7 @@ func (s *snake) moveRight(dist float64) {
 }
 
 func (s *snake) moveLeft(dist float64) {
-	s.headCenterX += dist
+	s.headCenterX -= dist
 
 	// teleport if head center is offscreen.
 	if s.headCenterX < 0 {
