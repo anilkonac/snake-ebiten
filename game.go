@@ -8,23 +8,29 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+// Snake parameters
 const (
 	snakeHeadCenterX = screenWidth / 2.0
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
 	snakeDirection   = directionRight
-	snakeLength      = 3
+	snakeLength      = 4
 	unitLength       = 25
 )
 
-const deltaTime = 1.0 / 60.0
-
-var (
-	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
-	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
-	colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
+// Game constants
+const (
+	deltaTime      = 1.0 / 60.0
+	halfUnitLength = unitLength / 2.0
 )
 
+// Colors to be used for drawing
+var (
+	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
+	colorSnake      = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
+)
+
+// Debug variables
 var (
 	tps float64
 	// mouseX int
@@ -55,26 +61,9 @@ func (g *game) Update() error {
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *game) Draw(screen *ebiten.Image) {
-	screen.Fill(colorBackground) // Jet
+	screen.Fill(colorBackground)
+	g.snake.draw(screen)
 	g.printDebugMsgs(screen)
-
-	// Draw snake
-	for indexUnit := 0; indexUnit < len(g.snake.units); indexUnit++ {
-		// Get unit
-		curUnit := &g.snake.units[indexUnit]
-
-		// Define color of the unit
-		var unitColor color.Color
-		if indexUnit%2 == 0 {
-			unitColor = colorSnake1
-
-		} else {
-			unitColor = colorSnake2
-		}
-
-		// Draw unit
-		curUnit.draw(screen, unitColor)
-	}
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
@@ -84,7 +73,6 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
-	// head := &g.snake.units[0]
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", head.centerX, head.centerY), 0, 15)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", g.snake.headCenterX, g.snake.headCenterY), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 }
