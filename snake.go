@@ -16,8 +16,8 @@ const (
 )
 
 type rotation struct {
-	posX      float64
-	posY      float64
+	centerX   float64
+	centerY   float64
 	direction directionT
 }
 
@@ -101,6 +101,14 @@ func (s *snake) draw(screen *ebiten.Image) {
 			height: unitLength * snakeLength64,
 		}.draw(screen, colorSnake)
 	}
+}
+
+func (s *snake) rotateTo(direction directionT) {
+	s.rotations = append(s.rotations, rotation{
+		centerX:   s.headCenterX,
+		centerY:   s.headCenterY,
+		direction: direction,
+	})
 }
 
 func (s *snake) moveUp(dist float64) {
