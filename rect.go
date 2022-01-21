@@ -13,10 +13,6 @@ type screenRect struct {
 	height float64
 }
 
-func newScreenRect(x, y, width, height float64) *screenRect {
-	return &screenRect{x: x, y: y, width: width, height: height}
-}
-
 func (r screenRect) draw(dst *ebiten.Image, color color.Color) {
 	// Check if this rectangle is out of the screen
 	// -----------------------------------

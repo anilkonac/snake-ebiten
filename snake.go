@@ -1,5 +1,7 @@
 package main
 
+import "github.com/hajimehoshi/ebiten/v2"
+
 type directionT uint8
 type snakeLengthT uint16
 
@@ -64,7 +66,41 @@ func (s *snake) update() {
 	case directionDown:
 		s.moveDown(travelDistance)
 	}
+}
 
+func (s *snake) draw(screen *ebiten.Image) {
+	snakeLength64 := float64(s.length)
+	switch s.direction {
+	// Create a screenRect whose x and y coordinates are top left corner. Then draw it.
+	case directionRight:
+		screenRect{
+			x:      s.headCenterX - unitLength*snakeLength64 + halfUnitLength,
+			y:      s.headCenterY - halfUnitLength,
+			width:  unitLength * snakeLength64,
+			height: unitLength,
+		}.draw(screen, colorSnake)
+	case directionLeft:
+		screenRect{
+			x:      s.headCenterX - halfUnitLength,
+			y:      s.headCenterY - halfUnitLength,
+			width:  unitLength * snakeLength64,
+			height: unitLength,
+		}.draw(screen, colorSnake)
+	case directionUp:
+		screenRect{
+			x:      s.headCenterX - halfUnitLength,
+			y:      s.headCenterY - halfUnitLength,
+			width:  unitLength,
+			height: unitLength * snakeLength64,
+		}.draw(screen, colorSnake)
+	case directionDown:
+		screenRect{
+			x:      s.headCenterX - halfUnitLength,
+			y:      s.headCenterY - unitLength*snakeLength64 + halfUnitLength,
+			width:  unitLength,
+			height: unitLength * snakeLength64,
+		}.draw(screen, colorSnake)
+	}
 }
 
 func (s *snake) moveUp(dist float64) {

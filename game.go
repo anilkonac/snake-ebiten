@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+// Snake parameters
 const (
 	snakeHeadCenterX = screenWidth / 2.0
 	snakeHeadCenterY = screenHeight / 2.0
@@ -17,17 +18,19 @@ const (
 	unitLength       = 25
 )
 
+// Game constants
 const (
 	deltaTime      = 1.0 / 60.0
 	halfUnitLength = unitLength / 2.0
 )
 
+// Colors to be used for drawing
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
 	colorSnake      = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
-	// colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
+// Debug variables
 var (
 	tps float64
 	// mouseX int
@@ -59,42 +62,8 @@ func (g *game) Update() error {
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
+	g.snake.draw(screen)
 	g.printDebugMsgs(screen)
-
-	// Check if snake is on an edge
-
-	// Draw snake
-	snakeLength64 := float64(g.snake.length)
-	switch g.snake.direction {
-	case directionRight:
-		screenRect{
-			x:      g.snake.headCenterX - unitLength*snakeLength64 + halfUnitLength,
-			y:      g.snake.headCenterY - halfUnitLength,
-			width:  unitLength * snakeLength64,
-			height: unitLength,
-		}.draw(screen, colorSnake)
-	case directionLeft:
-		screenRect{
-			x:      g.snake.headCenterX - halfUnitLength,
-			y:      g.snake.headCenterY - halfUnitLength,
-			width:  unitLength * snakeLength64,
-			height: unitLength,
-		}.draw(screen, colorSnake)
-	case directionUp:
-		screenRect{
-			x:      g.snake.headCenterX - halfUnitLength,
-			y:      g.snake.headCenterY - halfUnitLength,
-			width:  unitLength,
-			height: unitLength * snakeLength64,
-		}.draw(screen, colorSnake)
-	case directionDown:
-		screenRect{
-			x:      g.snake.headCenterX - halfUnitLength,
-			y:      g.snake.headCenterY - unitLength*snakeLength64 + halfUnitLength,
-			width:  unitLength,
-			height: unitLength * snakeLength64,
-		}.draw(screen, colorSnake)
-	}
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
