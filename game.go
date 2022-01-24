@@ -55,6 +55,7 @@ func (g *game) Update() error {
 	tps = ebiten.CurrentTPS()
 	// mouseX, mouseY = ebiten.CursorPosition()
 
+	g.handleInput()
 	g.snake.update()
 
 	return nil

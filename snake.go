@@ -16,9 +16,14 @@ const (
 )
 
 type rotation struct {
-	centerX   float64
-	centerY   float64
-	direction directionT
+	centerX       float64
+	centerY       float64
+	directionFrom directionT
+}
+
+type unit struct {
+	headCenterX float64
+	headCenterY float64
 }
 
 type snake struct {
@@ -70,6 +75,20 @@ func (s *snake) update() {
 
 func (s *snake) draw(screen *ebiten.Image) {
 	snakeLength64 := float64(s.length)
+
+	// Divide snake to rectangles for every rotation
+	// Create rectangle from head to rotation
+
+	// Compute direction of the rectangle
+
+	prevRotation := rotation{centerX: s.headCenterX, centerY: s.headCenterY, directionFrom: s.direction}
+	for _, curRotation := range s.rotations {
+		switch prevRotation.directionFrom {
+		case directionUp:
+
+		}
+	}
+
 	switch s.direction {
 	// Create a screenRect whose x and y coordinates are top left corner. Then draw it.
 	case directionRight:
@@ -105,10 +124,12 @@ func (s *snake) draw(screen *ebiten.Image) {
 
 func (s *snake) rotateTo(direction directionT) {
 	s.rotations = append(s.rotations, rotation{
-		centerX:   s.headCenterX,
-		centerY:   s.headCenterY,
-		direction: direction,
+		centerX:       s.headCenterX,
+		centerY:       s.headCenterY,
+		directionFrom: s.direction,
 	})
+
+	s.direction = direction
 }
 
 func (s *snake) moveUp(dist float64) {
