@@ -1,6 +1,10 @@
 package main
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type directionT uint8
 type snakeLengthT uint16
@@ -19,20 +23,13 @@ type rotation struct {
 	centerX       float64
 	centerY       float64
 	directionFrom directionT
-}
-
-type unit struct {
-	headCenterX float64
-	headCenterY float64
+	directionTo   directionT
 }
 
 type snake struct {
-	headCenterX float64
-	headCenterY float64
-	speed       uint8
-	direction   directionT
-	length      snakeLengthT
-	rotations   []rotation
+	speed     uint8
+	rotations []rotation
+	units     []unit
 }
 
 func newSnake(centerX float64, centerY float64, direction directionT, speed uint8, length snakeLengthT) *snake {
@@ -47,123 +44,75 @@ func newSnake(centerX float64, centerY float64, direction directionT, speed uint
 	}
 
 	snake := &snake{
+		speed:     speed,
+		rotations: make([]rotation, 0, maxSnakeLength),
+		units:     make([]unit, 0, maxSnakeLength),
+	}
+
+	snake.units = append(snake.units, unit{
 		headCenterX: centerX,
 		headCenterY: centerY,
-		speed:       speed,
 		direction:   direction,
 		length:      length,
-		rotations:   make([]rotation, 0, maxSnakeLength),
-	}
+	})
 
 	return snake
 }
 
 func (s *snake) update() {
-	// Update snake's head position
+
+	// Divide snake into units according to rotations
+	// numUnits := len(s.rotations) + 1
+
+	// Update units' head position
 	travelDistance := float64(s.speed) * deltaTime
-	switch s.direction {
-	case directionRight:
-		s.moveRight(travelDistance)
-	case directionLeft:
-		s.moveLeft(travelDistance)
-	case directionUp:
-		s.moveUp(travelDistance)
-	case directionDown:
-		s.moveDown(travelDistance)
+	for indexUnit := 0; indexUnit < len(s.units); indexUnit++ {
+		curUnit := &s.units[indexUnit]
+		switch curUnit.direction {
+		case directionRight:
+			curUnit.moveRight(travelDistance)
+		case directionLeft:
+			curUnit.moveLeft(travelDistance)
+		case directionUp:
+			curUnit.moveUp(travelDistance)
+		case directionDown:
+			curUnit.moveDown(travelDistance)
+		}
 	}
 }
 
 func (s *snake) draw(screen *ebiten.Image) {
-	snakeLength64 := float64(s.length)
+	for indexUnit := 0; indexUnit < len(s.units); indexUnit++ {
 
-	// Divide snake to rectangles for every rotation
-	// Create rectangle from head to rotation
+		curUnit := &s.units[indexUnit]
 
-	// Compute direction of the rectangle
-
-	prevRotation := rotation{centerX: s.headCenterX, centerY: s.headCenterY, directionFrom: s.direction}
-	for _, curRotation := range s.rotations {
-		switch prevRotation.directionFrom {
-		case directionUp:
-
+		// Select color of the unit
+		var color color.Color
+		if indexUnit%2 == 0 {
+			color = colorSnake
+		} else {
+			color = colorSnake2
 		}
+
+		curUnit.draw(screen, color)
+	}
+}
+
+func (s *snake) headUnit() *unit {
+	if len(s.units) == 0 {
+		panic("Headless snake!!")
 	}
 
-	switch s.direction {
-	// Create a screenRect whose x and y coordinates are top left corner. Then draw it.
-	case directionRight:
-		screenRect{
-			x:      s.headCenterX - unitLength*snakeLength64 + halfUnitLength,
-			y:      s.headCenterY - halfUnitLength,
-			width:  unitLength * snakeLength64,
-			height: unitLength,
-		}.draw(screen, colorSnake)
-	case directionLeft:
-		screenRect{
-			x:      s.headCenterX - halfUnitLength,
-			y:      s.headCenterY - halfUnitLength,
-			width:  unitLength * snakeLength64,
-			height: unitLength,
-		}.draw(screen, colorSnake)
-	case directionUp:
-		screenRect{
-			x:      s.headCenterX - halfUnitLength,
-			y:      s.headCenterY - halfUnitLength,
-			width:  unitLength,
-			height: unitLength * snakeLength64,
-		}.draw(screen, colorSnake)
-	case directionDown:
-		screenRect{
-			x:      s.headCenterX - halfUnitLength,
-			y:      s.headCenterY - unitLength*snakeLength64 + halfUnitLength,
-			width:  unitLength,
-			height: unitLength * snakeLength64,
-		}.draw(screen, colorSnake)
-	}
+	return &s.units[0]
 }
 
 func (s *snake) rotateTo(direction directionT) {
+	headUnit := s.headUnit()
+
 	s.rotations = append(s.rotations, rotation{
-		centerX:       s.headCenterX,
-		centerY:       s.headCenterY,
-		directionFrom: s.direction,
+		centerX:       headUnit.headCenterX,
+		centerY:       headUnit.headCenterY,
+		directionFrom: headUnit.direction,
+		directionTo:   direction,
 	})
-
-	s.direction = direction
-}
-
-func (s *snake) moveUp(dist float64) {
-	s.headCenterY -= dist
-
-	// teleport if head center is offscreen.
-	if s.headCenterY < 0 {
-		s.headCenterY += screenHeight
-	}
-}
-
-func (s *snake) moveDown(dist float64) {
-	s.headCenterY += dist
-
-	// teleport if head center is offscreen.
-	if s.headCenterY > screenHeight {
-		s.headCenterY -= screenHeight
-	}
-}
-
-func (s *snake) moveRight(dist float64) {
-	s.headCenterX += dist
-
-	// teleport if head center is offscreen.
-	if s.headCenterX > screenWidth {
-		s.headCenterX -= screenWidth
-	}
-}
-
-func (s *snake) moveLeft(dist float64) {
-	s.headCenterX -= dist
-
-	// teleport if head center is offscreen.
-	if s.headCenterX < 0 {
-		s.headCenterX += screenWidth
-	}
 }
