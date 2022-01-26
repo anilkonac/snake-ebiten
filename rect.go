@@ -31,7 +31,7 @@ func (r screenRect) draw(dst *ebiten.Image, color color.Color) {
 		screenRect{r.x, 0, r.width, r.height + r.y}.draw(dst, color)        // part that is in the screen
 		return
 	} else if r.y+r.height > screenHeight { // bottom part is off the screen
-		screenRect{r.x, 0, r.width, r.y + r.height - screenHeight}.draw(dst, color) // teleported right part
+		screenRect{r.x, 0, r.width, r.y + r.height - screenHeight}.draw(dst, color) // teleported bottom part
 		screenRect{r.x, r.y, r.width, screenHeight - r.y}.draw(dst, color)          // part that is in the screen
 		return
 	}

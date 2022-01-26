@@ -15,7 +15,7 @@ const (
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
 	snakeDirection   = directionRight
-	snakeLength      = 4
+	snakeLength      = 10
 	snakeWidth       = 25
 )
 
@@ -78,7 +78,7 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f FPS: %.1f", tps, fps))
-	headUnit := g.snake.headUnit()
+	headUnit := g.snake.unitHead
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 }
@@ -89,7 +89,7 @@ func (g *game) handleInput() {
 	pressedUp := inpututil.IsKeyJustPressed(ebiten.KeyUp) || inpututil.IsKeyJustPressed(ebiten.KeyW)
 	pressedDown := inpututil.IsKeyJustPressed(ebiten.KeyDown) || inpututil.IsKeyJustPressed(ebiten.KeyS)
 
-	snakeDir := g.snake.headUnit().direction
+	snakeDir := g.snake.unitHead.direction
 	if snakeDir == directionUp || snakeDir == directionDown {
 		if pressedLeft {
 			g.snake.rotateTo(directionLeft)
