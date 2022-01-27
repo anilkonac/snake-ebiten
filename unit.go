@@ -10,7 +10,8 @@ type unit struct {
 	headCenterX float64
 	headCenterY float64
 	direction   directionT
-	length_px   float64
+	length      float64
+	color       *color.RGBA
 	next        *unit
 	prev        *unit
 }
@@ -52,36 +53,36 @@ func (u *unit) moveLeft(dist float64) {
 }
 
 func (u *unit) draw(screen *ebiten.Image, color color.Color) {
-	length_px64 := float64(u.length_px)
+	length64 := float64(u.length)
 	switch u.direction {
 	// Create a screenRect whose x and y coordinates are top left corner. Then draw it.
 	case directionRight:
 		screenRect{
-			x:      u.headCenterX - length_px64 + halfSnakeWidth,
+			x:      u.headCenterX - length64 + halfSnakeWidth,
 			y:      u.headCenterY - halfSnakeWidth,
-			width:  length_px64,
+			width:  length64,
 			height: snakeWidth,
-		}.draw(screen, colorSnake)
+		}.draw(screen, color)
 	case directionLeft:
 		screenRect{
 			x:      u.headCenterX - halfSnakeWidth,
 			y:      u.headCenterY - halfSnakeWidth,
-			width:  length_px64,
+			width:  length64,
 			height: snakeWidth,
-		}.draw(screen, colorSnake)
+		}.draw(screen, color)
 	case directionUp:
 		screenRect{
 			x:      u.headCenterX - halfSnakeWidth,
 			y:      u.headCenterY - halfSnakeWidth,
 			width:  snakeWidth,
-			height: length_px64,
-		}.draw(screen, colorSnake)
+			height: length64,
+		}.draw(screen, color)
 	case directionDown:
 		screenRect{
 			x:      u.headCenterX - halfSnakeWidth,
-			y:      u.headCenterY - length_px64 + halfSnakeWidth,
+			y:      u.headCenterY - length64 + halfSnakeWidth,
 			width:  snakeWidth,
-			height: length_px64,
-		}.draw(screen, colorSnake)
+			height: length64,
+		}.draw(screen, color)
 	}
 }

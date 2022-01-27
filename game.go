@@ -15,8 +15,9 @@ const (
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
 	snakeDirection   = directionRight
-	snakeLength      = 10
+	snakeLength      = 400
 	snakeWidth       = 25
+	debugUnits       = false // Draw consecutive units with different colors.
 )
 
 // Game constants
@@ -28,7 +29,7 @@ const (
 // Colors to be used for drawing
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
-	colorSnake      = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
+	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
 	colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
