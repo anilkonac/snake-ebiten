@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 // Snake parameters
@@ -14,25 +15,28 @@ const (
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
 	snakeDirection   = directionRight
-	snakeLength      = 4
-	unitLength       = 25
+	snakeLength      = 400
+	snakeWidth       = 25
+	debugUnits       = false // Draw consecutive units with different colors.
 )
 
 // Game constants
 const (
 	deltaTime      = 1.0 / 60.0
-	halfUnitLength = unitLength / 2.0
+	halfSnakeWidth = snakeWidth / 2.0
 )
 
 // Colors to be used for drawing
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
-	colorSnake      = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
+	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
+	colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
 // Debug variables
 var (
 	tps float64
+	fps float64
 	// mouseX int
 	// mouseY int
 )
@@ -52,8 +56,10 @@ func newGame() *game {
 // Update is called every tick (1/60 [s] by default).
 func (g *game) Update() error {
 	tps = ebiten.CurrentTPS()
+	fps = ebiten.CurrentFPS()
 	// mouseX, mouseY = ebiten.CursorPosition()
 
+	g.handleInput()
 	g.snake.update()
 
 	return nil
@@ -72,7 +78,30 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *game) printDebugMsgs(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", g.snake.headCenterX, g.snake.headCenterY), 0, 15)
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f FPS: %.1f", tps, fps))
+	headUnit := g.snake.unitHead
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
+}
+
+func (g *game) handleInput() {
+	pressedLeft := inpututil.IsKeyJustPressed(ebiten.KeyLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA)
+	pressedRight := inpututil.IsKeyJustPressed(ebiten.KeyRight) || inpututil.IsKeyJustPressed(ebiten.KeyD)
+	pressedUp := inpututil.IsKeyJustPressed(ebiten.KeyUp) || inpututil.IsKeyJustPressed(ebiten.KeyW)
+	pressedDown := inpututil.IsKeyJustPressed(ebiten.KeyDown) || inpututil.IsKeyJustPressed(ebiten.KeyS)
+
+	snakeDir := g.snake.unitHead.direction
+	if snakeDir == directionUp || snakeDir == directionDown {
+		if pressedLeft {
+			g.snake.rotateTo(directionLeft)
+		} else if pressedRight {
+			g.snake.rotateTo(directionRight)
+		}
+	} else if snakeDir == directionLeft || snakeDir == directionRight {
+		if pressedUp {
+			g.snake.rotateTo(directionUp)
+		} else if pressedDown {
+			g.snake.rotateTo(directionDown)
+		}
+	}
 }
