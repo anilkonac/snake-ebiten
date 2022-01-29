@@ -52,37 +52,41 @@ func (u *unit) moveLeft(dist float64) {
 	}
 }
 
+// Compute this unit's rectangle parameters according to the direction and draw a rectangle with them.
 func (u *unit) draw(screen *ebiten.Image, color color.Color) {
 	length64 := float64(u.length)
 	switch u.direction {
-	// Create a screenRect whose x and y coordinates are top left corner. Then draw it.
 	case directionRight:
-		screenRect{
-			x:      u.headCenterX - length64 + halfSnakeWidth,
-			y:      u.headCenterY - halfSnakeWidth,
-			width:  length64,
-			height: snakeWidth,
-		}.draw(screen, color)
+		draw(
+			screen,
+			u.headCenterX-length64+halfSnakeWidth,
+			u.headCenterY-halfSnakeWidth,
+			length64, snakeWidth,
+			color,
+		)
 	case directionLeft:
-		screenRect{
-			x:      u.headCenterX - halfSnakeWidth,
-			y:      u.headCenterY - halfSnakeWidth,
-			width:  length64,
-			height: snakeWidth,
-		}.draw(screen, color)
+		draw(
+			screen,
+			u.headCenterX-halfSnakeWidth,
+			u.headCenterY-halfSnakeWidth,
+			length64, snakeWidth,
+			color,
+		)
 	case directionUp:
-		screenRect{
-			x:      u.headCenterX - halfSnakeWidth,
-			y:      u.headCenterY - halfSnakeWidth,
-			width:  snakeWidth,
-			height: length64,
-		}.draw(screen, color)
+		draw(
+			screen,
+			u.headCenterX-halfSnakeWidth,
+			u.headCenterY-halfSnakeWidth,
+			snakeWidth, length64,
+			color,
+		)
 	case directionDown:
-		screenRect{
-			x:      u.headCenterX - halfSnakeWidth,
-			y:      u.headCenterY - length64 + halfSnakeWidth,
-			width:  snakeWidth,
-			height: length64,
-		}.draw(screen, color)
+		draw(
+			screen,
+			u.headCenterX-halfSnakeWidth,
+			u.headCenterY-length64+halfSnakeWidth,
+			snakeWidth, length64,
+			color,
+		)
 	}
 }
