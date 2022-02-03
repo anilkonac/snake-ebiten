@@ -90,18 +90,31 @@ func (g *game) handleInput() {
 	pressedUp := inpututil.IsKeyJustPressed(ebiten.KeyUp) || inpututil.IsKeyJustPressed(ebiten.KeyW)
 	pressedDown := inpututil.IsKeyJustPressed(ebiten.KeyDown) || inpututil.IsKeyJustPressed(ebiten.KeyS)
 
-	snakeDir := g.snake.unitHead.direction
-	if snakeDir == directionUp || snakeDir == directionDown {
+	if !pressedLeft && !pressedRight && !pressedUp && !pressedDown {
+		return
+	}
+
+	dirCurrent := g.snake.unitHead.direction
+	dirNew := dirCurrent
+	if dirCurrent == directionUp || dirCurrent == directionDown {
 		if pressedLeft {
-			g.snake.rotateTo(directionLeft)
+			dirNew = directionLeft
 		} else if pressedRight {
-			g.snake.rotateTo(directionRight)
+			dirNew = directionRight
 		}
-	} else if snakeDir == directionLeft || snakeDir == directionRight {
+	} else if dirCurrent == directionLeft || dirCurrent == directionRight {
 		if pressedUp {
-			g.snake.rotateTo(directionUp)
+			dirNew = directionUp
 		} else if pressedDown {
-			g.snake.rotateTo(directionDown)
+			dirNew = directionDown
 		}
 	}
+
+	if dirCurrent == dirNew {
+		return
+	}
+
+	newTurn := newTurn(dirCurrent, dirNew)
+	g.snake.turnTo(newTurn)
+
 }

@@ -94,14 +94,12 @@ func (s *snake) updateTail(dist float64) {
 func (s *snake) draw(screen *ebiten.Image) {
 	curUnit := s.unitHead
 	for curUnit != nil {
-		curUnit.draw(screen, curUnit.color)
+		curUnit.draw(screen)
 		curUnit = curUnit.next
 	}
 }
 
-// Create a new unit, whose direction is the passed parameter, as the new head.
-func (s *snake) rotateTo(direction directionT) {
-
+func (s *snake) turnTo(newTurn *turn) {
 	oldHead := s.unitHead
 
 	// Decide color of new head unit
@@ -114,7 +112,7 @@ func (s *snake) rotateTo(direction directionT) {
 	newHead := &unit{
 		headCenterX: oldHead.headCenterX,
 		headCenterY: oldHead.headCenterY,
-		direction:   direction,
+		direction:   newTurn.directionTo,
 		length:      0,
 		color:       newColor,
 		next:        oldHead,
@@ -124,4 +122,7 @@ func (s *snake) rotateTo(direction directionT) {
 	// Add the new head unit to the beginning of the unit doubly linked list.
 	oldHead.prev = newHead
 	s.unitHead = newHead
+
+	// newturn is consumed, delete it
+	newTurn = nil
 }
