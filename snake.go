@@ -24,7 +24,7 @@ type snake struct {
 	distAfterTurn float64
 }
 
-func newSnake(centerX float64, centerY float64, direction directionT, speed uint8, snakeLength snakeLengthT) *snake {
+func newSnake(centerX, centerY float64, direction directionT, speed uint8, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}

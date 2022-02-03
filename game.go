@@ -77,15 +77,6 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
 
-func (g *game) printDebugMsgs(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f FPS: %.1f", tps, fps))
-	// headUnit := g.snake.unitHead
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
-}
-
 func (g *game) handleInput() {
 	pressedLeft := inpututil.IsKeyJustPressed(ebiten.KeyLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA)
 	pressedRight := inpututil.IsKeyJustPressed(ebiten.KeyRight) || inpututil.IsKeyJustPressed(ebiten.KeyD)
@@ -129,4 +120,13 @@ func (g *game) handleInput() {
 	newTurn := newTurn(dirCurrent, dirNew)
 	g.snake.turnTo(newTurn, false)
 
+}
+
+func (g *game) printDebugMsgs(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
+	// headUnit := g.snake.unitHead
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }
