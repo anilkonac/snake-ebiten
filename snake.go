@@ -16,9 +16,12 @@ const (
 )
 
 type snake struct {
-	speed    uint8
-	unitHead *unit
-	unitTail *unit
+	speed         uint8
+	unitHead      *unit
+	unitTail      *unit
+	turnPrev      *turn
+	turnQueue     []*turn
+	distAfterTurn float64
 }
 
 func newSnake(centerX float64, centerY float64, direction directionT, speed uint8, snakeLength snakeLengthT) *snake {
@@ -38,8 +41,6 @@ func newSnake(centerX float64, centerY float64, direction directionT, speed uint
 		direction:   direction,
 		length:      float64(snakeLength),
 		color:       &colorSnake1,
-		next:        nil,
-		prev:        nil,
 	}
 
 	snake := &snake{
@@ -53,6 +54,13 @@ func newSnake(centerX float64, centerY float64, direction directionT, speed uint
 
 func (s *snake) update() {
 	moveDistance := float64(s.speed) * deltaTime
+
+	// Take the next turn in the queue.
+	if len(s.turnQueue) > 0 && s.distAfterTurn > snakeWidth {
+		var nextTurn *turn
+		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
+		s.turnTo(nextTurn, true)
+	}
 
 	s.updateHead(moveDistance)
 	s.updateTail(moveDistance)
@@ -73,6 +81,8 @@ func (s *snake) updateHead(dist float64) {
 	case directionDown:
 		s.unitHead.moveDown(dist)
 	}
+
+	s.distAfterTurn += dist
 }
 
 func (s *snake) updateTail(dist float64) {
@@ -99,7 +109,24 @@ func (s *snake) draw(screen *ebiten.Image) {
 	}
 }
 
-func (s *snake) turnTo(newTurn *turn) {
+func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
+	if !isFromQueue {
+		// Check if the new turn is dangerous (twice same turns rapidly).
+		if (s.turnPrev != nil) &&
+			(s.turnPrev.isTurningLeft == newTurn.isTurningLeft) &&
+			(s.distAfterTurn <= snakeWidth) {
+			// New turn cannot be taken now, push it into the queue
+			s.turnQueue = append(s.turnQueue, newTurn)
+			return
+		}
+		// If there are turns in the queue then add the new turn also into it.
+		if len(s.turnQueue) > 0 {
+			s.turnQueue = append(s.turnQueue, newTurn)
+			return
+		}
+	}
+	s.distAfterTurn = 0
+
 	oldHead := s.unitHead
 
 	// Decide color of new head unit
@@ -116,13 +143,11 @@ func (s *snake) turnTo(newTurn *turn) {
 		length:      0,
 		color:       newColor,
 		next:        oldHead,
-		prev:        nil,
 	}
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
 	oldHead.prev = newHead
 	s.unitHead = newHead
 
-	// newturn is consumed, delete it
-	newTurn = nil
+	s.turnPrev = newTurn
 }

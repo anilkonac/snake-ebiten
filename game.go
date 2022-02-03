@@ -79,9 +79,11 @@ func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f FPS: %.1f", tps, fps))
-	headUnit := g.snake.unitHead
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
+	// headUnit := g.snake.unitHead
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }
 
 func (g *game) handleInput() {
@@ -94,7 +96,16 @@ func (g *game) handleInput() {
 		return
 	}
 
-	dirCurrent := g.snake.unitHead.direction
+	// Set current direction as the last turns' direction
+	var dirCurrent directionT
+	if len(g.snake.turnQueue) > 0 {
+		queueLength := len(g.snake.turnQueue)
+		dirCurrent = g.snake.turnQueue[queueLength-1].directionTo
+	} else {
+		dirCurrent = g.snake.unitHead.direction
+	}
+
+	// Determine new direction
 	dirNew := dirCurrent
 	if dirCurrent == directionUp || dirCurrent == directionDown {
 		if pressedLeft {
@@ -110,11 +121,12 @@ func (g *game) handleInput() {
 		}
 	}
 
-	if dirCurrent == dirNew {
+	if dirNew == dirCurrent {
 		return
 	}
 
+	// Create new turn
 	newTurn := newTurn(dirCurrent, dirNew)
-	g.snake.turnTo(newTurn)
+	g.snake.turnTo(newTurn, false)
 
 }
