@@ -12,6 +12,7 @@ type unit struct {
 	direction   directionT
 	length      float64
 	color       *color.RGBA
+	rect        *screenRect
 	next        *unit
 	prev        *unit
 }
@@ -54,39 +55,43 @@ func (u *unit) moveLeft(dist float64) {
 
 // Compute this unit's rectangle parameters according to the direction and draw a rectangle with them.
 func (u *unit) draw(screen *ebiten.Image) {
+	if u.rect == nil {
+		u.creteRect()
+	}
+
+	u.rect.draw(screen, u.color)
+}
+
+func (u *unit) creteRect() {
 	length64 := float64(u.length)
 	switch u.direction {
 	case directionRight:
-		drawRect(
-			screen,
-			u.headCenterX-length64+halfSnakeWidth, // x
-			u.headCenterY-halfSnakeWidth,          // y
-			length64, snakeWidth,                  // width, height
-			u.color,
-		)
+		u.rect = &screenRect{
+			x:      u.headCenterX - length64 + halfSnakeWidth,
+			y:      u.headCenterY - halfSnakeWidth,
+			width:  length64,
+			height: snakeWidth,
+		}
 	case directionLeft:
-		drawRect(
-			screen,
-			u.headCenterX-halfSnakeWidth,
-			u.headCenterY-halfSnakeWidth,
-			length64, snakeWidth,
-			u.color,
-		)
+		u.rect = &screenRect{
+			x:      u.headCenterX - halfSnakeWidth,
+			y:      u.headCenterY - halfSnakeWidth,
+			width:  length64,
+			height: snakeWidth,
+		}
 	case directionUp:
-		drawRect(
-			screen,
-			u.headCenterX-halfSnakeWidth,
-			u.headCenterY-halfSnakeWidth,
-			snakeWidth, length64,
-			u.color,
-		)
+		u.rect = &screenRect{
+			x:      u.headCenterX - halfSnakeWidth,
+			y:      u.headCenterY - halfSnakeWidth,
+			width:  snakeWidth,
+			height: length64,
+		}
 	case directionDown:
-		drawRect(
-			screen,
-			u.headCenterX-halfSnakeWidth,
-			u.headCenterY-length64+halfSnakeWidth,
-			snakeWidth, length64,
-			u.color,
-		)
+		u.rect = &screenRect{
+			x:      u.headCenterX - halfSnakeWidth,
+			y:      u.headCenterY - length64 + halfSnakeWidth,
+			width:  snakeWidth,
+			height: length64,
+		}
 	}
 }

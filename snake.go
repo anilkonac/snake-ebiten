@@ -43,6 +43,8 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 		color:       &colorSnake1,
 	}
 
+	initialUnit.creteRect()
+
 	snake := &snake{
 		speed:    speed,
 		unitHead: initialUnit,
@@ -82,6 +84,8 @@ func (s *snake) updateHead(dist float64) {
 		s.unitHead.moveDown(dist)
 	}
 
+	s.unitHead.creteRect() // Lazy rect updating
+
 	s.distAfterTurn += dist
 }
 
@@ -99,6 +103,8 @@ func (s *snake) updateTail(dist float64) {
 		s.unitTail = s.unitTail.prev
 		s.unitTail.next = nil
 	}
+
+	s.unitTail.creteRect() // Lazy rect updating
 }
 
 func (s *snake) draw(screen *ebiten.Image) {
@@ -144,10 +150,22 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 		color:       newColor,
 		next:        oldHead,
 	}
+	newHead.creteRect()
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
 	oldHead.prev = newHead
 	s.unitHead = newHead
 
 	s.turnPrev = newTurn
+}
+
+func (s *snake) checkIntersection() bool {
+	curUnit := s.unitHead.next
+	for curUnit != nil {
+		if s.unitHead.rect.intersects(curUnit.rect) {
+			return true
+		}
+		curUnit = curUnit.next
+	}
+	return false
 }

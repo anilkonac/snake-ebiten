@@ -17,7 +17,7 @@ const (
 	snakeDirection   = directionRight
 	snakeLength      = 400
 	snakeWidth       = 25
-	debugUnits       = false // Draw consecutive units with different colors.
+	debugUnits       = true // Draw consecutive units with different colors.
 )
 
 // Game constants
@@ -36,10 +36,12 @@ var (
 // Debug variables
 var (
 	tps float64
-	fps float64
+	// fps float64
 	// mouseX int
 	// mouseY int
 )
+
+var paused bool = false
 
 // game implements ebiten.game interface.
 type game struct {
@@ -56,11 +58,15 @@ func newGame() *game {
 // Update is called every tick (1/60 [s] by default).
 func (g *game) Update() error {
 	tps = ebiten.CurrentTPS()
-	fps = ebiten.CurrentFPS()
+	// fps = ebiten.CurrentFPS()
 	// mouseX, mouseY = ebiten.CursorPosition()
 
-	g.handleInput()
-	g.snake.update()
+	if !paused {
+		g.handleInput()
+		g.snake.update()
+	}
+
+	paused = g.snake.checkIntersection()
 
 	return nil
 }
@@ -89,8 +95,7 @@ func (g *game) handleInput() {
 
 	// Set current direction as the direction of the last turn to be taken.
 	var dirCurrent directionT
-	queueLength := len(g.snake.turnQueue)
-	if queueLength > 0 {
+	if queueLength := len(g.snake.turnQueue); queueLength > 0 {
 		dirCurrent = g.snake.turnQueue[queueLength-1].directionTo
 	} else {
 		dirCurrent = g.snake.unitHead.direction
