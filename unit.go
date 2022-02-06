@@ -57,7 +57,7 @@ func (u *unit) draw(screen *ebiten.Image) {
 	length64 := float64(u.length)
 	switch u.direction {
 	case directionRight:
-		draw(
+		drawRect(
 			screen,
 			u.headCenterX-length64+halfSnakeWidth, // x
 			u.headCenterY-halfSnakeWidth,          // y
@@ -65,7 +65,7 @@ func (u *unit) draw(screen *ebiten.Image) {
 			u.color,
 		)
 	case directionLeft:
-		draw(
+		drawRect(
 			screen,
 			u.headCenterX-halfSnakeWidth,
 			u.headCenterY-halfSnakeWidth,
@@ -73,7 +73,7 @@ func (u *unit) draw(screen *ebiten.Image) {
 			u.color,
 		)
 	case directionUp:
-		draw(
+		drawRect(
 			screen,
 			u.headCenterX-halfSnakeWidth,
 			u.headCenterY-halfSnakeWidth,
@@ -81,7 +81,7 @@ func (u *unit) draw(screen *ebiten.Image) {
 			u.color,
 		)
 	case directionDown:
-		draw(
+		drawRect(
 			screen,
 			u.headCenterX-halfSnakeWidth,
 			u.headCenterY-length64+halfSnakeWidth,

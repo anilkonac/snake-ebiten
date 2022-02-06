@@ -1,15 +1,13 @@
 package main
 
 type turn struct {
-	directionFrom directionT
 	directionTo   directionT
 	isTurningLeft bool
 }
 
 func newTurn(directionFrom, directionTo directionT) *turn {
 	newTurn := &turn{
-		directionFrom: directionFrom,
-		directionTo:   directionTo,
+		directionTo: directionTo,
 	}
 
 	// Identify turning direction

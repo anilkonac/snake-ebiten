@@ -87,10 +87,10 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Set current direction as the last turns' direction
+	// Set current direction as the direction of the last turn to be taken.
 	var dirCurrent directionT
-	if len(g.snake.turnQueue) > 0 {
-		queueLength := len(g.snake.turnQueue)
+	queueLength := len(g.snake.turnQueue)
+	if queueLength > 0 {
 		dirCurrent = g.snake.turnQueue[queueLength-1].directionTo
 	} else {
 		dirCurrent = g.snake.unitHead.direction
