@@ -11,14 +11,30 @@ type screenRect struct {
 	width, height float64
 }
 
-func (r screenRect) intersects(other *screenRect) bool {
+func (a screenRect) intersects(b *screenRect) bool {
 
-	// intersectsX := (other.x > r.x && other.x < r.x+r.width) || (r.x > other.x && r.x < other.x+other.width)
-	// intersectsY := (other.y > r.y && other.y < r.y+r.height) || (r.y > other.y && r.y < other.y+other.height)
+	aBottomRightX := a.x + a.width
+	aBottomRightY := a.y + a.height
+	bBottomRightX := b.x + b.width
+	bBottomRightY := b.y + b.height
 
-	// return intersectsX && intersectsY
+	if (a.x < b.x) && (aBottomRightX < b.x) { // a is on the left side of b
+		return false
+	}
 
-	return false
+	if (a.x > bBottomRightX) && (aBottomRightX > bBottomRightX) { // a is on the right side of b
+		return false
+	}
+
+	if (a.y < b.y) && (aBottomRightY < b.y) { // a is above b
+		return false
+	}
+
+	if (a.y > bBottomRightY) && (aBottomRightY > bBottomRightY) { // a is under b
+		return false
+	}
+
+	return true
 }
 
 func (r screenRect) draw(dst *ebiten.Image, clr color.Color) {

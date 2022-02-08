@@ -15,7 +15,7 @@ const (
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
 	snakeDirection   = directionRight
-	snakeLength      = 400
+	snakeLength      = 200
 	snakeWidth       = 25
 	debugUnits       = true // Draw consecutive units with different colors.
 )

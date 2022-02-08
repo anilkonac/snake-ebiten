@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -34,4 +35,10 @@ func drawRect(dst *ebiten.Image, x, y, width, height float64, color color.Color)
 	// Draw the rectangle at last
 	// --------------------------
 	ebitenutil.DrawRect(dst, x, y, width, height, color)
+	if debugUnits {
+		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", x, y), int(x)-90, int(y)-15)
+		bottomX := x + width
+		bottomY := y + height
+		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+	}
 }
