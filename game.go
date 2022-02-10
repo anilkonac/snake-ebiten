@@ -14,16 +14,16 @@ const (
 	snakeHeadCenterX = screenWidth / 2.0
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
-	snakeDirection   = directionRight
-	snakeLength      = 200
+	snakeLength      = 600
 	snakeWidth       = 25
-	debugUnits       = true // Draw consecutive units with different colors.
+	debugUnits       = false // Draw consecutive units with different colors.
 )
 
 // Game constants
 const (
 	deltaTime      = 1.0 / 60.0
 	halfSnakeWidth = snakeWidth / 2.0
+	pauseTime      = 3.0 // seconds
 )
 
 // Colors to be used for drawing
@@ -37,20 +37,18 @@ var (
 var (
 	tps float64
 	// fps float64
-	// mouseX int
-	// mouseY int
 )
-
-var paused bool = false
 
 // game implements ebiten.game interface.
 type game struct {
-	snake *snake
+	snake       *snake
+	paused      bool
+	timeInPause float32
 }
 
 func newGame() *game {
 	game := new(game)
-	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, snakeDirection, snakeSpeed, snakeLength)
+	game.snake = newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength)
 
 	return game
 }
@@ -59,14 +57,18 @@ func newGame() *game {
 func (g *game) Update() error {
 	tps = ebiten.CurrentTPS()
 	// fps = ebiten.CurrentFPS()
-	// mouseX, mouseY = ebiten.CursorPosition()
 
-	if !paused {
-		g.handleInput()
-		g.snake.update()
+	if g.paused {
+		g.timeInPause += deltaTime
+		if g.timeInPause >= pauseTime {
+			*g = *newGame() // Restart the game
+		}
+		return nil
 	}
 
-	paused = g.snake.checkIntersection()
+	g.handleInput()
+	g.snake.update()
+	g.paused = g.snake.checkIntersection()
 
 	return nil
 }

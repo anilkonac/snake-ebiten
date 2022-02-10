@@ -1,6 +1,9 @@
 package main
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -24,6 +27,10 @@ type snake struct {
 	distAfterTurn float64
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 func newSnake(centerX, centerY float64, direction directionT, speed uint8, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
@@ -38,9 +45,10 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	initialUnit := &unit{
 		headCenterX: centerX,
 		headCenterY: centerY,
-		direction:   direction,
-		length:      float64(snakeLength),
-		color:       &colorSnake1,
+		// direction:   directionT(rand.Intn(int(directionTotal))),
+		direction: direction,
+		length:    float64(snakeLength),
+		color:     &colorSnake1,
 	}
 
 	initialUnit.creteRect()
@@ -52,6 +60,11 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	}
 
 	return snake
+}
+
+func newSnakeRandDir(centerX, centerY float64, speed uint8, snakeLength snakeLengthT) *snake {
+	var direction directionT = directionT(rand.Intn(int(directionTotal)))
+	return newSnake(centerX, centerY, direction, speed, snakeLength)
 }
 
 func (s *snake) update() {
@@ -104,7 +117,10 @@ func (s *snake) updateTail(dist float64) {
 		s.unitTail.next = nil
 	}
 
-	s.unitTail.creteRect() // Lazy rect updating
+	if s.unitTail != s.unitHead {
+		s.unitTail.creteRect() // Lazy rect updating
+	}
+
 }
 
 func (s *snake) draw(screen *ebiten.Image) {
