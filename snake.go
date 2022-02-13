@@ -45,10 +45,9 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	initialUnit := &unit{
 		headCenterX: centerX,
 		headCenterY: centerY,
-		// direction:   directionT(rand.Intn(int(directionTotal))),
-		direction: direction,
-		length:    float64(snakeLength),
-		color:     &colorSnake1,
+		direction:   direction,
+		length:      float64(snakeLength),
+		color:       &colorSnake1,
 	}
 
 	initialUnit.creteRect()
@@ -97,7 +96,9 @@ func (s *snake) updateHead(dist float64) {
 		s.unitHead.moveDown(dist)
 	}
 
-	s.unitHead.creteRect() // Lazy rect updating
+	if s.unitHead != s.unitTail {
+		s.unitHead.creteRect() // Lazy rect updating
+	}
 
 	s.distAfterTurn += dist
 }
@@ -117,9 +118,7 @@ func (s *snake) updateTail(dist float64) {
 		s.unitTail.next = nil
 	}
 
-	if s.unitTail != s.unitHead {
-		s.unitTail.creteRect() // Lazy rect updating
-	}
+	s.unitTail.creteRect() // Lazy rect updating
 
 }
 
@@ -176,7 +175,11 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 }
 
 func (s *snake) checkIntersection() bool {
-	curUnit := s.unitHead.next
+	if s.unitHead.next == nil {
+		return false
+	}
+
+	curUnit := s.unitHead.next.next
 	for curUnit != nil {
 		if s.unitHead.rect.intersects(curUnit.rect) {
 			return true

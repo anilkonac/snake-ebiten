@@ -14,7 +14,7 @@ const (
 	snakeHeadCenterX = screenWidth / 2.0
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
-	snakeLength      = 600
+	snakeLength      = 400
 	snakeWidth       = 25
 	debugUnits       = false // Draw consecutive units with different colors.
 )
@@ -23,7 +23,7 @@ const (
 const (
 	deltaTime      = 1.0 / 60.0
 	halfSnakeWidth = snakeWidth / 2.0
-	pauseTime      = 3.0 // seconds
+	gameOverTime   = 1.5 // seconds
 )
 
 // Colors to be used for drawing
@@ -41,13 +41,15 @@ var (
 
 // game implements ebiten.game interface.
 type game struct {
-	snake       *snake
-	paused      bool
-	timeInPause float32
+	snake          *snake
+	gameOver       bool
+	paused         bool
+	timeInGameOver float32
 }
 
 func newGame() *game {
 	game := new(game)
+	// game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength)
 	game.snake = newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength)
 
 	return game
@@ -58,9 +60,17 @@ func (g *game) Update() error {
 	tps = ebiten.CurrentTPS()
 	// fps = ebiten.CurrentFPS()
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		g.paused = !g.paused
+	}
+
 	if g.paused {
-		g.timeInPause += deltaTime
-		if g.timeInPause >= pauseTime {
+		return nil
+	}
+
+	if g.gameOver {
+		g.timeInGameOver += deltaTime
+		if g.timeInGameOver >= gameOverTime {
 			*g = *newGame() // Restart the game
 		}
 		return nil
@@ -68,7 +78,7 @@ func (g *game) Update() error {
 
 	g.handleInput()
 	g.snake.update()
-	g.paused = g.snake.checkIntersection()
+	g.gameOver = g.snake.checkIntersection()
 
 	return nil
 }

@@ -12,7 +12,7 @@ type unit struct {
 	direction   directionT
 	length      float64
 	color       *color.RGBA
-	rect        *screenRect
+	rect        *rectF64
 	next        *unit
 	prev        *unit
 }
@@ -66,28 +66,28 @@ func (u *unit) creteRect() {
 	length64 := float64(u.length)
 	switch u.direction {
 	case directionRight:
-		u.rect = &screenRect{
+		u.rect = &rectF64{
 			x:      u.headCenterX - length64 + halfSnakeWidth,
 			y:      u.headCenterY - halfSnakeWidth,
 			width:  length64,
 			height: snakeWidth,
 		}
 	case directionLeft:
-		u.rect = &screenRect{
+		u.rect = &rectF64{
 			x:      u.headCenterX - halfSnakeWidth,
 			y:      u.headCenterY - halfSnakeWidth,
 			width:  length64,
 			height: snakeWidth,
 		}
 	case directionUp:
-		u.rect = &screenRect{
+		u.rect = &rectF64{
 			x:      u.headCenterX - halfSnakeWidth,
 			y:      u.headCenterY - halfSnakeWidth,
 			width:  snakeWidth,
 			height: length64,
 		}
 	case directionDown:
-		u.rect = &screenRect{
+		u.rect = &rectF64{
 			x:      u.headCenterX - halfSnakeWidth,
 			y:      u.headCenterY - length64 + halfSnakeWidth,
 			width:  snakeWidth,
