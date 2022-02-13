@@ -14,7 +14,6 @@ const (
 	snakeHeadCenterX = screenWidth / 2.0
 	snakeHeadCenterY = screenHeight / 2.0
 	snakeSpeed       = 200
-	snakeDirection   = directionRight
 	snakeLength      = 400
 	snakeWidth       = 25
 	debugUnits       = false // Draw consecutive units with different colors.
@@ -24,6 +23,7 @@ const (
 const (
 	deltaTime      = 1.0 / 60.0
 	halfSnakeWidth = snakeWidth / 2.0
+	gameOverTime   = 1.5 // seconds
 )
 
 // Colors to be used for drawing
@@ -36,31 +36,54 @@ var (
 // Debug variables
 var (
 	tps float64
-	fps float64
-	// mouseX int
-	// mouseY int
+	// fps float64
 )
 
 // game implements ebiten.game interface.
 type game struct {
-	snake *snake
+	snake          *snake
+	gameOver       bool
+	paused         bool
+	timeInGameOver float32
 }
 
 func newGame() *game {
 	game := new(game)
-	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, snakeDirection, snakeSpeed, snakeLength)
+	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength)
 
 	return game
+}
+
+func (g *game) restart() {
+	*g = game{
+		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength),
+	}
 }
 
 // Update is called every tick (1/60 [s] by default).
 func (g *game) Update() error {
 	tps = ebiten.CurrentTPS()
-	fps = ebiten.CurrentFPS()
-	// mouseX, mouseY = ebiten.CursorPosition()
+	// fps = ebiten.CurrentFPS()
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		g.paused = !g.paused
+	}
+
+	if g.paused {
+		return nil
+	}
+
+	if g.gameOver {
+		g.timeInGameOver += deltaTime
+		if g.timeInGameOver >= gameOverTime {
+			g.restart()
+		}
+		return nil
+	}
 
 	g.handleInput()
 	g.snake.update()
+	g.gameOver = g.snake.checkIntersection()
 
 	return nil
 }
@@ -87,12 +110,12 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Set current direction as the direction of the last turn to be taken.
 	var dirCurrent directionT
-	queueLength := len(g.snake.turnQueue)
-	if queueLength > 0 {
+	if queueLength := len(g.snake.turnQueue); queueLength > 0 {
+		// Set current direction as the direction of the last turn to be taken.
 		dirCurrent = g.snake.turnQueue[queueLength-1].directionTo
 	} else {
+		// Set as current head direction
 		dirCurrent = g.snake.unitHead.direction
 	}
 
@@ -116,7 +139,7 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Create new turn
+	// Create a new turn and take it
 	newTurn := newTurn(dirCurrent, dirNew)
 	g.snake.turnTo(newTurn, false)
 

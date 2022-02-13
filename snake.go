@@ -1,6 +1,9 @@
 package main
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -24,6 +27,10 @@ type snake struct {
 	distAfterTurn float64
 }
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 func newSnake(centerX, centerY float64, direction directionT, speed uint8, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
@@ -41,7 +48,10 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 		direction:   direction,
 		length:      float64(snakeLength),
 		color:       &colorSnake1,
+		rects:       make([]rectF64, 0, 4),
 	}
+
+	initialUnit.creteRects()
 
 	snake := &snake{
 		speed:    speed,
@@ -52,10 +62,15 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	return snake
 }
 
+func newSnakeRandDir(centerX, centerY float64, speed uint8, snakeLength snakeLengthT) *snake {
+	var direction directionT = directionT(rand.Intn(int(directionTotal)))
+	return newSnake(centerX, centerY, direction, speed, snakeLength)
+}
+
 func (s *snake) update() {
 	moveDistance := float64(s.speed) * deltaTime
 
-	// Take the next turn in the queue.
+	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
 	if len(s.turnQueue) > 0 && s.distAfterTurn > snakeWidth {
 		var nextTurn *turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
@@ -82,6 +97,10 @@ func (s *snake) updateHead(dist float64) {
 		s.unitHead.moveDown(dist)
 	}
 
+	if s.unitHead != s.unitTail {
+		s.unitHead.creteRects() // Update rectangles of this unit
+	}
+
 	s.distAfterTurn += dist
 }
 
@@ -99,6 +118,8 @@ func (s *snake) updateTail(dist float64) {
 		s.unitTail = s.unitTail.prev
 		s.unitTail.next = nil
 	}
+
+	s.unitTail.creteRects() // Update rectangles of this unit
 }
 
 func (s *snake) draw(screen *ebiten.Image) {
@@ -144,10 +165,27 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 		color:       newColor,
 		next:        oldHead,
 	}
+	newHead.creteRects()
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
 	oldHead.prev = newHead
 	s.unitHead = newHead
 
 	s.turnPrev = newTurn
+}
+
+func (s *snake) checkIntersection() bool {
+	if s.unitHead.next == nil {
+		return false
+	}
+
+	// Skip head's next unit, since it is not possible for the head to intersect it.
+	curUnit := s.unitHead.next.next
+	for curUnit != nil {
+		if s.unitHead.intersects(curUnit) {
+			return true
+		}
+		curUnit = curUnit.next
+	}
+	return false
 }

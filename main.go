@@ -12,12 +12,11 @@ const (
 )
 
 func main() {
-	game := newGame()
-
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Ssnake")
 
 	// Start game loop
+	game := newGame()
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
