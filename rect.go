@@ -1,19 +1,9 @@
 package main
 
-import (
-	"fmt"
-	"image/color"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-)
-
 type rectF64 struct {
 	x, y          float64
 	width, height float64
 }
-
-const epsilon = 0.001
 
 // Divide rectangle up to 4 ones according to where it is off-screen.
 func (r rectF64) slice(rects *[]rectF64) {
@@ -42,14 +32,4 @@ func (r rectF64) slice(rects *[]rectF64) {
 
 	// Add sliced rectangle to the slice
 	*rects = append(*rects, r)
-}
-
-func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
-	ebitenutil.DrawRect(dst, r.x, r.y, r.width, r.height, clr)
-	if debugUnits {
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)
-		bottomX := r.x + r.width
-		bottomY := r.y + r.height
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-	}
 }

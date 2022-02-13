@@ -49,10 +49,15 @@ type game struct {
 
 func newGame() *game {
 	game := new(game)
-	// game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength)
-	game.snake = newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength)
+	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength)
 
 	return game
+}
+
+func (g *game) restart() {
+	*g = game{
+		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength),
+	}
 }
 
 // Update is called every tick (1/60 [s] by default).
@@ -71,7 +76,7 @@ func (g *game) Update() error {
 	if g.gameOver {
 		g.timeInGameOver += deltaTime
 		if g.timeInGameOver >= gameOverTime {
-			*g = *newGame() // Restart the game
+			g.restart()
 		}
 		return nil
 	}
@@ -105,11 +110,12 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Set current direction as the direction of the last turn to be taken.
 	var dirCurrent directionT
 	if queueLength := len(g.snake.turnQueue); queueLength > 0 {
+		// Set current direction as the direction of the last turn to be taken.
 		dirCurrent = g.snake.turnQueue[queueLength-1].directionTo
 	} else {
+		// Set as current head direction
 		dirCurrent = g.snake.unitHead.direction
 	}
 
@@ -133,7 +139,7 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Create new turn
+	// Create a new turn and take it
 	newTurn := newTurn(dirCurrent, dirNew)
 	g.snake.turnTo(newTurn, false)
 

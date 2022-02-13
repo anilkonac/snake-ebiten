@@ -70,7 +70,7 @@ func newSnakeRandDir(centerX, centerY float64, speed uint8, snakeLength snakeLen
 func (s *snake) update() {
 	moveDistance := float64(s.speed) * deltaTime
 
-	// Take the next turn in the queue.
+	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
 	if len(s.turnQueue) > 0 && s.distAfterTurn > snakeWidth {
 		var nextTurn *turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
@@ -179,6 +179,7 @@ func (s *snake) checkIntersection() bool {
 		return false
 	}
 
+	// Skip head's next unit, since it is not possible for the head to intersect it.
 	curUnit := s.unitHead.next.next
 	for curUnit != nil {
 		if s.unitHead.intersects(curUnit) {
