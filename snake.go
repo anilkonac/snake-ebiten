@@ -48,9 +48,10 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 		direction:   direction,
 		length:      float64(snakeLength),
 		color:       &colorSnake1,
+		rects:       make([]rectF64, 0, 4),
 	}
 
-	initialUnit.creteRect()
+	initialUnit.creteRects()
 
 	snake := &snake{
 		speed:    speed,
@@ -97,7 +98,7 @@ func (s *snake) updateHead(dist float64) {
 	}
 
 	if s.unitHead != s.unitTail {
-		s.unitHead.creteRect() // Lazy rect updating
+		s.unitHead.creteRects() // Update rectangles of this unit
 	}
 
 	s.distAfterTurn += dist
@@ -118,8 +119,7 @@ func (s *snake) updateTail(dist float64) {
 		s.unitTail.next = nil
 	}
 
-	s.unitTail.creteRect() // Lazy rect updating
-
+	s.unitTail.creteRects() // Update rectangles of this unit
 }
 
 func (s *snake) draw(screen *ebiten.Image) {
@@ -165,7 +165,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 		color:       newColor,
 		next:        oldHead,
 	}
-	newHead.creteRect()
+	newHead.creteRects()
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
 	oldHead.prev = newHead
@@ -181,7 +181,7 @@ func (s *snake) checkIntersection() bool {
 
 	curUnit := s.unitHead.next.next
 	for curUnit != nil {
-		if s.unitHead.rect.intersects(curUnit.rect) {
+		if s.unitHead.intersects(curUnit) {
 			return true
 		}
 		curUnit = curUnit.next
