@@ -23,7 +23,7 @@ const (
 const (
 	deltaTime      = 1.0 / 60.0
 	halfSnakeWidth = snakeWidth / 2.0
-	gameOverTime   = 1.5 // seconds
+	restartTime    = 1.5 // seconds
 )
 
 // Colors to be used for drawing
@@ -41,10 +41,10 @@ var (
 
 // game implements ebiten.game interface.
 type game struct {
-	snake          *snake
-	gameOver       bool
-	paused         bool
-	timeInGameOver float32
+	snake             *snake
+	gameOver          bool
+	paused            bool
+	timeAfterGameOver float32
 }
 
 func newGame() *game {
@@ -74,8 +74,8 @@ func (g *game) Update() error {
 	}
 
 	if g.gameOver {
-		g.timeInGameOver += deltaTime
-		if g.timeInGameOver >= gameOverTime {
+		g.timeAfterGameOver += deltaTime
+		if g.timeAfterGameOver >= restartTime {
 			g.restart()
 		}
 		return nil
@@ -110,6 +110,7 @@ func (g *game) handleInput() {
 		return
 	}
 
+	// Assign current direction
 	var dirCurrent directionT
 	if queueLength := len(g.snake.turnQueue); queueLength > 0 {
 		// Set current direction as the direction of the last turn to be taken.
@@ -119,15 +120,15 @@ func (g *game) handleInput() {
 		dirCurrent = g.snake.unitHead.direction
 	}
 
-	// Determine new direction
+	// Specify new direction
 	dirNew := dirCurrent
-	if dirCurrent == directionUp || dirCurrent == directionDown {
+	if (dirCurrent == directionUp) || (dirCurrent == directionDown) {
 		if pressedLeft {
 			dirNew = directionLeft
 		} else if pressedRight {
 			dirNew = directionRight
 		}
-	} else if dirCurrent == directionLeft || dirCurrent == directionRight {
+	} else if (dirCurrent == directionLeft) || (dirCurrent == directionRight) {
 		if pressedUp {
 			dirNew = directionUp
 		} else if pressedDown {

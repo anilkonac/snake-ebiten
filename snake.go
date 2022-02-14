@@ -10,6 +10,8 @@ import (
 type directionT uint8
 type snakeLengthT uint16
 
+const epsilonSafeDist = 0.5
+
 const (
 	directionUp directionT = iota
 	directionDown
@@ -42,16 +44,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 		panic("Initial y position of the snake is off-screen.")
 	}
 
-	initialUnit := &unit{
-		headCenterX: centerX,
-		headCenterY: centerY,
-		direction:   direction,
-		length:      float64(snakeLength),
-		color:       &colorSnake1,
-		rects:       make([]rectF64, 0, 4),
-	}
-
-	initialUnit.creteRects()
+	initialUnit := newUnit(centerX, centerY, direction, float64(snakeLength), &colorSnake1)
 
 	snake := &snake{
 		speed:    speed,
@@ -71,7 +64,7 @@ func (s *snake) update() {
 	moveDistance := float64(s.speed) * deltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
-	if len(s.turnQueue) > 0 && s.distAfterTurn > snakeWidth {
+	if (len(s.turnQueue) > 0) && (s.distAfterTurn-snakeWidth >= epsilonSafeDist) {
 		var nextTurn *turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
 		s.turnTo(nextTurn, true)
@@ -109,7 +102,7 @@ func (s *snake) updateTail(dist float64) {
 	s.unitTail.length -= dist
 
 	// Rotate tail if its length is less than width of the snake
-	if s.unitTail.length <= snakeWidth && s.unitTail.prev != nil {
+	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
 		s.unitTail.direction = s.unitTail.prev.direction
 	}
 
@@ -157,20 +150,14 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	}
 
 	// Create new head unit
-	newHead := &unit{
-		headCenterX: oldHead.headCenterX,
-		headCenterY: oldHead.headCenterY,
-		direction:   newTurn.directionTo,
-		length:      0,
-		color:       newColor,
-		next:        oldHead,
-	}
-	newHead.creteRects()
+	newHead := newUnit(oldHead.headCenterX, oldHead.headCenterY, newTurn.directionTo, 0, newColor)
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
+	newHead.next = oldHead
 	oldHead.prev = newHead
 	s.unitHead = newHead
 
+	// Update prev turn
 	s.turnPrev = newTurn
 }
 

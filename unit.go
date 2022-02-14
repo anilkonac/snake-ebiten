@@ -8,6 +8,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+const epsilon = 0.001
+
 type unit struct {
 	headCenterX float64
 	headCenterY float64
@@ -19,7 +21,18 @@ type unit struct {
 	prev        *unit
 }
 
-const epsilon = 0.001
+func newUnit(headCenterX, headCenterY float64, direction directionT, length float64, color *color.RGBA) *unit {
+	newUnit := &unit{
+		headCenterX: headCenterX,
+		headCenterY: headCenterY,
+		direction:   direction,
+		length:      length,
+		color:       color,
+	}
+	newUnit.creteRects()
+
+	return newUnit
+}
 
 func (u *unit) moveUp(dist float64) {
 	u.headCenterY -= dist
@@ -70,7 +83,7 @@ func (u *unit) draw(screen *ebiten.Image) {
 }
 
 func (u *unit) creteRects() {
-	// Create the rectangle to be used for slicing.
+	// Create the rectangle to be sliced.
 	var pureRect rectF64
 	length64 := float64(u.length)
 	switch u.direction {
