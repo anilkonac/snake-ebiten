@@ -176,3 +176,7 @@ func (s *snake) checkIntersection() bool {
 	}
 	return false
 }
+
+func (s *snake) ate() {
+
+}

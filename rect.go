@@ -1,5 +1,6 @@
 package main
 
+// the rectangle that is compatible with ebiten.drawRect function's parameters(float64)
 type rectF64 struct {
 	x, y          float64
 	width, height float64
@@ -32,4 +33,29 @@ func (r rectF64) slice(rects *[]rectF64) {
 
 	// Add sliced rectangle to the slice
 	*rects = append(*rects, r)
+}
+
+func intersects(rectA, rectB rectF64) bool {
+	aRightX := rectA.x + rectA.width
+	bRightX := rectB.x + rectB.width
+	aBottomY := rectA.y + rectA.height
+	bBottomY := rectB.y + rectB.height
+
+	if (rectA.x-rectB.x <= epsilon) && (aRightX-rectB.x <= epsilon) { // rectA is on the left side of rectB
+		return false
+	}
+
+	if (rectA.x-bRightX >= -epsilon) && (aRightX-bRightX >= -epsilon) { // rectA is on the right side of rectB
+		return false
+	}
+
+	if (rectA.y-rectB.y <= epsilon) && (aBottomY-rectB.y <= epsilon) { // rectA is above rectB
+		return false
+	}
+
+	if (rectA.y-bBottomY >= -epsilon) && (aBottomY-bBottomY >= -epsilon) { // rectA is under rectB
+		return false
+	}
+
+	return true
 }

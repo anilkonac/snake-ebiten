@@ -11,12 +11,13 @@ import (
 
 // Snake parameters
 const (
-	snakeHeadCenterX = screenWidth / 2.0
-	snakeHeadCenterY = screenHeight / 2.0
-	snakeSpeed       = 200
-	snakeLength      = 400
-	snakeWidth       = 25
-	debugUnits       = false // Draw consecutive units with different colors.
+	snakeHeadCenterX   = screenWidth / 2.0
+	snakeHeadCenterY   = screenHeight / 2.0
+	snakeSpeed         = 200
+	snakeLength        = 100
+	snakeWidth         = 25
+	debugUnits         = false // Draw consecutive units with different colors.
+	foodLengthIncrease = 10
 )
 
 // Game constants
@@ -30,7 +31,8 @@ const (
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
 	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
-	colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
+	colorSnake2     = color.RGBA{6, 214, 160, 255}   // Caribbean Green
+	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
 // Debug variables
@@ -42,6 +44,7 @@ var (
 // game implements ebiten.game interface.
 type game struct {
 	snake             *snake
+	food              *food
 	gameOver          bool
 	paused            bool
 	timeAfterGameOver float32
@@ -50,6 +53,7 @@ type game struct {
 func newGame() *game {
 	game := new(game)
 	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength)
+	game.food = newFoodRandLoc()
 
 	return game
 }
@@ -57,6 +61,7 @@ func newGame() *game {
 func (g *game) restart() {
 	*g = game{
 		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength),
+		food:  newFoodRandLoc(),
 	}
 }
 
@@ -84,6 +89,7 @@ func (g *game) Update() error {
 	g.handleInput()
 	g.snake.update()
 	g.gameOver = g.snake.checkIntersection()
+	g.checkFoodEaten()
 
 	return nil
 }
@@ -91,7 +97,10 @@ func (g *game) Update() error {
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
+
 	g.snake.draw(screen)
+	g.food.draw(screen)
+
 	g.printDebugMsgs(screen)
 }
 
@@ -153,4 +162,16 @@ func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
+}
+
+func (g *game) checkFoodEaten() {
+	for _, rectHead := range g.snake.unitHead.rects {
+		for _, rectFood := range g.food.rects {
+			if !intersects(rectHead, rectFood) {
+				continue
+			}
+
+			g.food = newFoodRandLoc()
+		}
+	}
 }
