@@ -11,13 +11,13 @@ import (
 
 // Snake parameters
 const (
-	snakeHeadCenterX   = screenWidth / 2.0
-	snakeHeadCenterY   = screenHeight / 2.0
-	snakeSpeed         = 200
-	snakeLength        = 100
-	snakeWidth         = 25
-	debugUnits         = false // Draw consecutive units with different colors.
-	foodLengthIncrease = 10
+	snakeHeadCenterX      = screenWidth / 2.0
+	snakeHeadCenterY      = screenHeight / 2.0
+	snakeSpeed            = 200
+	snakeLength           = 200
+	snakeWidth            = 25
+	debugUnits            = false // Draw consecutive units with different colors.
+	lengthIncreasePercent = 18
 )
 
 // Game constants
@@ -171,7 +171,9 @@ func (g *game) checkFoodEaten() {
 				continue
 			}
 
+			g.snake.grow()
 			g.food = newFoodRandLoc()
+			return
 		}
 	}
 }

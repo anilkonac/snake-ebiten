@@ -21,7 +21,7 @@ type unit struct {
 	prev        *unit
 }
 
-func newUnit(headCenterX, headCenterY float64, direction directionT, length float64, color *color.RGBA) *unit {
+func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
 	newUnit := &unit{
 		headCenterX: headCenterX,
 		headCenterY: headCenterY,

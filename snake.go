@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/rand"
 	"time"
 
@@ -21,12 +22,13 @@ const (
 )
 
 type snake struct {
-	speed         uint8
-	unitHead      *unit
-	unitTail      *unit
-	turnPrev      *turn
-	turnQueue     []*turn
-	distAfterTurn float64
+	speed           uint8
+	unitHead        *unit
+	unitTail        *unit
+	turnPrev        *turn
+	turnQueue       []*turn
+	distAfterTurn   float64
+	remainingGrowth float64
 }
 
 func init() {
@@ -44,7 +46,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 		panic("Initial y position of the snake is off-screen.")
 	}
 
-	initialUnit := newUnit(centerX, centerY, direction, float64(snakeLength), &colorSnake1)
+	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
 
 	snake := &snake{
 		speed:    speed,
@@ -98,18 +100,23 @@ func (s *snake) updateHead(dist float64) {
 }
 
 func (s *snake) updateTail(dist float64) {
-	// Decrease tail length
-	s.unitTail.length -= dist
+	if s.remainingGrowth > 0 {
+		s.remainingGrowth -= dist
+		s.remainingGrowth = math.Max(s.remainingGrowth, 0)
+	} else {
+		// Decrease tail length
+		s.unitTail.length -= dist
 
-	// Rotate tail if its length is less than width of the snake
-	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
-		s.unitTail.direction = s.unitTail.prev.direction
-	}
+		// Rotate tail if its length is less than width of the snake
+		if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
+			s.unitTail.direction = s.unitTail.prev.direction
+		}
 
-	// Destroy tail unit if its length is not positive
-	if s.unitTail.length <= 0 {
-		s.unitTail = s.unitTail.prev
-		s.unitTail.next = nil
+		// Destroy tail unit if its length is not positive
+		if s.unitTail.length <= 0 {
+			s.unitTail = s.unitTail.prev
+			s.unitTail.next = nil
+		}
 	}
 
 	s.unitTail.creteRects() // Update rectangles of this unit
@@ -150,7 +157,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	}
 
 	// Create new head unit
-	newHead := newUnit(oldHead.headCenterX, oldHead.headCenterY, newTurn.directionTo, 0, newColor)
+	newHead := newUnit(oldHead.headCenterX, oldHead.headCenterY, 0, newTurn.directionTo, newColor)
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
 	newHead.next = oldHead
@@ -177,6 +184,12 @@ func (s *snake) checkIntersection() bool {
 	return false
 }
 
-func (s *snake) ate() {
+func (s *snake) grow() {
+	// Compute total length of the snake
+	var totalLength float64
+	for unit := s.unitHead; unit != nil; unit = unit.next {
+		totalLength += unit.length
+	}
 
+	s.remainingGrowth = totalLength * lengthIncreasePercent / 100.0
 }

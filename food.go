@@ -10,8 +10,8 @@ import (
 type pixel uint16
 
 const (
-	foodLength     = 10
-	foodLengthHalf = foodLength / 2.0
+	foodLength     = snakeWidth / 2.0
+	halfFoodLength = halfSnakeWidth
 )
 
 type food struct {
@@ -24,8 +24,8 @@ func newFood(centerX, centerY pixel) *food {
 	}
 
 	pureRect := rectF64{
-		x:      float64(centerX) - foodLengthHalf,
-		y:      float64(centerY) - foodLengthHalf,
+		x:      float64(centerX) - halfFoodLength,
+		y:      float64(centerY) - halfFoodLength,
 		width:  foodLength,
 		height: foodLength,
 	}
