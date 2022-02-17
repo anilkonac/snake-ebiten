@@ -89,7 +89,7 @@ func (g *game) Update() error {
 	g.handleInput()
 	g.snake.update()
 	g.gameOver = g.snake.checkIntersection()
-	g.checkFoodEaten()
+	g.checkFood()
 
 	return nil
 }
@@ -164,7 +164,27 @@ func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }
 
-func (g *game) checkFoodEaten() {
+func (g *game) checkFood() {
+	if !g.food.active {
+		// If food has spawned on the snake, respawn it elsewhere.
+		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+			for _, rectUnit := range unit.rects {
+				for _, rectFood := range g.food.rects {
+					if !intersects(rectUnit, rectFood) {
+						continue
+					}
+
+					g.food = newFoodRandLoc()
+					return
+				}
+			}
+		}
+		// Food has spawned in an open position, activate it.
+		g.food.active = true
+		return
+	}
+
+	// Check if the snake has eaten the food.
 	for _, rectHead := range g.snake.unitHead.rects {
 		for _, rectFood := range g.food.rects {
 			if !intersects(rectHead, rectFood) {

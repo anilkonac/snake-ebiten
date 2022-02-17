@@ -15,7 +15,8 @@ const (
 )
 
 type food struct {
-	rects []rectF64
+	active bool
+	rects  []rectF64
 }
 
 func newFood(centerX, centerY pixel) *food {
@@ -39,6 +40,10 @@ func newFoodRandLoc() *food {
 }
 
 func (f food) draw(screen *ebiten.Image) {
+	if !f.active {
+		return
+	}
+
 	for _, rect := range f.rects {
 		ebitenutil.DrawRect(screen, rect.x, rect.y, rect.width, rect.height, colorFood)
 	}

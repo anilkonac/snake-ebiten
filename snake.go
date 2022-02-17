@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math"
 	"math/rand"
 	"time"
 
@@ -102,7 +101,7 @@ func (s *snake) updateHead(dist float64) {
 func (s *snake) updateTail(dist float64) {
 	if s.remainingGrowth > 0 {
 		s.remainingGrowth -= dist
-		s.remainingGrowth = math.Max(s.remainingGrowth, 0)
+		// s.remainingGrowth = math.Max(s.remainingGrowth, 0)
 	} else {
 		// Decrease tail length
 		s.unitTail.length -= dist
@@ -191,5 +190,5 @@ func (s *snake) grow() {
 		totalLength += unit.length
 	}
 
-	s.remainingGrowth = totalLength * lengthIncreasePercent / 100.0
+	s.remainingGrowth += totalLength * lengthIncreasePercent / 100.0
 }
