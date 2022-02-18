@@ -13,20 +13,20 @@ const epsilon = 0.001
 type unit struct {
 	headCenterX float64
 	headCenterY float64
-	direction   directionT
 	length      float64
+	direction   directionT
 	rects       []rectF64 // rectangles that are used for both collision checking and drawing
 	color       *color.RGBA
 	next        *unit
 	prev        *unit
 }
 
-func newUnit(headCenterX, headCenterY float64, direction directionT, length float64, color *color.RGBA) *unit {
+func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
 	newUnit := &unit{
 		headCenterX: headCenterX,
 		headCenterY: headCenterY,
-		direction:   direction,
 		length:      length,
+		direction:   direction,
 		color:       color,
 	}
 	newUnit.creteRects()
@@ -126,28 +126,11 @@ func (u *unit) creteRects() {
 func (a *unit) intersects(b *unit) bool {
 	for _, rectA := range a.rects {
 		for _, rectB := range b.rects {
-			aRightX := rectA.x + rectA.width
-			bRightX := rectB.x + rectB.width
-			aBottomY := rectA.y + rectA.height
-			bBottomY := rectB.y + rectB.height
-
-			if (rectA.x-rectB.x <= epsilon) && (aRightX-rectB.x <= epsilon) { // rectA is on the left side of rectB
-				continue
+			if intersects(rectA, rectB) {
+				return true
 			}
 
-			if (rectA.x-bRightX >= -epsilon) && (aRightX-bRightX >= -epsilon) { // rectA is on the right side of rectB
-				continue
-			}
-
-			if (rectA.y-rectB.y <= epsilon) && (aBottomY-rectB.y <= epsilon) { // rectA is above rectB
-				continue
-			}
-
-			if (rectA.y-bBottomY >= -epsilon) && (aBottomY-bBottomY >= -epsilon) { // rectA is under rectB
-				continue
-			}
-
-			return true
+			continue
 		}
 	}
 

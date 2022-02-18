@@ -11,12 +11,13 @@ import (
 
 // Snake parameters
 const (
-	snakeHeadCenterX = screenWidth / 2.0
-	snakeHeadCenterY = screenHeight / 2.0
-	snakeSpeed       = 200
-	snakeLength      = 400
-	snakeWidth       = 25
-	debugUnits       = false // Draw consecutive units with different colors.
+	snakeHeadCenterX      = screenWidth / 2.0
+	snakeHeadCenterY      = screenHeight / 2.0
+	snakeSpeed            = 200
+	snakeLength           = 200
+	snakeWidth            = 25
+	debugUnits            = false // Draw consecutive units with different colors.
+	lengthIncreasePercent = 18
 )
 
 // Game constants
@@ -30,7 +31,8 @@ const (
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
 	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
-	colorSnake2     = color.RGBA{239, 71, 111, 255}  // Paradise Pink
+	colorSnake2     = color.RGBA{6, 214, 160, 255}   // Caribbean Green
+	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
 // Debug variables
@@ -42,21 +44,23 @@ var (
 // game implements ebiten.game interface.
 type game struct {
 	snake             *snake
+	food              *food
 	gameOver          bool
 	paused            bool
 	timeAfterGameOver float32
 }
 
 func newGame() *game {
-	game := new(game)
-	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength)
-
-	return game
+	return &game{
+		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength),
+		food:  newFoodRandLoc(),
+	}
 }
 
 func (g *game) restart() {
 	*g = game{
 		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength),
+		food:  newFoodRandLoc(),
 	}
 }
 
@@ -84,6 +88,7 @@ func (g *game) Update() error {
 	g.handleInput()
 	g.snake.update()
 	g.gameOver = g.snake.checkIntersection()
+	g.checkFood()
 
 	return nil
 }
@@ -91,7 +96,10 @@ func (g *game) Update() error {
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
+
 	g.snake.draw(screen)
+	g.food.draw(screen)
+
 	g.printDebugMsgs(screen)
 }
 
@@ -110,25 +118,16 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Assign current direction
-	var dirCurrent directionT
-	if queueLength := len(g.snake.turnQueue); queueLength > 0 {
-		// Set current direction as the direction of the last turn to be taken.
-		dirCurrent = g.snake.turnQueue[queueLength-1].directionTo
-	} else {
-		// Set as current head direction
-		dirCurrent = g.snake.unitHead.direction
-	}
-
 	// Specify new direction
+	dirCurrent := g.snake.lastDirection()
 	dirNew := dirCurrent
-	if (dirCurrent == directionUp) || (dirCurrent == directionDown) {
+	if isDirectionVertical(dirCurrent) {
 		if pressedLeft {
 			dirNew = directionLeft
 		} else if pressedRight {
 			dirNew = directionRight
 		}
-	} else if (dirCurrent == directionLeft) || (dirCurrent == directionRight) {
+	} else {
 		if pressedUp {
 			dirNew = directionUp
 		} else if pressedDown {
@@ -153,4 +152,38 @@ func (g *game) printDebugMsgs(screen *ebiten.Image) {
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
+}
+
+func (g *game) checkFood() {
+	if !g.food.isActive {
+		// If food has spawned on the snake, respawn it elsewhere.
+		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+			for _, rectUnit := range unit.rects {
+				for _, rectFood := range g.food.rects {
+					if !intersects(rectUnit, rectFood) {
+						continue
+					}
+
+					g.food = newFoodRandLoc()
+					return
+				}
+			}
+		}
+		// Food has spawned in an open position, activate it.
+		g.food.isActive = true
+		return
+	}
+
+	// Check if the snake has eaten the food.
+	for _, rectHead := range g.snake.unitHead.rects {
+		for _, rectFood := range g.food.rects {
+			if !intersects(rectHead, rectFood) {
+				continue
+			}
+
+			g.snake.grow()
+			g.food = newFoodRandLoc()
+			return
+		}
+	}
 }
