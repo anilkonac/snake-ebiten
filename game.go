@@ -121,7 +121,7 @@ func (g *game) handleInput() {
 	// Specify new direction
 	dirCurrent := g.snake.lastDirection()
 	dirNew := dirCurrent
-	if isDirectionHorizontal(dirCurrent) {
+	if isDirectionVertical(dirCurrent) {
 		if pressedLeft {
 			dirNew = directionLeft
 		} else if pressedRight {

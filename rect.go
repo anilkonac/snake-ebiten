@@ -1,6 +1,6 @@
 package main
 
-// the rectangle that is compatible with ebiten.drawRect function's parameters(float64)
+// Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
 type rectF64 struct {
 	x, y          float64
 	width, height float64

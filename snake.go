@@ -20,7 +20,7 @@ const (
 	directionTotal
 )
 
-func isDirectionHorizontal(dir directionT) bool {
+func isDirectionVertical(dir directionT) bool {
 	if dir >= directionTotal {
 		panic("wrong direction")
 	}
