@@ -20,6 +20,13 @@ const (
 	directionTotal
 )
 
+func isDirectionHorizontal(dir directionT) bool {
+	if dir >= directionTotal {
+		panic("wrong direction")
+	}
+	return (dir == directionUp) || (dir == directionDown)
+}
+
 type snake struct {
 	speed           uint8
 	unitHead        *unit
@@ -101,7 +108,6 @@ func (s *snake) updateHead(dist float64) {
 func (s *snake) updateTail(dist float64) {
 	if s.remainingGrowth > 0 {
 		s.remainingGrowth -= dist
-		// s.remainingGrowth = math.Max(s.remainingGrowth, 0)
 	} else {
 		// Decrease tail length
 		s.unitTail.length -= dist
@@ -191,4 +197,14 @@ func (s *snake) grow() {
 	}
 
 	s.remainingGrowth += totalLength * lengthIncreasePercent / 100.0
+}
+
+func (s *snake) lastDirection() directionT {
+	// if the turn queue is not empty, return the direction of the last turn to be taken.
+	if queueLength := len(s.turnQueue); queueLength > 0 {
+		return s.turnQueue[queueLength-1].directionTo
+	}
+
+	// return current head direction
+	return s.unitHead.direction
 }

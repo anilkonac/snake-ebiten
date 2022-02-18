@@ -13,8 +13,8 @@ const epsilon = 0.001
 type unit struct {
 	headCenterX float64
 	headCenterY float64
-	direction   directionT
 	length      float64
+	direction   directionT
 	rects       []rectF64 // rectangles that are used for both collision checking and drawing
 	color       *color.RGBA
 	next        *unit
@@ -25,8 +25,8 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 	newUnit := &unit{
 		headCenterX: headCenterX,
 		headCenterY: headCenterY,
-		direction:   direction,
 		length:      length,
+		direction:   direction,
 		color:       color,
 	}
 	newUnit.creteRects()

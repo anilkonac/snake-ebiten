@@ -7,40 +7,40 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type pixel uint16
-
 const (
 	foodLength     = snakeWidth / 2.0
 	halfFoodLength = halfSnakeWidth
 )
 
 type food struct {
-	active bool
-	rects  []rectF64
+	isActive bool
+	rects    []rectF64
 }
 
-func newFood(centerX, centerY pixel) *food {
+func newFood(centerX, centerY float64) *food {
 	newFood := &food{
 		rects: make([]rectF64, 0, 4),
 	}
 
+	// Create a rectangle to use in drawing and eating logic.
 	pureRect := rectF64{
-		x:      float64(centerX) - halfFoodLength,
-		y:      float64(centerY) - halfFoodLength,
+		x:      centerX - halfFoodLength,
+		y:      centerY - halfFoodLength,
 		width:  foodLength,
 		height: foodLength,
 	}
+	// Split this rectangle if it is on a screen edge.
 	pureRect.slice(&newFood.rects)
 
 	return newFood
 }
 
 func newFoodRandLoc() *food {
-	return newFood(pixel(rand.Intn(screenWidth)), pixel(rand.Intn(screenHeight)))
+	return newFood(float64(rand.Intn(screenWidth)), float64(rand.Intn(screenHeight)))
 }
 
 func (f food) draw(screen *ebiten.Image) {
-	if !f.active {
+	if !f.isActive {
 		return
 	}
 

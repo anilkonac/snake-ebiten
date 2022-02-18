@@ -51,11 +51,10 @@ type game struct {
 }
 
 func newGame() *game {
-	game := new(game)
-	game.snake = newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength)
-	game.food = newFoodRandLoc()
-
-	return game
+	return &game{
+		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength),
+		food:  newFoodRandLoc(),
+	}
 }
 
 func (g *game) restart() {
@@ -119,25 +118,16 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Assign current direction
-	var dirCurrent directionT
-	if queueLength := len(g.snake.turnQueue); queueLength > 0 {
-		// Set current direction as the direction of the last turn to be taken.
-		dirCurrent = g.snake.turnQueue[queueLength-1].directionTo
-	} else {
-		// Set as current head direction
-		dirCurrent = g.snake.unitHead.direction
-	}
-
 	// Specify new direction
+	dirCurrent := g.snake.lastDirection()
 	dirNew := dirCurrent
-	if (dirCurrent == directionUp) || (dirCurrent == directionDown) {
+	if isDirectionHorizontal(dirCurrent) {
 		if pressedLeft {
 			dirNew = directionLeft
 		} else if pressedRight {
 			dirNew = directionRight
 		}
-	} else if (dirCurrent == directionLeft) || (dirCurrent == directionRight) {
+	} else {
 		if pressedUp {
 			dirNew = directionUp
 		} else if pressedDown {
@@ -165,7 +155,7 @@ func (g *game) printDebugMsgs(screen *ebiten.Image) {
 }
 
 func (g *game) checkFood() {
-	if !g.food.active {
+	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 			for _, rectUnit := range unit.rects {
@@ -180,7 +170,7 @@ func (g *game) checkFood() {
 			}
 		}
 		// Food has spawned in an open position, activate it.
-		g.food.active = true
+		g.food.isActive = true
 		return
 	}
 
