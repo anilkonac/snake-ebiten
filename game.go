@@ -35,12 +35,6 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
-// Debug variables
-var (
-	tps float64
-	// fps float64
-)
-
 // game implements ebiten.game interface.
 type game struct {
 	snake             *snake
@@ -66,8 +60,6 @@ func (g *game) restart() {
 
 // Update is called every tick (1/60 [s] by default).
 func (g *game) Update() error {
-	tps = ebiten.CurrentTPS()
-	// fps = ebiten.CurrentFPS()
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.paused = !g.paused
@@ -145,15 +137,6 @@ func (g *game) handleInput() {
 
 }
 
-func (g *game) printDebugMsgs(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f", tps))
-	// headUnit := g.snake.unitHead
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
-}
-
 func (g *game) checkFood() {
 	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
@@ -186,4 +169,13 @@ func (g *game) checkFood() {
 			return
 		}
 	}
+}
+
+func (g *game) printDebugMsgs(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
+	// headUnit := g.snake.unitHead
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }
