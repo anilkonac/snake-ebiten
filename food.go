@@ -30,7 +30,7 @@ func newFood(centerX, centerY float64) *food {
 		height: foodLength,
 	}
 	// Split this rectangle if it is on a screen edge.
-	pureRect.slice(&newFood.rects)
+	pureRect.split(&newFood.rects)
 
 	return newFood
 }

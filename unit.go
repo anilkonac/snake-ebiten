@@ -120,7 +120,7 @@ func (u *unit) creteRects() {
 	}
 
 	u.rects = make([]rectF64, 0, 4) // Remove old rectangles
-	pureRect.slice(&u.rects)        // Create rectangles divided at screen edges
+	pureRect.split(&u.rects)        // Create split rectangles on screen edges.
 }
 
 func (a *unit) intersects(b *unit) bool {

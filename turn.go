@@ -10,7 +10,7 @@ func newTurn(directionFrom, directionTo directionT) *turn {
 		directionTo: directionTo,
 	}
 
-	// Identify turning direction
+	// Determine the direction of rotation.
 	if (directionFrom == directionUp && directionTo == directionLeft) ||
 		(directionFrom == directionLeft && directionTo == directionDown) ||
 		(directionFrom == directionDown && directionTo == directionRight) ||

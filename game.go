@@ -27,7 +27,7 @@ const (
 	restartTime    = 1.5 // seconds
 )
 
-// Colors to be used for drawing
+// Colors to be used in the drawing.
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
 	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
@@ -110,7 +110,7 @@ func (g *game) handleInput() {
 		return
 	}
 
-	// Specify new direction
+	// Determine the new direction.
 	dirCurrent := g.snake.lastDirection()
 	dirNew := dirCurrent
 	if isDirectionVertical(dirCurrent) {

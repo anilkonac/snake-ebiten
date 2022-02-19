@@ -145,7 +145,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 			s.turnQueue = append(s.turnQueue, newTurn)
 			return
 		}
-		// If there are turns in the queue then add the new turn also into it.
+		// If there are turns in the queue then add the new turn to the queue as well.
 		if len(s.turnQueue) > 0 {
 			s.turnQueue = append(s.turnQueue, newTurn)
 			return
@@ -155,13 +155,13 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 
 	oldHead := s.unitHead
 
-	// Decide color of new head unit
+	// Decide on the color of the new head unit.
 	newColor := &colorSnake1
 	if debugUnits && (oldHead.color == &colorSnake1) {
 		newColor = &colorSnake2
 	}
 
-	// Create new head unit
+	// Create a new head unit.
 	newHead := newUnit(oldHead.headCenterX, oldHead.headCenterY, 0, newTurn.directionTo, newColor)
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
@@ -178,7 +178,7 @@ func (s *snake) checkIntersection() bool {
 		return false
 	}
 
-	// Skip head's next unit, since it is not possible for the head to intersect it.
+	// Skip the next unit of the head, since it is not possible for the head to intersect with it.
 	curUnit := s.unitHead.next.next
 	for curUnit != nil {
 		if s.unitHead.intersects(curUnit) {
@@ -190,7 +190,7 @@ func (s *snake) checkIntersection() bool {
 }
 
 func (s *snake) grow() {
-	// Compute total length of the snake
+	// Compute the total length of the snake.
 	var totalLength float64
 	for unit := s.unitHead; unit != nil; unit = unit.next {
 		totalLength += unit.length
