@@ -20,11 +20,11 @@ const (
 	directionTotal
 )
 
-func isDirectionVertical(dir directionT) bool {
-	if dir >= directionTotal {
+func isVertical(direction directionT) bool {
+	if direction >= directionTotal {
 		panic("wrong direction")
 	}
-	return (dir == directionUp) || (dir == directionDown)
+	return (direction == directionUp) || (direction == directionDown)
 }
 
 type snake struct {
@@ -50,6 +50,10 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	}
 	if centerY > screenHeight {
 		panic("Initial y position of the snake is off-screen.")
+	}
+	if (isVertical(direction) && (snakeLength > screenHeight)) ||
+		(!isVertical(direction) && (snakeLength > screenWidth)) {
+		panic("Initial snake head intersects itself.")
 	}
 
 	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
@@ -178,8 +182,7 @@ func (s *snake) checkIntersection() bool {
 		return false
 	}
 
-	// Skip the next unit of the head, since it is not possible for the head to intersect with it.
-	curUnit := s.unitHead.next.next
+	curUnit := s.unitHead.next
 	for curUnit != nil {
 		if s.unitHead.intersects(curUnit) {
 			return true
