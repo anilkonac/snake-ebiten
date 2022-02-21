@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"fmt"
@@ -9,10 +9,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+const (
+	ScreenWidth  = 800
+	ScreenHeight = 600
+)
+
 // Snake parameters
 const (
-	snakeHeadCenterX      = screenWidth / 2.0
-	snakeHeadCenterY      = screenHeight / 2.0
+	snakeHeadCenterX      = ScreenWidth / 2.0
+	snakeHeadCenterY      = ScreenHeight / 2.0
 	snakeSpeed            = 200
 	snakeLength           = 200
 	snakeWidth            = 25
@@ -35,8 +40,8 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
-// game implements ebiten.game interface.
-type game struct {
+// Game implements ebiten.Game interface.
+type Game struct {
 	snake             *snake
 	food              *food
 	gameOver          bool
@@ -44,22 +49,22 @@ type game struct {
 	timeAfterGameOver float32
 }
 
-func newGame() *game {
-	return &game{
+func NewGame() *Game {
+	return &Game{
 		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
 
-func (g *game) restart() {
-	*g = game{
+func (g *Game) restart() {
+	*g = Game{
 		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
 
 // Update is called every tick (1/60 [s] by default).
-func (g *game) Update() error {
+func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.paused = !g.paused
@@ -86,7 +91,7 @@ func (g *game) Update() error {
 }
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
-func (g *game) Draw(screen *ebiten.Image) {
+func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
 	g.snake.draw(screen)
@@ -96,11 +101,11 @@ func (g *game) Draw(screen *ebiten.Image) {
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
-func (g *game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return screenWidth, screenHeight
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return ScreenWidth, ScreenHeight
 }
 
-func (g *game) handleInput() {
+func (g *Game) handleInput() {
 	pressedLeft := inpututil.IsKeyJustPressed(ebiten.KeyLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA)
 	pressedRight := inpututil.IsKeyJustPressed(ebiten.KeyRight) || inpututil.IsKeyJustPressed(ebiten.KeyD)
 	pressedUp := inpututil.IsKeyJustPressed(ebiten.KeyUp) || inpututil.IsKeyJustPressed(ebiten.KeyW)
@@ -137,7 +142,7 @@ func (g *game) handleInput() {
 
 }
 
-func (g *game) checkFood() {
+func (g *Game) checkFood() {
 	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
@@ -171,7 +176,7 @@ func (g *game) checkFood() {
 	}
 }
 
-func (g *game) printDebugMsgs(screen *ebiten.Image) {
+func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 	// headUnit := g.snake.unitHead
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)

@@ -1,16 +1,12 @@
 package main
 
 import (
+	g "github.com/anilkonac/snake-ebiten/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const (
-	screenWidth  = 800
-	screenHeight = 600
-)
-
 func main() {
-	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowSize(g.ScreenWidth, g.ScreenHeight)
 	ebiten.SetWindowTitle("Ssnake")
-	ebiten.RunGame(newGame())
+	ebiten.RunGame(g.NewGame())
 }

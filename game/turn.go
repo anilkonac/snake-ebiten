@@ -1,4 +1,4 @@
-package main
+package game
 
 type turn struct {
 	directionTo   directionT

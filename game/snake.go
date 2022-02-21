@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"math/rand"
@@ -45,14 +45,14 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if centerX > screenWidth {
+	if centerX > ScreenWidth {
 		panic("Initial x position of the snake is off-screen.")
 	}
-	if centerY > screenHeight {
+	if centerY > ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if (isVertical(direction) && (snakeLength > screenHeight)) ||
-		(!isVertical(direction) && (snakeLength > screenWidth)) {
+	if (isVertical(direction) && (snakeLength > ScreenHeight)) ||
+		(!isVertical(direction) && (snakeLength > ScreenWidth)) {
 		panic("Initial snake head intersects itself.")
 	}
 

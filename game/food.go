@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"math/rand"
@@ -36,7 +36,7 @@ func newFood(centerX, centerY float64) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(float64(rand.Intn(screenWidth)), float64(rand.Intn(screenHeight)))
+	return newFood(float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight)))
 }
 
 func (f food) draw(screen *ebiten.Image) {

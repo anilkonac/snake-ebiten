@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"fmt"
@@ -39,7 +39,7 @@ func (u *unit) moveUp(dist float64) {
 
 	// teleport if head center is offscreen.
 	if u.headCenterY < 0 {
-		u.headCenterY += screenHeight
+		u.headCenterY += ScreenHeight
 	}
 }
 
@@ -47,8 +47,8 @@ func (u *unit) moveDown(dist float64) {
 	u.headCenterY += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterY > screenHeight {
-		u.headCenterY -= screenHeight
+	if u.headCenterY > ScreenHeight {
+		u.headCenterY -= ScreenHeight
 	}
 }
 
@@ -56,8 +56,8 @@ func (u *unit) moveRight(dist float64) {
 	u.headCenterX += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterX > screenWidth {
-		u.headCenterX -= screenWidth
+	if u.headCenterX > ScreenWidth {
+		u.headCenterX -= ScreenWidth
 	}
 }
 
@@ -66,7 +66,7 @@ func (u *unit) moveLeft(dist float64) {
 
 	// teleport if head center is offscreen.
 	if u.headCenterX < 0 {
-		u.headCenterX += screenWidth
+		u.headCenterX += ScreenWidth
 	}
 }
 
