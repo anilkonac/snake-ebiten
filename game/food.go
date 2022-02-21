@@ -1,10 +1,8 @@
 package game
 
 import (
+	"image/color"
 	"math/rand"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
@@ -13,8 +11,8 @@ const (
 )
 
 type food struct {
-	isActive bool
-	rects    []rectF64
+	active bool
+	rects  []rectF64
 }
 
 func newFood(centerX, centerY float64) *food {
@@ -39,12 +37,18 @@ func newFoodRandLoc() *food {
 	return newFood(float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight)))
 }
 
-func (f food) draw(screen *ebiten.Image) {
-	if !f.isActive {
-		return
-	}
+// Implement collidable interface
+// ------------------------------
+func (f food) isActive() bool {
+	return f.active
+}
 
-	for _, rect := range f.rects {
-		ebitenutil.DrawRect(screen, rect.x, rect.y, rect.width, rect.height, colorFood)
-	}
+func (f food) rectSlice() []rectF64 {
+	return f.rects
+}
+
+// Implement drawable interface
+// ------------------------------
+func (f food) Color() color.Color {
+	return colorFood
 }

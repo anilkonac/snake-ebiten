@@ -21,7 +21,7 @@ const (
 	snakeSpeed            = 200
 	snakeLength           = 200
 	snakeWidth            = 25
-	debugUnits            = false // Draw consecutive units with different colors.
+	debugRects            = false // Draw consecutive units with different colors and draw position info of rects.
 	lengthIncreasePercent = 18
 )
 
@@ -95,7 +95,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
 	g.snake.draw(screen)
-	g.food.draw(screen)
+	draw(g.food, screen)
 
 	g.printDebugMsgs(screen)
 }
@@ -143,36 +143,35 @@ func (g *Game) handleInput() {
 }
 
 func (g *Game) checkFood() {
-	if !g.food.isActive {
+	if !g.food.active {
 		// If food has spawned on the snake, respawn it elsewhere.
-		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
-			for _, rectUnit := range unit.rects {
-				for _, rectFood := range g.food.rects {
-					if !intersects(rectUnit, rectFood) {
-						continue
-					}
-
-					g.food = newFoodRandLoc()
-					return
-				}
+		for curUnit := g.snake.unitHead; curUnit != nil; curUnit = curUnit.next {
+			if collides(curUnit, g.food) {
+				g.food = newFoodRandLoc()
+				return
 			}
 		}
 		// Food has spawned in an open position, activate it.
-		g.food.isActive = true
+		g.food.active = true
 		return
 	}
 
 	// Check if the snake has eaten the food.
-	for _, rectHead := range g.snake.unitHead.rects {
-		for _, rectFood := range g.food.rects {
-			if !intersects(rectHead, rectFood) {
-				continue
-			}
+	// for _, rectHead := range g.snake.unitHead.rects {
+	// 	for _, rectFood := range g.food.rects {
+	// 		if !intersects(rectHead, rectFood) {
+	// 			continue
+	// 		}
 
-			g.snake.grow()
-			g.food = newFoodRandLoc()
-			return
-		}
+	// 		g.snake.grow()
+	// 		g.food = newFoodRandLoc()
+	// 		return
+	// 	}
+	// }
+	if collides(g.snake.unitHead, g.food) {
+		g.snake.grow()
+		g.food = newFoodRandLoc()
+		return
 	}
 }
 
