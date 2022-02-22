@@ -1,5 +1,13 @@
 package game
 
+import (
+	"fmt"
+	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+)
+
 // Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
 type rectF64 struct {
 	x, y          float64
@@ -33,6 +41,16 @@ func (r rectF64) split(rects *[]rectF64) {
 
 	// Add the split rectangle to the rects slice.
 	*rects = append(*rects, r)
+}
+
+func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
+	ebitenutil.DrawRect(dst, r.x, r.y, r.width, r.height, clr)
+	if debugRects {
+		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)
+		bottomX := r.x + r.width
+		bottomY := r.y + r.height
+		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+	}
 }
 
 func intersects(rectA, rectB rectF64) bool {

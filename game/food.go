@@ -11,8 +11,8 @@ const (
 )
 
 type food struct {
-	active bool
-	rects  []rectF64
+	isActive bool
+	rects    []rectF64
 }
 
 func newFood(centerX, centerY float64) *food {
@@ -37,18 +37,24 @@ func newFoodRandLoc() *food {
 	return newFood(float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight)))
 }
 
-// Implement collidable interface
-// ------------------------------
-func (f food) isActive() bool {
-	return f.active
+// Implement slicer interface
+// --------------------------
+func (f food) slice() []rectF64 {
+	return f.rects
 }
 
-func (f food) rectSlice() []rectF64 {
-	return f.rects
+// Implement collidable interface
+// ------------------------------
+func (f food) collEnabled() bool {
+	return true
 }
 
 // Implement drawable interface
 // ------------------------------
+func (f food) drawEnabled() bool {
+	return f.isActive
+}
+
 func (f food) Color() color.Color {
 	return colorFood
 }

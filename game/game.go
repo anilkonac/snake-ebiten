@@ -143,7 +143,7 @@ func (g *Game) handleInput() {
 }
 
 func (g *Game) checkFood() {
-	if !g.food.active {
+	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for curUnit := g.snake.unitHead; curUnit != nil; curUnit = curUnit.next {
 			if collides(curUnit, g.food) {
@@ -152,22 +152,10 @@ func (g *Game) checkFood() {
 			}
 		}
 		// Food has spawned in an open position, activate it.
-		g.food.active = true
+		g.food.isActive = true
 		return
 	}
 
-	// Check if the snake has eaten the food.
-	// for _, rectHead := range g.snake.unitHead.rects {
-	// 	for _, rectFood := range g.food.rects {
-	// 		if !intersects(rectHead, rectFood) {
-	// 			continue
-	// 		}
-
-	// 		g.snake.grow()
-	// 		g.food = newFoodRandLoc()
-	// 		return
-	// 	}
-	// }
 	if collides(g.snake.unitHead, g.food) {
 		g.snake.grow()
 		g.food = newFoodRandLoc()

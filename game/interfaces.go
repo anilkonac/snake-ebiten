@@ -1,46 +1,43 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+type slicer interface {
+	slice() []rectF64
+}
+
 type collidable interface {
-	isActive() bool
-	rectSlice() []rectF64
+	slicer
+	collEnabled() bool
 }
 
 type drawable interface {
-	collidable
+	slicer
+	drawEnabled() bool
 	Color() color.Color
 }
 
 func draw(src drawable, dst *ebiten.Image) {
-	if !src.isActive() {
+	if !src.drawEnabled() {
 		return
 	}
 
-	for _, rect := range src.rectSlice() {
-		ebitenutil.DrawRect(dst, rect.x, rect.y, rect.width, rect.height, src.Color())
-		if debugRects {
-			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
-			bottomX := rect.x + rect.width
-			bottomY := rect.y + rect.height
-			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-		}
+	for _, rect := range src.slice() {
+		rect.draw(dst, src.Color())
 	}
 }
 
 func collides(a, b collidable) bool {
-	if !a.isActive() || !b.isActive() {
+	if !a.collEnabled() || !b.collEnabled() {
 		return false
 	}
 
-	for _, rectA := range a.rectSlice() {
-		for _, rectB := range b.rectSlice() {
+	for _, rectA := range a.slice() {
+		for _, rectB := range b.slice() {
 			if !intersects(rectA, rectB) {
 				continue
 			}

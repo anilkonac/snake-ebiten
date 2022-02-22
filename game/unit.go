@@ -107,17 +107,24 @@ func (u *unit) creteRects() {
 	pureRect.split(&u.rects)        // Create split rectangles on screen edges.
 }
 
+// Implement slicer interface
+// --------------------------
+func (u *unit) slice() []rectF64 {
+	return u.rects
+}
+
 // Implement collidable interface
 // ------------------------------
-func (u *unit) isActive() bool {
+func (u *unit) collEnabled() bool {
 	return true
-}
-func (u *unit) rectSlice() []rectF64 {
-	return u.rects
 }
 
 // Implement drawable interface
 // ------------------------------
+func (u *unit) drawEnabled() bool {
+	return true
+}
+
 func (u *unit) Color() color.Color {
 	return u.color
 }
