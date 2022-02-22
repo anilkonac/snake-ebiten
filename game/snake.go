@@ -51,8 +51,8 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	if centerY > ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if (isVertical(direction) && (snakeLength > ScreenHeight)) ||
-		(!isVertical(direction) && (snakeLength > ScreenWidth)) {
+	if isVertical := isVertical(direction); (isVertical && (snakeLength > ScreenHeight)) ||
+		(!isVertical && (snakeLength > ScreenWidth)) {
 		panic("Initial snake head intersects itself.")
 	}
 
@@ -134,7 +134,7 @@ func (s *snake) updateTail(dist float64) {
 func (s *snake) draw(screen *ebiten.Image) {
 	curUnit := s.unitHead
 	for curUnit != nil {
-		curUnit.draw(screen)
+		draw(curUnit, screen)
 		curUnit = curUnit.next
 	}
 }
@@ -161,7 +161,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 
 	// Decide on the color of the new head unit.
 	newColor := &colorSnake1
-	if debugUnits && (oldHead.color == &colorSnake1) {
+	if debugRects && (oldHead.color == &colorSnake1) {
 		newColor = &colorSnake2
 	}
 
@@ -184,7 +184,7 @@ func (s *snake) checkIntersection() bool {
 
 	curUnit := s.unitHead.next
 	for curUnit != nil {
-		if s.unitHead.intersects(curUnit) {
+		if collides(s.unitHead, curUnit) {
 			return true
 		}
 		curUnit = curUnit.next

@@ -1,10 +1,8 @@
 package game
 
 import (
+	"image/color"
 	"math/rand"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
@@ -39,12 +37,24 @@ func newFoodRandLoc() *food {
 	return newFood(float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight)))
 }
 
-func (f food) draw(screen *ebiten.Image) {
-	if !f.isActive {
-		return
-	}
+// Implement slicer interface
+// --------------------------
+func (f food) slice() []rectF64 {
+	return f.rects
+}
 
-	for _, rect := range f.rects {
-		ebitenutil.DrawRect(screen, rect.x, rect.y, rect.width, rect.height, colorFood)
-	}
+// Implement collidable interface
+// ------------------------------
+func (f food) collEnabled() bool {
+	return true
+}
+
+// Implement drawable interface
+// ------------------------------
+func (f food) drawEnabled() bool {
+	return f.isActive
+}
+
+func (f food) Color() color.Color {
+	return colorFood
 }

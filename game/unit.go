@@ -1,11 +1,7 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const epsilon = 0.001
@@ -70,18 +66,6 @@ func (u *unit) moveLeft(dist float64) {
 	}
 }
 
-func (u *unit) draw(screen *ebiten.Image) {
-	for _, rect := range u.rects {
-		ebitenutil.DrawRect(screen, rect.x, rect.y, rect.width, rect.height, u.color)
-		if debugUnits {
-			ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
-			bottomX := rect.x + rect.width
-			bottomY := rect.y + rect.height
-			ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-		}
-	}
-}
-
 func (u *unit) creteRects() {
 	// Create the rectangle to be sliced.
 	var pureRect rectF64
@@ -123,16 +107,24 @@ func (u *unit) creteRects() {
 	pureRect.split(&u.rects)        // Create split rectangles on screen edges.
 }
 
-func (a *unit) intersects(b *unit) bool {
-	for _, rectA := range a.rects {
-		for _, rectB := range b.rects {
-			if intersects(rectA, rectB) {
-				return true
-			}
+// Implement slicer interface
+// --------------------------
+func (u *unit) slice() []rectF64 {
+	return u.rects
+}
 
-			continue
-		}
-	}
+// Implement collidable interface
+// ------------------------------
+func (u *unit) collEnabled() bool {
+	return true
+}
 
-	return false
+// Implement drawable interface
+// ------------------------------
+func (u *unit) drawEnabled() bool {
+	return true
+}
+
+func (u *unit) Color() color.Color {
+	return u.color
 }
