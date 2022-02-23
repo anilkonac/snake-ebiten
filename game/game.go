@@ -94,8 +94,12 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
-	g.snake.draw(screen)
-	draw(g.food, screen)
+	// Draw the snake
+	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+		draw(screen, unit)
+	}
+	// Draw the food
+	draw(screen, g.food)
 
 	g.printDebugMsgs(screen)
 }

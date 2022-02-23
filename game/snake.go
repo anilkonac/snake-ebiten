@@ -3,14 +3,12 @@ package game
 import (
 	"math/rand"
 	"time"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type directionT uint8
 type snakeLengthT uint16
 
-const epsilonSafeDist = 0.5
+const safeDist = 0.5
 
 const (
 	directionUp directionT = iota
@@ -53,7 +51,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	}
 	if isVertical := isVertical(direction); (isVertical && (snakeLength > ScreenHeight)) ||
 		(!isVertical && (snakeLength > ScreenWidth)) {
-		panic("Initial snake head intersects itself.")
+		panic("Initial snake intersects itself.")
 	}
 
 	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
@@ -76,7 +74,7 @@ func (s *snake) update() {
 	moveDistance := float64(s.speed) * deltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
-	if (len(s.turnQueue) > 0) && (s.distAfterTurn-snakeWidth >= epsilonSafeDist) {
+	if (len(s.turnQueue) > 0) && (s.distAfterTurn-snakeWidth >= safeDist) {
 		var nextTurn *turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
 		s.turnTo(nextTurn, true)
@@ -129,14 +127,6 @@ func (s *snake) updateTail(dist float64) {
 	}
 
 	s.unitTail.creteRects() // Update rectangles of this unit
-}
-
-func (s *snake) draw(screen *ebiten.Image) {
-	curUnit := s.unitHead
-	for curUnit != nil {
-		draw(curUnit, screen)
-		curUnit = curUnit.next
-	}
 }
 
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {

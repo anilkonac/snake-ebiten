@@ -21,7 +21,7 @@ type drawable interface {
 	Color() color.Color
 }
 
-func draw(src drawable, dst *ebiten.Image) {
+func draw(dst *ebiten.Image, src drawable) {
 	if !src.drawEnabled() {
 		return
 	}

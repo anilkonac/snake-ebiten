@@ -30,44 +30,8 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 	return newUnit
 }
 
-func (u *unit) moveUp(dist float64) {
-	u.headCenterY -= dist
-
-	// teleport if head center is offscreen.
-	if u.headCenterY < 0 {
-		u.headCenterY += ScreenHeight
-	}
-}
-
-func (u *unit) moveDown(dist float64) {
-	u.headCenterY += dist
-
-	// teleport if head center is offscreen.
-	if u.headCenterY > ScreenHeight {
-		u.headCenterY -= ScreenHeight
-	}
-}
-
-func (u *unit) moveRight(dist float64) {
-	u.headCenterX += dist
-
-	// teleport if head center is offscreen.
-	if u.headCenterX > ScreenWidth {
-		u.headCenterX -= ScreenWidth
-	}
-}
-
-func (u *unit) moveLeft(dist float64) {
-	u.headCenterX -= dist
-
-	// teleport if head center is offscreen.
-	if u.headCenterX < 0 {
-		u.headCenterX += ScreenWidth
-	}
-}
-
 func (u *unit) creteRects() {
-	// Create the rectangle to be sliced.
+	// Create the rectangle to split.
 	var pureRect rectF64
 	length64 := float64(u.length)
 	switch u.direction {
@@ -105,6 +69,42 @@ func (u *unit) creteRects() {
 
 	u.rects = make([]rectF64, 0, 4) // Remove old rectangles
 	pureRect.split(&u.rects)        // Create split rectangles on screen edges.
+}
+
+func (u *unit) moveUp(dist float64) {
+	u.headCenterY -= dist
+
+	// teleport if head center is offscreen.
+	if u.headCenterY < 0 {
+		u.headCenterY += ScreenHeight
+	}
+}
+
+func (u *unit) moveDown(dist float64) {
+	u.headCenterY += dist
+
+	// teleport if head center is offscreen.
+	if u.headCenterY > ScreenHeight {
+		u.headCenterY -= ScreenHeight
+	}
+}
+
+func (u *unit) moveRight(dist float64) {
+	u.headCenterX += dist
+
+	// teleport if head center is offscreen.
+	if u.headCenterX > ScreenWidth {
+		u.headCenterX -= ScreenWidth
+	}
+}
+
+func (u *unit) moveLeft(dist float64) {
+	u.headCenterX -= dist
+
+	// teleport if head center is offscreen.
+	if u.headCenterX < 0 {
+		u.headCenterX += ScreenWidth
+	}
 }
 
 // Implement slicer interface
