@@ -9,27 +9,24 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+// Game constants
 const (
-	ScreenWidth  = 800
-	ScreenHeight = 600
+	GameWidth      = 800
+	GameHeight     = 600
+	deltaTime      = 1.0 / 60.0
+	halfSnakeWidth = snakeWidth / 2.0
+	restartTime    = 1.5 // seconds
 )
 
 // Snake parameters
 const (
-	snakeHeadCenterX      = ScreenWidth / 2.0
-	snakeHeadCenterY      = ScreenHeight / 2.0
+	snakeHeadCenterX      = GameWidth / 2.0
+	snakeHeadCenterY      = GameHeight / 2.0
 	snakeSpeed            = 200
 	snakeLength           = 200
 	snakeWidth            = 25
-	debugRects            = false // Draw consecutive units with different colors and draw position info of rects.
+	debugUnits            = false // Draw consecutive units with different colors and draw position info of rects.
 	lengthIncreasePercent = 18
-)
-
-// Game constants
-const (
-	deltaTime      = 1.0 / 60.0
-	halfSnakeWidth = snakeWidth / 2.0
-	restartTime    = 1.5 // seconds
 )
 
 // Colors to be used in the drawing.
@@ -97,6 +94,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw the snake
 	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 		draw(screen, unit)
+		if debugUnits {
+			unit.markHeadCenter(screen)
+		}
 	}
 	// Draw the food
 	draw(screen, g.food)
@@ -106,7 +106,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return ScreenWidth, ScreenHeight
+	return GameWidth, GameHeight
 }
 
 func (g *Game) handleInput() {
@@ -150,7 +150,7 @@ func (g *Game) checkFood() {
 	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for curUnit := g.snake.unitHead; curUnit != nil; curUnit = curUnit.next {
-			if collides(curUnit, g.food) {
+			if collides(curUnit, g.food, toleranceDefault) {
 				g.food = newFoodRandLoc()
 				return
 			}
@@ -160,7 +160,7 @@ func (g *Game) checkFood() {
 		return
 	}
 
-	if collides(g.snake.unitHead, g.food) {
+	if collides(g.snake.unitHead, g.food, toleranceDefault) {
 		g.snake.grow()
 		g.food = newFoodRandLoc()
 		return

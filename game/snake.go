@@ -8,7 +8,11 @@ import (
 type directionT uint8
 type snakeLengthT uint16
 
-const safeDist = 0.5
+const (
+	safeDist            = 0.5
+	toleranceDefault    = 0.001
+	toleranceSecondUnit = halfSnakeWidth
+)
 
 const (
 	directionUp directionT = iota
@@ -43,14 +47,14 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if centerX > ScreenWidth {
+	if centerX > GameWidth {
 		panic("Initial x position of the snake is off-screen.")
 	}
-	if centerY > ScreenHeight {
+	if centerY > GameHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if isVertical := isVertical(direction); (isVertical && (snakeLength > ScreenHeight)) ||
-		(!isVertical && (snakeLength > ScreenWidth)) {
+	if isVertical := isVertical(direction); (isVertical && (snakeLength > GameHeight)) ||
+		(!isVertical && (snakeLength > GameWidth)) {
 		panic("Initial snake intersects itself.")
 	}
 
@@ -151,7 +155,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 
 	// Decide on the color of the new head unit.
 	newColor := &colorSnake1
-	if debugRects && (oldHead.color == &colorSnake1) {
+	if debugUnits && (oldHead.color == &colorSnake1) {
 		newColor = &colorSnake2
 	}
 
@@ -172,9 +176,15 @@ func (s *snake) checkIntersection() bool {
 		return false
 	}
 
+	// Check for collision between head and second unit more loosely.
 	curUnit := s.unitHead.next
+	if collides(s.unitHead, curUnit, toleranceSecondUnit) {
+		return true
+	}
+	// Carefully check for collision between the rest of the units and the head.
+	curUnit = curUnit.next
 	for curUnit != nil {
-		if collides(s.unitHead, curUnit) {
+		if collides(s.unitHead, curUnit, toleranceDefault) {
 			return true
 		}
 		curUnit = curUnit.next

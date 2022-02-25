@@ -16,26 +16,30 @@ type rectF64 struct {
 
 // Divide rectangle up to 4 based on where it is off-screen.
 func (r rectF64) split(rects *[]rectF64) {
+	if r.width < 0 || r.height < 0 {
+		return
+	}
+
 	rightX := r.x + r.width
 	bottomY := r.y + r.height
 
 	if r.x < 0 { // left part is off-screen
-		rectF64{r.x + ScreenWidth, r.y, -r.x, r.height}.split(rects) // teleported left part
-		rectF64{0, r.y, rightX, r.height}.split(rects)               // part in the screen
+		rectF64{r.x + GameWidth, r.y, -r.x, r.height}.split(rects) // teleported left part
+		rectF64{0, r.y, rightX, r.height}.split(rects)             // part in the screen
 		return
-	} else if rightX > ScreenWidth { // right part is off-screen
-		rectF64{0, r.y, rightX - ScreenWidth, r.height}.split(rects) // teleported right part
-		rectF64{r.x, r.y, ScreenWidth - r.x, r.height}.split(rects)  // part in the screen
+	} else if rightX > GameWidth { // right part is off-screen
+		rectF64{0, r.y, rightX - GameWidth, r.height}.split(rects) // teleported right part
+		rectF64{r.x, r.y, GameWidth - r.x, r.height}.split(rects)  // part in the screen
 		return
 	}
 
 	if r.y < 0 { // upper part is off-screen
-		rectF64{r.x, ScreenHeight + r.y, r.width, -r.y}.split(rects) // teleported upper part
-		rectF64{r.x, 0, r.width, bottomY}.split(rects)               // part in the screen
+		rectF64{r.x, GameHeight + r.y, r.width, -r.y}.split(rects) // teleported upper part
+		rectF64{r.x, 0, r.width, bottomY}.split(rects)             // part in the screen
 		return
-	} else if bottomY > ScreenHeight { // bottom part is off-screen
-		rectF64{r.x, 0, r.width, bottomY - ScreenHeight}.split(rects) // teleported bottom part
-		rectF64{r.x, r.y, r.width, ScreenHeight - r.y}.split(rects)   // part in the screen
+	} else if bottomY > GameHeight { // bottom part is off-screen
+		rectF64{r.x, 0, r.width, bottomY - GameHeight}.split(rects) // teleported bottom part
+		rectF64{r.x, r.y, r.width, GameHeight - r.y}.split(rects)   // part in the screen
 		return
 	}
 
@@ -45,7 +49,7 @@ func (r rectF64) split(rects *[]rectF64) {
 
 func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
 	ebitenutil.DrawRect(dst, r.x, r.y, r.width, r.height, clr)
-	if debugRects {
+	if debugUnits {
 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)
 		bottomX := r.x + r.width
 		bottomY := r.y + r.height
@@ -53,25 +57,25 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
 	}
 }
 
-func intersects(rectA, rectB rectF64) bool {
+func intersects(rectA, rectB rectF64, tolerance float64) bool {
 	aRightX := rectA.x + rectA.width
 	bRightX := rectB.x + rectB.width
 	aBottomY := rectA.y + rectA.height
 	bBottomY := rectB.y + rectB.height
 
-	if (rectA.x-rectB.x <= epsilon) && (aRightX-rectB.x <= epsilon) { // rectA is on the left side of rectB
+	if (rectA.x-rectB.x <= tolerance) && (aRightX-rectB.x <= tolerance) { // rectA is on the left side of rectB
 		return false
 	}
 
-	if (rectA.x-bRightX >= -epsilon) && (aRightX-bRightX >= -epsilon) { // rectA is on the right side of rectB
+	if (rectA.x-bRightX >= -tolerance) && (aRightX-bRightX >= -tolerance) { // rectA is on the right side of rectB
 		return false
 	}
 
-	if (rectA.y-rectB.y <= epsilon) && (aBottomY-rectB.y <= epsilon) { // rectA is above rectB
+	if (rectA.y-rectB.y <= tolerance) && (aBottomY-rectB.y <= tolerance) { // rectA is above rectB
 		return false
 	}
 
-	if (rectA.y-bBottomY >= -epsilon) && (aBottomY-bBottomY >= -epsilon) { // rectA is under rectB
+	if (rectA.y-bBottomY >= -tolerance) && (aBottomY-bBottomY >= -tolerance) { // rectA is under rectB
 		return false
 	}
 

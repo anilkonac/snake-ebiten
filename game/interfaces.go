@@ -31,14 +31,14 @@ func draw(dst *ebiten.Image, src drawable) {
 	}
 }
 
-func collides(a, b collidable) bool {
+func collides(a, b collidable, tolerance float64) bool {
 	if !a.collEnabled() || !b.collEnabled() {
 		return false
 	}
 
 	for _, rectA := range a.slice() {
 		for _, rectB := range b.slice() {
-			if !intersects(rectA, rectB) {
+			if !intersects(rectA, rectB, tolerance) {
 				continue
 			}
 

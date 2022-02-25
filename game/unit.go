@@ -2,9 +2,10 @@ package game
 
 import (
 	"image/color"
-)
 
-const epsilon = 0.001
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+)
 
 type unit struct {
 	headCenterX float64
@@ -76,7 +77,7 @@ func (u *unit) moveUp(dist float64) {
 
 	// teleport if head center is offscreen.
 	if u.headCenterY < 0 {
-		u.headCenterY += ScreenHeight
+		u.headCenterY += GameHeight
 	}
 }
 
@@ -84,8 +85,8 @@ func (u *unit) moveDown(dist float64) {
 	u.headCenterY += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterY > ScreenHeight {
-		u.headCenterY -= ScreenHeight
+	if u.headCenterY > GameHeight {
+		u.headCenterY -= GameHeight
 	}
 }
 
@@ -93,8 +94,8 @@ func (u *unit) moveRight(dist float64) {
 	u.headCenterX += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterX > ScreenWidth {
-		u.headCenterX -= ScreenWidth
+	if u.headCenterX > GameWidth {
+		u.headCenterX -= GameWidth
 	}
 }
 
@@ -103,7 +104,7 @@ func (u *unit) moveLeft(dist float64) {
 
 	// teleport if head center is offscreen.
 	if u.headCenterX < 0 {
-		u.headCenterX += ScreenWidth
+		u.headCenterX += GameWidth
 	}
 }
 
@@ -127,4 +128,11 @@ func (u *unit) drawEnabled() bool {
 
 func (u *unit) Color() color.Color {
 	return u.color
+}
+
+func (u *unit) markHeadCenter(dst *ebiten.Image) {
+	headCX := u.headCenterX
+	headCY := u.headCenterY
+	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
+	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
 }
