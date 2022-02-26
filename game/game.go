@@ -29,11 +29,10 @@ import (
 
 // Game constants
 const (
-	GameWidth      = 800
-	GameHeight     = 600
-	deltaTime      = 1.0 / 60.0
-	halfSnakeWidth = snakeWidth / 2.0
-	restartTime    = 1.5 // seconds
+	GameWidth   = 800
+	GameHeight  = 600
+	deltaTime   = 1.0 / 60.0
+	restartTime = 1.5 // seconds
 )
 
 // Snake parameters
@@ -46,6 +45,8 @@ const (
 	debugUnits            = false // Draw consecutive units with different colors and draw position info of rects.
 	lengthIncreasePercent = 18
 )
+
+const halfSnakeWidth = snakeWidth / 2.0
 
 // Colors to be used in the drawing.
 var (

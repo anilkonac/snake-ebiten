@@ -34,7 +34,7 @@ type rectF64 struct {
 
 // Divide rectangle up to 4 based on where it is off-screen.
 func (r rectF64) split(rects *[]rectF64) {
-	if r.width < 0 || r.height < 0 {
+	if r.width <= 0 || r.height <= 0 {
 		return
 	}
 

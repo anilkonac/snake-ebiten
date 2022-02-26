@@ -122,7 +122,7 @@ func (s *snake) updateHead(dist float64) {
 		s.unitHead.moveDown(dist)
 	}
 
-	if s.unitHead != s.unitTail {
+	if (s.unitHead != s.unitTail) || (s.remainingGrowth > 0) { // Avoid unnecessary updates
 		s.unitHead.creteRects() // Update rectangles of this unit
 	}
 
@@ -132,20 +132,21 @@ func (s *snake) updateHead(dist float64) {
 func (s *snake) updateTail(dist float64) {
 	if s.remainingGrowth > 0 {
 		s.remainingGrowth -= dist
-	} else {
-		// Decrease tail length
-		s.unitTail.length -= dist
+		return
+	}
 
-		// Rotate tail if its length is less than width of the snake
-		if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
-			s.unitTail.direction = s.unitTail.prev.direction
-		}
+	// Decrease tail length
+	s.unitTail.length -= dist
 
-		// Destroy tail unit if its length is not positive
-		if s.unitTail.length <= 0 {
-			s.unitTail = s.unitTail.prev
-			s.unitTail.next = nil
-		}
+	// Rotate tail if its length is less than width of the snake
+	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
+		s.unitTail.direction = s.unitTail.prev.direction
+	}
+
+	// Destroy tail unit if its length is not positive
+	if s.unitTail.length <= 0 {
+		s.unitTail = s.unitTail.prev
+		s.unitTail.next = nil
 	}
 
 	s.unitTail.creteRects() // Update rectangles of this unit
