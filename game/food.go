@@ -52,7 +52,7 @@ func newFood(centerX, centerY float64) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(float64(rand.Intn(GameWidth)), float64(rand.Intn(GameHeight)))
+	return newFood(float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight)))
 }
 
 // Implement slicer interface

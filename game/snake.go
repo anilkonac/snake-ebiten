@@ -29,7 +29,7 @@ type snakeLengthT uint16
 const (
 	safeDist            = 0.5
 	toleranceDefault    = 0.001
-	toleranceSecondUnit = halfSnakeWidth
+	toleranceScreenEdge = halfSnakeWidth
 )
 
 const (
@@ -65,14 +65,14 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if centerX > GameWidth {
+	if centerX > ScreenWidth {
 		panic("Initial x position of the snake is off-screen.")
 	}
-	if centerY > GameHeight {
+	if centerY > ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if isVertical := isVertical(direction); (isVertical && (snakeLength > GameHeight)) ||
-		(!isVertical && (snakeLength > GameWidth)) {
+	if isVertical := isVertical(direction); (isVertical && (snakeLength > ScreenHeight)) ||
+		(!isVertical && (snakeLength > ScreenWidth)) {
 		panic("Initial snake intersects itself.")
 	}
 
@@ -191,23 +191,24 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 }
 
 func (s *snake) checkIntersection() bool {
-	if s.unitHead.next == nil {
+	curUnit := s.unitHead.next
+	if curUnit == nil {
 		return false
 	}
 
-	// Check for collision between head and second unit more loosely.
-	curUnit := s.unitHead.next
-	if collides(s.unitHead, curUnit, toleranceSecondUnit) {
-		return true
+	tolerance := toleranceDefault
+	if len(curUnit.rects) > 1 { // If second unit is on an edge
+		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}
-	// Carefully check for collision between the rest of the units and the head.
+
 	curUnit = curUnit.next
 	for curUnit != nil {
-		if collides(s.unitHead, curUnit, toleranceDefault) {
+		if collides(s.unitHead, curUnit, tolerance) {
 			return true
 		}
 		curUnit = curUnit.next
 	}
+
 	return false
 }
 

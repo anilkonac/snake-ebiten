@@ -42,22 +42,22 @@ func (r rectF64) split(rects *[]rectF64) {
 	bottomY := r.y + r.height
 
 	if r.x < 0 { // left part is off-screen
-		rectF64{r.x + GameWidth, r.y, -r.x, r.height}.split(rects) // teleported left part
-		rectF64{0, r.y, rightX, r.height}.split(rects)             // part in the screen
+		rectF64{r.x + ScreenWidth, r.y, -r.x, r.height}.split(rects) // teleported left part
+		rectF64{0, r.y, rightX, r.height}.split(rects)               // part in the screen
 		return
-	} else if rightX > GameWidth { // right part is off-screen
-		rectF64{0, r.y, rightX - GameWidth, r.height}.split(rects) // teleported right part
-		rectF64{r.x, r.y, GameWidth - r.x, r.height}.split(rects)  // part in the screen
+	} else if rightX > ScreenWidth { // right part is off-screen
+		rectF64{0, r.y, rightX - ScreenWidth, r.height}.split(rects) // teleported right part
+		rectF64{r.x, r.y, ScreenWidth - r.x, r.height}.split(rects)  // part in the screen
 		return
 	}
 
 	if r.y < 0 { // upper part is off-screen
-		rectF64{r.x, GameHeight + r.y, r.width, -r.y}.split(rects) // teleported upper part
-		rectF64{r.x, 0, r.width, bottomY}.split(rects)             // part in the screen
+		rectF64{r.x, ScreenHeight + r.y, r.width, -r.y}.split(rects) // teleported upper part
+		rectF64{r.x, 0, r.width, bottomY}.split(rects)               // part in the screen
 		return
-	} else if bottomY > GameHeight { // bottom part is off-screen
-		rectF64{r.x, 0, r.width, bottomY - GameHeight}.split(rects) // teleported bottom part
-		rectF64{r.x, r.y, r.width, GameHeight - r.y}.split(rects)   // part in the screen
+	} else if bottomY > ScreenHeight { // bottom part is off-screen
+		rectF64{r.x, 0, r.width, bottomY - ScreenHeight}.split(rects) // teleported bottom part
+		rectF64{r.x, r.y, r.width, ScreenHeight - r.y}.split(rects)   // part in the screen
 		return
 	}
 

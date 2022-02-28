@@ -95,7 +95,7 @@ func (u *unit) moveUp(dist float64) {
 
 	// teleport if head center is offscreen.
 	if u.headCenterY < 0 {
-		u.headCenterY += GameHeight
+		u.headCenterY += ScreenHeight
 	}
 }
 
@@ -103,8 +103,8 @@ func (u *unit) moveDown(dist float64) {
 	u.headCenterY += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterY > GameHeight {
-		u.headCenterY -= GameHeight
+	if u.headCenterY > ScreenHeight {
+		u.headCenterY -= ScreenHeight
 	}
 }
 
@@ -112,8 +112,8 @@ func (u *unit) moveRight(dist float64) {
 	u.headCenterX += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterX > GameWidth {
-		u.headCenterX -= GameWidth
+	if u.headCenterX > ScreenWidth {
+		u.headCenterX -= ScreenWidth
 	}
 }
 
@@ -122,7 +122,7 @@ func (u *unit) moveLeft(dist float64) {
 
 	// teleport if head center is offscreen.
 	if u.headCenterX < 0 {
-		u.headCenterX += GameWidth
+		u.headCenterX += ScreenWidth
 	}
 }
 

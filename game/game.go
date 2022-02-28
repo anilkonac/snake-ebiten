@@ -29,19 +29,19 @@ import (
 
 // Game constants
 const (
-	GameWidth   = 800
-	GameHeight  = 600
-	deltaTime   = 1.0 / 60.0
-	restartTime = 1.5 // seconds
+	ScreenWidth  = 960
+	ScreenHeight = 720
+	deltaTime    = 1.0 / 60.0
+	restartTime  = 1.5 // seconds
 )
 
 // Snake parameters
 const (
-	snakeHeadCenterX      = GameWidth / 2.0
-	snakeHeadCenterY      = GameHeight / 2.0
-	snakeSpeed            = 200
-	snakeLength           = 200
-	snakeWidth            = 25
+	snakeHeadCenterX      = ScreenWidth / 2.0
+	snakeHeadCenterY      = ScreenHeight / 2.0
+	snakeSpeed            = 240
+	snakeLength           = 240
+	snakeWidth            = 30
 	debugUnits            = false // Draw consecutive units with different colors and draw position info of rects.
 	lengthIncreasePercent = 18
 )
@@ -125,7 +125,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return GameWidth, GameHeight
+	return ScreenWidth, ScreenHeight
 }
 
 func (g *Game) handleInput() {
@@ -188,6 +188,7 @@ func (g *Game) checkFood() {
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d Remaining Growth: %.2f", g.snake.foodEaten, g.snake.remainingGrowth), 0, 15)
 	// headUnit := g.snake.unitHead
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
