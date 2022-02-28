@@ -37,18 +37,19 @@ const (
 
 // Snake parameters
 const (
-	snakeHeadCenterX      = ScreenWidth / 2.0
-	snakeHeadCenterY      = ScreenHeight / 2.0
-	snakeSpeed            = 240
-	snakeLength           = 240
-	snakeWidth            = 30
-	debugUnits            = false // Draw consecutive units with different colors and draw position info of rects.
-	lengthIncreasePercent = 18
+	snakeHeadCenterX = ScreenWidth / 2.0
+	snakeHeadCenterY = ScreenHeight / 2.0
+	snakeSpeed       = 240
+	snakeLength      = 240
+	snakeWidth       = 30
+	debugUnits       = false // Draw consecutive units with different colors and draw position info of rects.
+
 )
 
 const halfSnakeWidth = snakeWidth / 2.0
 
-// https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
+// Colors to be used in the drawing.
+// Palette: https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
 	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola

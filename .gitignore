@@ -4,3 +4,5 @@
 *.s
 
 snake-ebiten
+
+*.zip

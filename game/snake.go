@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
+	"math"
 	"math/rand"
 	"time"
 )
@@ -55,6 +56,7 @@ type snake struct {
 	turnQueue       []*turn
 	distAfterTurn   float64
 	remainingGrowth float64
+	foodEaten       uint8
 }
 
 func init() {
@@ -218,7 +220,11 @@ func (s *snake) grow() {
 		totalLength += unit.length
 	}
 
-	s.remainingGrowth += totalLength * lengthIncreasePercent / 100.0
+	// Compute the new growth and add to the remaining growth value.
+	// f(x)=20/(e^(0.05x))
+	increasePercent := 20.0 / math.Exp(0.05*float64(s.foodEaten))
+	s.remainingGrowth += totalLength * increasePercent / 100
+	s.foodEaten++
 }
 
 func (s *snake) lastDirection() directionT {
