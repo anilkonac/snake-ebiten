@@ -48,7 +48,7 @@ const (
 
 const halfSnakeWidth = snakeWidth / 2.0
 
-// Colors to be used in the drawing.
+// https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
 var (
 	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
 	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
@@ -141,7 +141,7 @@ func (g *Game) handleInput() {
 	// Determine the new direction.
 	dirCurrent := g.snake.lastDirection()
 	dirNew := dirCurrent
-	if isVertical(dirCurrent) {
+	if dirCurrent.isVertical() {
 		if pressedLeft {
 			dirNew = directionLeft
 		} else if pressedRight {

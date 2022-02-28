@@ -126,6 +126,13 @@ func (u *unit) moveLeft(dist float64) {
 	}
 }
 
+func (u *unit) markHeadCenter(dst *ebiten.Image) {
+	headCX := u.headCenterX
+	headCY := u.headCenterY
+	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
+	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
+}
+
 // Implement slicer interface
 // --------------------------
 func (u *unit) slice() []rectF64 {
@@ -146,11 +153,4 @@ func (u *unit) drawEnabled() bool {
 
 func (u *unit) Color() color.Color {
 	return u.color
-}
-
-func (u *unit) markHeadCenter(dst *ebiten.Image) {
-	headCX := u.headCenterX
-	headCY := u.headCenterY
-	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
-	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
 }

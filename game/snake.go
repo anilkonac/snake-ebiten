@@ -40,11 +40,11 @@ const (
 	directionTotal
 )
 
-func isVertical(direction directionT) bool {
-	if direction >= directionTotal {
+func (d directionT) isVertical() bool {
+	if d >= directionTotal {
 		panic("wrong direction")
 	}
-	return (direction == directionUp) || (direction == directionDown)
+	return (d == directionUp) || (d == directionDown)
 }
 
 type snake struct {
@@ -71,7 +71,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	if centerY > ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if isVertical := isVertical(direction); (isVertical && (snakeLength > ScreenHeight)) ||
+	if isVertical := direction.isVertical(); (isVertical && (snakeLength > ScreenHeight)) ||
 		(!isVertical && (snakeLength > ScreenWidth)) {
 		panic("Initial snake intersects itself.")
 	}
@@ -88,7 +88,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 }
 
 func newSnakeRandDir(centerX, centerY float64, speed uint8, snakeLength snakeLengthT) *snake {
-	var direction directionT = directionT(rand.Intn(int(directionTotal)))
+	direction := directionT(rand.Intn(int(directionTotal)))
 	return newSnake(centerX, centerY, direction, speed, snakeLength)
 }
 
@@ -201,7 +201,6 @@ func (s *snake) checkIntersection() bool {
 		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}
 
-	curUnit = curUnit.next
 	for curUnit != nil {
 		if collides(s.unitHead, curUnit, tolerance) {
 			return true
