@@ -49,7 +49,7 @@ func (d directionT) isVertical() bool {
 }
 
 type snake struct {
-	speed           uint8
+	speed           float64
 	unitHead        *unit
 	unitTail        *unit
 	turnPrev        *turn
@@ -63,7 +63,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(centerX, centerY float64, direction directionT, speed uint8, snakeLength snakeLengthT) *snake {
+func newSnake(centerX, centerY float64, direction directionT, speed float64, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -89,7 +89,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	return snake
 }
 
-func newSnakeRandDir(centerX, centerY float64, speed uint8, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(centerX, centerY float64, speed float64, snakeLength snakeLengthT) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
 	return newSnake(centerX, centerY, direction, speed, snakeLength)
 }
@@ -103,6 +103,10 @@ func (s *snake) update() {
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
 		s.turnTo(nextTurn, true)
 	}
+
+	// Update snake speed
+	//f(x)=240+60/e^(0.025x)
+	s.speed = snakeSpeedLast + (snakeSpeedInitial-snakeSpeedLast)/math.Exp(0.025*float64(s.foodEaten))
 
 	s.updateHead(moveDistance)
 	s.updateTail(moveDistance)
@@ -124,7 +128,7 @@ func (s *snake) updateHead(dist float64) {
 		s.unitHead.moveDown(dist)
 	}
 
-	if (s.unitHead != s.unitTail) || (s.remainingGrowth > 0) { // Avoid unnecessary updates
+	if s.unitHead != s.unitTail { // Avoid unnecessary updates
 		s.unitHead.creteRects() // Update rectangles of this unit
 	}
 
@@ -132,13 +136,14 @@ func (s *snake) updateHead(dist float64) {
 }
 
 func (s *snake) updateTail(dist float64) {
+	decreaseAmount := dist
 	if s.remainingGrowth > 0 {
-		s.remainingGrowth -= dist
-		return
+		decreaseAmount = 2.0 * decreaseAmount / 3.0
+		s.remainingGrowth -= decreaseAmount
 	}
 
 	// Decrease tail length
-	s.unitTail.length -= dist
+	s.unitTail.length -= decreaseAmount
 
 	// Rotate tail if its length is less than width of the snake
 	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
@@ -221,8 +226,8 @@ func (s *snake) grow() {
 	}
 
 	// Compute the new growth and add to the remaining growth value.
-	// f(x)=20/(e^(0.05x))
-	increasePercent := 20.0 / math.Exp(0.05*float64(s.foodEaten))
+	// f(x)=20/(e^(0.025x))
+	increasePercent := 20.0 / math.Exp(0.025*float64(s.foodEaten))
 	s.remainingGrowth += totalLength * increasePercent / 100
 	s.foodEaten++
 }

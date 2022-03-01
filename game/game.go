@@ -37,12 +37,13 @@ const (
 
 // Snake parameters
 const (
-	snakeHeadCenterX = ScreenWidth / 2.0
-	snakeHeadCenterY = ScreenHeight / 2.0
-	snakeSpeed       = 240
-	snakeLength      = 240
-	snakeWidth       = 30
-	debugUnits       = false // Draw consecutive units with different colors and draw position info of rects.
+	snakeHeadCenterX  = ScreenWidth / 2.0
+	snakeHeadCenterY  = ScreenHeight / 2.0
+	snakeSpeedInitial = 300
+	snakeSpeedLast    = 240
+	snakeLength       = 240
+	snakeWidth        = 30
+	debugUnits        = false // Draw consecutive units with different colors and draw position info of rects.
 
 )
 
@@ -57,6 +58,8 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
+var printFPS bool = true
+
 // Game implements ebiten.Game interface.
 type Game struct {
 	snake             *snake
@@ -68,24 +71,21 @@ type Game struct {
 
 func NewGame() *Game {
 	return &Game{
-		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeed, snakeLength),
+		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeedInitial, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *Game) restart() {
 	*g = Game{
-		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeed, snakeLength),
+		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeedInitial, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
 
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
-		g.paused = !g.paused
-	}
+	g.handleSettingsInputs()
 
 	if g.paused {
 		return nil
@@ -166,6 +166,15 @@ func (g *Game) handleInput() {
 
 }
 
+func (g *Game) handleSettingsInputs() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		g.paused = !g.paused
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
+		printFPS = !printFPS
+	}
+}
+
 func (g *Game) checkFood() {
 	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
@@ -188,11 +197,11 @@ func (g *Game) checkFood() {
 }
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
+	if printFPS {
+		ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
+	}
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Speed: %.3f", g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d Remaining Growth: %.2f", g.snake.foodEaten, g.snake.remainingGrowth), 0, 15)
-	// headUnit := g.snake.unitHead
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Head X: %.2f Y: %.2f", headUnit.headCenterX, headUnit.headCenterY), 0, 15)
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Mouse X: %d Y: %d", mouseX, mouseY), 0, 30)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }
