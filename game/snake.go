@@ -104,10 +104,6 @@ func (s *snake) update() {
 		s.turnTo(nextTurn, true)
 	}
 
-	// Update snake speed
-	//f(x)=240+60/e^(0.025x)
-	s.speed = snakeSpeedLast + (snakeSpeedInitial-snakeSpeedLast)/math.Exp(0.025*float64(s.foodEaten))
-
 	s.updateHead(moveDistance)
 	s.updateTail(moveDistance)
 }
@@ -230,6 +226,10 @@ func (s *snake) grow() {
 	increasePercent := 20.0 / math.Exp(0.025*float64(s.foodEaten))
 	s.remainingGrowth += totalLength * increasePercent / 100
 	s.foodEaten++
+
+	// Update snake speed
+	//f(x)=240+60/e^(0.025x)
+	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.025*float64(s.foodEaten))
 }
 
 func (s *snake) lastDirection() directionT {

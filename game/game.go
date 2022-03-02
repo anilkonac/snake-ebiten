@@ -40,7 +40,7 @@ const (
 	snakeHeadCenterX  = ScreenWidth / 2.0
 	snakeHeadCenterY  = ScreenHeight / 2.0
 	snakeSpeedInitial = 300
-	snakeSpeedLast    = 240
+	snakeSpeedFinal   = 240
 	snakeLength       = 240
 	snakeWidth        = 30
 	debugUnits        = false // Draw consecutive units with different colors and draw position info of rects.
