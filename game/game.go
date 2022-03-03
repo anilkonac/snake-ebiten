@@ -40,7 +40,7 @@ const (
 	snakeHeadCenterX  = ScreenWidth / 2.0
 	snakeHeadCenterY  = ScreenHeight / 2.0
 	snakeSpeedInitial = 300
-	snakeSpeedFinal   = 240
+	snakeSpeedFinal   = 275
 	snakeLength       = 240
 	snakeWidth        = 30
 	debugUnits        = false // Draw consecutive units with different colors and draw position info of rects.
@@ -71,14 +71,14 @@ type Game struct {
 
 func NewGame() *Game {
 	return &Game{
-		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeSpeedInitial, snakeLength),
+		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *Game) restart() {
 	*g = Game{
-		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeSpeedInitial, snakeLength),
+		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
@@ -200,8 +200,9 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
 		ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 	}
-	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Speed: %.3f", g.snake.speed))
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d  Speed: %.3f", g.snake.foodEaten, g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d Remaining Growth: %.2f", g.snake.foodEaten, g.snake.remainingGrowth), 0, 15)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }

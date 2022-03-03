@@ -55,7 +55,8 @@ type snake struct {
 	turnPrev        *turn
 	turnQueue       []*turn
 	distAfterTurn   float64
-	remainingGrowth float64
+	growthRemaining float64
+	growthTarget    float64
 	foodEaten       uint8
 }
 
@@ -63,7 +64,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(centerX, centerY float64, direction directionT, speed float64, snakeLength snakeLengthT) *snake {
+func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -81,7 +82,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed float64, sna
 	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
 
 	snake := &snake{
-		speed:    speed,
+		speed:    snakeSpeedInitial,
 		unitHead: initialUnit,
 		unitTail: initialUnit,
 	}
@@ -89,9 +90,9 @@ func newSnake(centerX, centerY float64, direction directionT, speed float64, sna
 	return snake
 }
 
-func newSnakeRandDir(centerX, centerY float64, speed float64, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(centerX, centerY float64, snakeLength snakeLengthT) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
-	return newSnake(centerX, centerY, direction, speed, snakeLength)
+	return newSnake(centerX, centerY, direction, snakeLength)
 }
 
 func (s *snake) update() {
@@ -133,9 +134,14 @@ func (s *snake) updateHead(dist float64) {
 
 func (s *snake) updateTail(dist float64) {
 	decreaseAmount := dist
-	if s.remainingGrowth > 0 {
-		decreaseAmount = 2.0 * decreaseAmount / 3.0
-		s.remainingGrowth -= decreaseAmount
+	if s.growthRemaining > 0 {
+		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
+		// f(x) = 0.75 + (x-0.5)^2
+		growthCompletion := 1 - s.growthRemaining/s.growthTarget
+		decreaseAmount = decreaseAmount * (0.75 + (growthCompletion-0.5)*(growthCompletion-0.5))
+		s.growthRemaining -= decreaseAmount
+	} else {
+		s.growthTarget = 0
 	}
 
 	// Decrease tail length
@@ -224,12 +230,14 @@ func (s *snake) grow() {
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=20/(e^(0.025x))
 	increasePercent := 20.0 / math.Exp(0.025*float64(s.foodEaten))
-	s.remainingGrowth += totalLength * increasePercent / 100
+	curGrowth := totalLength * increasePercent / 100
+	s.growthRemaining += curGrowth
+	s.growthTarget += curGrowth
 	s.foodEaten++
 
 	// Update snake speed
-	//f(x)=240+60/e^(0.025x)
-	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.025*float64(s.foodEaten))
+	// f(x)=270+30/e^(0.010x)
+	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.01*float64(s.foodEaten))
 }
 
 func (s *snake) lastDirection() directionT {
