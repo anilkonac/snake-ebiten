@@ -1,0 +1,10 @@
+{
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "\\.go$",
+                "cmd": "GOOS=js GOARCH=wasm go build -o docs/snake-ebiten.wasm github.com/anilkonac/snake-ebiten"
+            }
+        ]
+    }
+}

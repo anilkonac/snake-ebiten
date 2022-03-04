@@ -29,7 +29,7 @@ type snakeLengthT uint16
 
 const (
 	safeDist            = 0.5
-	toleranceDefault    = 0.001
+	toleranceDefault    = snakeWidth / 16.0
 	toleranceScreenEdge = halfSnakeWidth
 )
 
@@ -99,7 +99,7 @@ func (s *snake) update() {
 	moveDistance := float64(s.speed) * deltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
-	if (len(s.turnQueue) > 0) && (s.distAfterTurn-snakeWidth >= safeDist) {
+	if (len(s.turnQueue) > 0) && (s.distAfterTurn+toleranceDefault >= snakeWidth) {
 		var nextTurn *turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
 		s.turnTo(nextTurn, true)
@@ -228,16 +228,16 @@ func (s *snake) grow() {
 	}
 
 	// Compute the new growth and add to the remaining growth value.
-	// f(x)=20/(e^(0.025x))
-	increasePercent := 20.0 / math.Exp(0.025*float64(s.foodEaten))
+	// f(x)=20/(e^(0.0125x))
+	increasePercent := 20.0 / math.Exp(0.0125*float64(s.foodEaten))
 	curGrowth := totalLength * increasePercent / 100.0
 	s.growthRemaining += curGrowth
 	s.growthTarget += curGrowth
 	s.foodEaten++
 
 	// Update snake speed
-	// f(x)=275+25/e^(0.010x)
-	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.01*float64(s.foodEaten))
+	// f(x)=275+25/e^(0.010625x)
+	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.010625*float64(s.foodEaten))
 }
 
 func (s *snake) lastDirection() directionT {

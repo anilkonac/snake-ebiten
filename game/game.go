@@ -58,7 +58,7 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
-var printFPS bool = true
+var printFPS bool = false
 
 // Game implements ebiten.Game interface.
 type Game struct {
@@ -111,6 +111,9 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
+	// Draw the food
+	draw(screen, g.food)
+
 	// Draw the snake
 	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 		draw(screen, unit)
@@ -118,8 +121,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			unit.markHeadCenter(screen)
 		}
 	}
-	// Draw the food
-	draw(screen, g.food)
 
 	g.printDebugMsgs(screen)
 }
