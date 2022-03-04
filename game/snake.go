@@ -136,9 +136,9 @@ func (s *snake) updateTail(dist float64) {
 	decreaseAmount := dist
 	if s.growthRemaining > 0 {
 		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
-		// f(x) = 0.75 + (x-0.5)^2
+		// f(x) = 0.75 + (x-0.5)^2 where  0 <= x <= 1
 		growthCompletion := 1 - s.growthRemaining/s.growthTarget
-		decreaseAmount = decreaseAmount * (0.75 + (growthCompletion-0.5)*(growthCompletion-0.5))
+		decreaseAmount *= (0.75 + (growthCompletion-0.5)*(growthCompletion-0.5))
 		s.growthRemaining -= decreaseAmount
 	} else {
 		s.growthTarget = 0
@@ -230,13 +230,13 @@ func (s *snake) grow() {
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=20/(e^(0.025x))
 	increasePercent := 20.0 / math.Exp(0.025*float64(s.foodEaten))
-	curGrowth := totalLength * increasePercent / 100
+	curGrowth := totalLength * increasePercent / 100.0
 	s.growthRemaining += curGrowth
 	s.growthTarget += curGrowth
 	s.foodEaten++
 
 	// Update snake speed
-	// f(x)=270+30/e^(0.010x)
+	// f(x)=275+25/e^(0.010x)
 	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.01*float64(s.foodEaten))
 }
 
