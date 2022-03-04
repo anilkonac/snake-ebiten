@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
+	"math"
 	"math/rand"
 	"time"
 )
@@ -48,20 +49,22 @@ func (d directionT) isVertical() bool {
 }
 
 type snake struct {
-	speed           uint8
+	speed           float64
 	unitHead        *unit
 	unitTail        *unit
 	turnPrev        *turn
 	turnQueue       []*turn
 	distAfterTurn   float64
-	remainingGrowth float64
+	growthRemaining float64
+	growthTarget    float64
+	foodEaten       uint8
 }
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(centerX, centerY float64, direction directionT, speed uint8, snakeLength snakeLengthT) *snake {
+func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -79,7 +82,7 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
 
 	snake := &snake{
-		speed:    speed,
+		speed:    snakeSpeedInitial,
 		unitHead: initialUnit,
 		unitTail: initialUnit,
 	}
@@ -87,9 +90,9 @@ func newSnake(centerX, centerY float64, direction directionT, speed uint8, snake
 	return snake
 }
 
-func newSnakeRandDir(centerX, centerY float64, speed uint8, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(centerX, centerY float64, snakeLength snakeLengthT) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
-	return newSnake(centerX, centerY, direction, speed, snakeLength)
+	return newSnake(centerX, centerY, direction, snakeLength)
 }
 
 func (s *snake) update() {
@@ -122,7 +125,7 @@ func (s *snake) updateHead(dist float64) {
 		s.unitHead.moveDown(dist)
 	}
 
-	if (s.unitHead != s.unitTail) || (s.remainingGrowth > 0) { // Avoid unnecessary updates
+	if s.unitHead != s.unitTail { // Avoid unnecessary updates
 		s.unitHead.creteRects() // Update rectangles of this unit
 	}
 
@@ -130,13 +133,19 @@ func (s *snake) updateHead(dist float64) {
 }
 
 func (s *snake) updateTail(dist float64) {
-	if s.remainingGrowth > 0 {
-		s.remainingGrowth -= dist
-		return
+	decreaseAmount := dist
+	if s.growthRemaining > 0 {
+		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
+		// f(x) = 0.75 + (x-0.5)^2 where  0 <= x <= 1
+		growthCompletion := 1 - s.growthRemaining/s.growthTarget
+		decreaseAmount *= (0.75 + (growthCompletion-0.5)*(growthCompletion-0.5))
+		s.growthRemaining -= decreaseAmount
+	} else {
+		s.growthTarget = 0
 	}
 
 	// Decrease tail length
-	s.unitTail.length -= dist
+	s.unitTail.length -= decreaseAmount
 
 	// Rotate tail if its length is less than width of the snake
 	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
@@ -218,7 +227,17 @@ func (s *snake) grow() {
 		totalLength += unit.length
 	}
 
-	s.remainingGrowth += totalLength * lengthIncreasePercent / 100.0
+	// Compute the new growth and add to the remaining growth value.
+	// f(x)=20/(e^(0.025x))
+	increasePercent := 20.0 / math.Exp(0.025*float64(s.foodEaten))
+	curGrowth := totalLength * increasePercent / 100.0
+	s.growthRemaining += curGrowth
+	s.growthTarget += curGrowth
+	s.foodEaten++
+
+	// Update snake speed
+	// f(x)=275+25/e^(0.010x)
+	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.01*float64(s.foodEaten))
 }
 
 func (s *snake) lastDirection() directionT {
