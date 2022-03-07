@@ -28,7 +28,6 @@ type directionT uint8
 type snakeLengthT uint16
 
 const (
-	safeDist            = 0.5
 	toleranceDefault    = snakeWidth / 16.0
 	toleranceScreenEdge = halfSnakeWidth
 )
@@ -141,7 +140,7 @@ func (s *snake) updateTail(dist float64) {
 		decreaseAmount *= (0.75 + (growthCompletion-0.5)*(growthCompletion-0.5))
 		s.growthRemaining -= decreaseAmount
 	} else {
-		s.growthTarget = 0
+		s.growthTarget = s.growthRemaining
 	}
 
 	// Decrease tail length
