@@ -6,3 +6,7 @@ A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 Play the current development version at https://anilkonac.github.io/snake-ebiten/.
 
 Play possibly the more stable (and older) version at https://anilkonac.itch.io/ssnake.
+
+## License
+Except for the game/shaders folder, the project is licensed under the GPL-3.0 license.
+Shader files under game/shaders folder are licensed under the MIT license.

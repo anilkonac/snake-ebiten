@@ -2,4 +2,4 @@
 
 package shaders
 
-var Basic = []byte("//go:build ignore\r\n\r\npackage main\r\n\r\nvar Color vec4\r\nvar TimeElapsed float\r\n\r\nfunc Fragment(position vec4, texCoord vec2, color vec4) vec4 {\r\n\ta := Color.a / 0xffff\r\n\tr := (Color.r / 0xffff) * a\r\n\tg := (Color.g / 0xffff) * a\r\n\tb := (Color.b / 0xffff) * a\r\n\treturn vec4(r, g, b, a)\r\n}\r\n")
+var Basic = []byte("// Copyright (c) 2022 Anıl Konaç\n// This file is licensed under the MIT license.\n\n//go:build ignore\n\npackage main\n\nvar Color vec4\n\nfunc Fragment(position vec4, texCoord vec2, color vec4) vec4 {\n\tnormColor := Color / 0xffff\n\tnormColor.rgb *= normColor.a\n\treturn normColor\n}\n")

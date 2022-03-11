@@ -31,7 +31,9 @@ var shader *ebiten.Shader
 
 func init() {
 	var err error
-	shader, err = ebiten.NewShader(shaders.Basic)
+	// shader, err = ebiten.NewShader(shaders.Basic)
+	// shader, err = ebiten.NewShader(shaders.Hollow)
+	shader, err = ebiten.NewShader(shaders.Round)
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +84,10 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
 	op.GeoM.Translate(r.x, r.y)
 	cr, cg, cb, ca := clr.RGBA()
 	op.Uniforms = map[string]interface{}{
-		"Color": []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
+		"Color":  []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
+		"Width":  float32(r.width),
+		"Height": float32(r.height),
+		// "Thickness": float32(5),
 	}
 	dst.DrawRectShader(1, 1, shader, op)
 
