@@ -22,9 +22,20 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/anilkonac/snake-ebiten/game/shaders"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
+
+var shader *ebiten.Shader
+
+func init() {
+	var err error
+	shader, err = ebiten.NewShader(shaders.Basic)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
 type rectF64 struct {
@@ -66,7 +77,15 @@ func (r rectF64) split(rects *[]rectF64) {
 }
 
 func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
-	ebitenutil.DrawRect(dst, r.x, r.y, r.width, r.height, clr)
+	op := &ebiten.DrawRectShaderOptions{}
+	op.GeoM.Scale(r.width, r.height)
+	op.GeoM.Translate(r.x, r.y)
+	cr, cg, cb, ca := clr.RGBA()
+	op.Uniforms = map[string]interface{}{
+		"Color": []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
+	}
+	dst.DrawRectShader(1, 1, shader, op)
+
 	if debugUnits {
 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)
 		bottomX := r.x + r.width
