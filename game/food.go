@@ -76,3 +76,7 @@ func (f food) drawEnabled() bool {
 func (f food) Color() color.Color {
 	return colorFood
 }
+
+func (f food) TotalDimension() (width, height float64) {
+	return foodLength, foodLength
+}

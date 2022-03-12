@@ -37,6 +37,7 @@ type drawable interface {
 	slicer
 	drawEnabled() bool
 	Color() color.Color
+	TotalDimension() (width, height float64)
 }
 
 func draw(dst *ebiten.Image, src drawable) {
@@ -45,7 +46,8 @@ func draw(dst *ebiten.Image, src drawable) {
 	}
 
 	for _, rect := range src.slice() {
-		rect.draw(dst, src.Color())
+		totWidth, totHeight := src.TotalDimension()
+		rect.draw(dst, src.Color(), totWidth, totHeight)
 	}
 }
 

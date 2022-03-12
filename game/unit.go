@@ -154,3 +154,14 @@ func (u *unit) drawEnabled() bool {
 func (u *unit) Color() color.Color {
 	return u.color
 }
+
+func (u *unit) TotalDimension() (width, height float64) {
+	if u.direction.isVertical() {
+		width = snakeWidth
+		height = u.length
+	} else {
+		width = u.length
+		height = snakeWidth
+	}
+	return
+}

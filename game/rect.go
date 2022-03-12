@@ -28,7 +28,7 @@ import (
 )
 
 var shaderList []*ebiten.Shader
-var curShader uint8 = 0
+var curShader uint8 = 2
 
 func init() {
 	newShader(shaders.Basic)
@@ -46,8 +46,9 @@ func newShader(src []byte) {
 
 // Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
 type rectF64 struct {
-	x, y          float64
-	width, height float64
+	x, y             float64
+	width, height    float64
+	xInUnit, yInUnit float64
 }
 
 // Divide rectangle up to 4 based on where it is off-screen.
@@ -60,22 +61,22 @@ func (r rectF64) split(rects *[]rectF64) {
 	bottomY := r.y + r.height
 
 	if r.x < 0 { // left part is off-screen
-		rectF64{r.x + ScreenWidth, r.y, -r.x, r.height}.split(rects) // teleported left part
-		rectF64{0, r.y, rightX, r.height}.split(rects)               // part in the screen
+		rectF64{r.x + ScreenWidth, r.y, -r.x, r.height, 0, 0}.split(rects) // teleported left part
+		rectF64{0, r.y, rightX, r.height, -r.x, 0}.split(rects)            // part in the screen
 		return
 	} else if rightX > ScreenWidth { // right part is off-screen
-		rectF64{0, r.y, rightX - ScreenWidth, r.height}.split(rects) // teleported right part
-		rectF64{r.x, r.y, ScreenWidth - r.x, r.height}.split(rects)  // part in the screen
+		rectF64{0, r.y, rightX - ScreenWidth, r.height, ScreenWidth - r.x, 0}.split(rects) // teleported right part
+		rectF64{r.x, r.y, ScreenWidth - r.x, r.height, 0, 0}.split(rects)                  // part in the screen
 		return
 	}
 
 	if r.y < 0 { // upper part is off-screen
-		rectF64{r.x, ScreenHeight + r.y, r.width, -r.y}.split(rects) // teleported upper part
-		rectF64{r.x, 0, r.width, bottomY}.split(rects)               // part in the screen
+		rectF64{r.x, ScreenHeight + r.y, r.width, -r.y, r.xInUnit, 0}.split(rects) // teleported upper part
+		rectF64{r.x, 0, r.width, bottomY, r.xInUnit, -r.y}.split(rects)            // part in the screen
 		return
 	} else if bottomY > ScreenHeight { // bottom part is off-screen
-		rectF64{r.x, 0, r.width, bottomY - ScreenHeight}.split(rects) // teleported bottom part
-		rectF64{r.x, r.y, r.width, ScreenHeight - r.y}.split(rects)   // part in the screen
+		rectF64{r.x, 0, r.width, bottomY - ScreenHeight, r.xInUnit, ScreenHeight - r.y}.split(rects) // teleported bottom part
+		rectF64{r.x, r.y, r.width, ScreenHeight - r.y, r.xInUnit, 0}.split(rects)                    // part in the screen
 		return
 	}
 
@@ -83,16 +84,17 @@ func (r rectF64) split(rects *[]rectF64) {
 	*rects = append(*rects, r)
 }
 
-func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
+func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalWidth, totalHeight float64) {
 	op := &ebiten.DrawRectShaderOptions{}
 	op.GeoM.Scale(r.width, r.height)
 	op.GeoM.Translate(r.x, r.y)
 	cr, cg, cb, ca := clr.RGBA()
 	op.Uniforms = map[string]interface{}{
-		"Color":     []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
-		"Width":     float32(r.width),
-		"Height":    float32(r.height),
-		"Thickness": float32(5),
+		"Color":         []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
+		"RectSize":      []float32{float32(r.width), float32(r.height)},
+		"RectPosInUnit": []float32{float32(r.xInUnit), float32(r.yInUnit)},
+		"TotalSize":     []float32{float32(totalWidth), float32(totalHeight)},
+		"Thickness":     float32(5),
 	}
 	dst.DrawRectShader(1, 1, shaderList[curShader], op)
 
