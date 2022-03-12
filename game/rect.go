@@ -27,16 +27,21 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-var shader *ebiten.Shader
+var shaderList []*ebiten.Shader
+var curShader uint8 = 0
 
 func init() {
-	var err error
-	// shader, err = ebiten.NewShader(shaders.Basic)
-	// shader, err = ebiten.NewShader(shaders.Hollow)
-	shader, err = ebiten.NewShader(shaders.Round)
+	newShader(shaders.Basic)
+	newShader(shaders.Hollow)
+	newShader(shaders.Round)
+}
+
+func newShader(src []byte) {
+	shader, err := ebiten.NewShader(src)
 	if err != nil {
 		panic(err)
 	}
+	shaderList = append(shaderList, shader)
 }
 
 // Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
@@ -84,12 +89,12 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
 	op.GeoM.Translate(r.x, r.y)
 	cr, cg, cb, ca := clr.RGBA()
 	op.Uniforms = map[string]interface{}{
-		"Color":  []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
-		"Width":  float32(r.width),
-		"Height": float32(r.height),
-		// "Thickness": float32(5),
+		"Color":     []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
+		"Width":     float32(r.width),
+		"Height":    float32(r.height),
+		"Thickness": float32(5),
 	}
-	dst.DrawRectShader(1, 1, shader, op)
+	dst.DrawRectShader(1, 1, shaderList[curShader], op)
 
 	if debugUnits {
 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)

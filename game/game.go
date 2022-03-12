@@ -58,7 +58,7 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
-var printFPS bool = false
+var printFPS bool = true
 
 // Game implements ebiten.Game interface.
 type Game struct {
@@ -174,6 +174,12 @@ func (g *Game) handleSettingsInputs() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		printFPS = !printFPS
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		curShader++
+		if int(curShader) >= len(shaderList) {
+			curShader = 0
+		}
+	}
 }
 
 func (g *Game) checkFood() {
@@ -200,9 +206,10 @@ func (g *Game) checkFood() {
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()),
-			ScreenWidth-130, 0)
+			ScreenWidth-128, 0)
 	}
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
+	ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
 	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d  Speed: %.3f", g.snake.foodEaten, g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d Remaining Growth: %.2f, Target Growth: %.2f", g.snake.foodEaten, g.snake.growthRemaining, g.snake.growthTarget), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)

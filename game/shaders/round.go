@@ -15,7 +15,7 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	realCoord := vec2(Width*texCoord.x, Height*texCoord.y)
 	if Width <= Height {
 		radius := Width / 2
-		roundCenter1 := vec2(radius, radius)
+		roundCenter1 := vec2(radius)
 		roundCenter2 := vec2(radius, Height-radius)
 
 		distToCenter1 := distance(realCoord, roundCenter1)
