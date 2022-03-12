@@ -20,6 +20,6 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		normColor.a = 0
 	}
 
-	normColor.xyz *= normColor.a
+	normColor.rgb *= normColor.a
 	return normColor
 }

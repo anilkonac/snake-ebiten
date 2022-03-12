@@ -6,6 +6,7 @@
 package main
 
 var Color vec4
+var ShadedCorners [4]float
 var RectSize vec2
 var RectPosInUnit vec2
 var TotalSize vec2
@@ -21,8 +22,25 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 
 		distToCenter1 := distance(posInUnit, roundCenter1)
 		distToCenter2 := distance(posInUnit, roundCenter2)
-		if ((posInUnit.y < radius) && (distToCenter1 > radius)) ||
-			((posInUnit.y > (TotalSize.y - radius)) && (distToCenter2 > radius)) {
+
+		// Top Left Corner
+		if ShadedCorners[0] && (posInUnit.x < radius) &&
+			(posInUnit.y < radius) && (distToCenter1 > radius) {
+			normColor.a = 0
+		}
+		// Bottom Left Corner
+		if ShadedCorners[1] && (posInUnit.x < radius) &&
+			(posInUnit.y > (TotalSize.y - radius)) && (distToCenter2 > radius) {
+			normColor.a = 0
+		}
+		// Bottom Right Corner
+		if ShadedCorners[2] && (posInUnit.x > radius) &&
+			(posInUnit.y > (TotalSize.y - radius)) && (distToCenter2 > radius) {
+			normColor.a = 0
+		}
+		// Top Right Corner
+		if ShadedCorners[3] && (posInUnit.x > radius) &&
+			(posInUnit.y < radius) && (distToCenter1 > radius) {
 			normColor.a = 0
 		}
 	} else {
@@ -32,12 +50,29 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 
 		distToCenter1 := distance(posInUnit, roundCenter1)
 		distToCenter2 := distance(posInUnit, roundCenter2)
-		if ((posInUnit.x < radius) && (distToCenter1 > radius)) ||
-			((posInUnit.x > (TotalSize.x - radius)) && (distToCenter2 > radius)) {
+
+		// Top Left Corner
+		if ShadedCorners[0] && (posInUnit.x < radius) &&
+			(posInUnit.y < radius) && (distToCenter1 > radius) {
+			normColor.a = 0
+		}
+		// Bottom Left Corner
+		if ShadedCorners[1] && (posInUnit.x < radius) &&
+			(posInUnit.y > radius) && (distToCenter1 > radius) {
+			normColor.a = 0
+		}
+		// Bottom Right Corner
+		if ShadedCorners[2] && (posInUnit.x > TotalSize.x-radius) &&
+			(posInUnit.y > radius) && (distToCenter2 > radius) {
+			normColor.a = 0
+		}
+		// Top Right Corner
+		if ShadedCorners[3] && (posInUnit.x > TotalSize.x-radius) &&
+			(posInUnit.y < radius) && (distToCenter2 > radius) {
 			normColor.a = 0
 		}
 	}
 
-	normColor.xyz *= normColor.a
+	normColor.rgb *= normColor.a
 	return normColor
 }

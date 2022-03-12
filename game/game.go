@@ -112,14 +112,52 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
 	// Draw the food
-	draw(screen, g.food)
+	draw(screen, g.food, 0xF)
 
 	// Draw the snake
-	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
-		draw(screen, unit)
-		if debugUnits {
-			unit.markHeadCenter(screen)
+	// --------------
+	// Draw head
+	var roundCorners uint8
+	curUnit := g.snake.unitHead
+
+	if curUnit == g.snake.unitTail {
+		roundCorners = 0xF
+	} else {
+		switch curUnit.direction {
+		case directionUp:
+			roundCorners = 0x9
+		case directionDown:
+			roundCorners = 0x6
+		case directionLeft:
+			roundCorners = 0xC
+		case directionRight:
+			roundCorners = 0x3
 		}
+	}
+	draw(screen, curUnit, roundCorners)
+
+	curUnit = curUnit.next
+	if curUnit != nil {
+		// prevDirection := g.snake.unitHead.direction
+		for curUnit != g.snake.unitTail {
+			draw(screen, curUnit, 0x0)
+			curUnit = curUnit.next
+		}
+
+		// Draw the tail
+		if curUnit != g.snake.unitHead {
+			switch curUnit.direction {
+			case directionUp:
+				roundCorners = 0x6
+			case directionDown:
+				roundCorners = 0x9
+			case directionLeft:
+				roundCorners = 0x3
+			case directionRight:
+				roundCorners = 0xC
+			}
+		}
+		draw(screen, curUnit, roundCorners)
 	}
 
 	g.printDebugMsgs(screen)
@@ -176,7 +214,7 @@ func (g *Game) handleSettingsInputs() {
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		curShader++
-		if int(curShader) >= len(shaderList) {
+		if curShader >= shaderTotal {
 			curShader = 0
 		}
 	}
@@ -196,7 +234,7 @@ func (g *Game) checkFood() {
 		return
 	}
 
-	if collides(g.snake.unitHead, g.food, toleranceDefault) {
+	if collides(g.snake.unitHead, g.food, toleranceFood) {
 		g.snake.grow()
 		g.food = newFoodRandLoc()
 		return

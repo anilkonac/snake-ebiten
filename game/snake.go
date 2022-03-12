@@ -29,6 +29,7 @@ type snakeLengthT uint16
 
 const (
 	toleranceDefault    = snakeWidth / 16.0
+	toleranceFood       = snakeWidth / 8.0
 	toleranceScreenEdge = halfSnakeWidth
 )
 

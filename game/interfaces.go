@@ -37,17 +37,17 @@ type drawable interface {
 	slicer
 	drawEnabled() bool
 	Color() color.Color
-	TotalDimension() (width, height float64)
+	totalDimension() (width, height float64)
 }
 
-func draw(dst *ebiten.Image, src drawable) {
+func draw(dst *ebiten.Image, src drawable, shadedCorners uint8) {
 	if !src.drawEnabled() {
 		return
 	}
 
 	for _, rect := range src.slice() {
-		totWidth, totHeight := src.TotalDimension()
-		rect.draw(dst, src.Color(), totWidth, totHeight)
+		totWidth, totHeight := src.totalDimension()
+		rect.draw(dst, src.Color(), totWidth, totHeight, shadedCorners)
 	}
 }
 

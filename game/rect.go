@@ -22,27 +22,9 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/anilkonac/snake-ebiten/game/shaders"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
-
-var shaderList []*ebiten.Shader
-var curShader uint8 = 2
-
-func init() {
-	newShader(shaders.Basic)
-	newShader(shaders.Hollow)
-	newShader(shaders.Round)
-}
-
-func newShader(src []byte) {
-	shader, err := ebiten.NewShader(src)
-	if err != nil {
-		panic(err)
-	}
-	shaderList = append(shaderList, shader)
-}
 
 // Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
 type rectF64 struct {
@@ -84,7 +66,7 @@ func (r rectF64) split(rects *[]rectF64) {
 	*rects = append(*rects, r)
 }
 
-func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalWidth, totalHeight float64) {
+func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalWidth, totalHeight float64, cornerStatus uint8) {
 	op := &ebiten.DrawRectShaderOptions{}
 	op.GeoM.Scale(r.width, r.height)
 	op.GeoM.Translate(r.x, r.y)
@@ -94,9 +76,13 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalWidth, totalHeigh
 		"RectSize":      []float32{float32(r.width), float32(r.height)},
 		"RectPosInUnit": []float32{float32(r.xInUnit), float32(r.yInUnit)},
 		"TotalSize":     []float32{float32(totalWidth), float32(totalHeight)},
-		"Thickness":     float32(5),
+		"ShadedCorners": []float32{float32((cornerStatus >> 3) % 2), float32((cornerStatus >> 2) % 2), float32((cornerStatus >> 1) % 2), float32(cornerStatus % 2)},
 	}
-	dst.DrawRectShader(1, 1, shaderList[curShader], op)
+	if curShader == shaderHollow {
+		op.Uniforms["Thickness"] = float32(5)
+	}
+
+	dst.DrawRectShader(1, 1, shaderMap[curShader], op)
 
 	if debugUnits {
 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)

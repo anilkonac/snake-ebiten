@@ -155,7 +155,7 @@ func (u *unit) Color() color.Color {
 	return u.color
 }
 
-func (u *unit) TotalDimension() (width, height float64) {
+func (u *unit) totalDimension() (width, height float64) {
 	if u.direction.isVertical() {
 		width = snakeWidth
 		height = u.length
@@ -165,3 +165,7 @@ func (u *unit) TotalDimension() (width, height float64) {
 	}
 	return
 }
+
+// func (u *unit) shader() shaderT {
+// 	return shaderRound
+// }
