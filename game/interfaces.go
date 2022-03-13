@@ -37,18 +37,25 @@ type drawable interface {
 	slicer
 	drawEnabled() bool
 	Color() color.Color
-	totalDimension() (width, height float64)
+	totalDimension() *[2]float64
 }
 
-func draw(dst *ebiten.Image, src drawable, shadedCorners uint8) {
+func draw(dst *ebiten.Image, src drawable, shadedCorners *[4]uint8) {
 	if !src.drawEnabled() {
 		return
 	}
 
 	for _, rect := range src.slice() {
-		totWidth, totHeight := src.totalDimension()
-		rect.draw(dst, src.Color(), totWidth, totHeight, shadedCorners)
+		rect.draw(dst, src.Color(), src.totalDimension(), shadedCorners)
 	}
+
+	if debugUnits {
+		switch v := src.(type) {
+		case *unit:
+			v.markHeadCenter(dst)
+		}
+	}
+
 }
 
 func collides(a, b collidable, tolerance float64) bool {

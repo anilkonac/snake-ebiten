@@ -43,8 +43,6 @@ const (
 	snakeSpeedFinal   = 275
 	snakeLength       = 240
 	snakeWidth        = 30
-	debugUnits        = false // Draw consecutive units with different colors and draw position info of rects.
-
 )
 
 const halfSnakeWidth = snakeWidth / 2.0
@@ -58,7 +56,11 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
-var printFPS bool = true
+var (
+	printFPS   = true
+	debugUnits = false // Draw consecutive units with different colors and draw position info of rects.
+
+)
 
 // Game implements ebiten.Game interface.
 type Game struct {
@@ -112,53 +114,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
 	// Draw the food
-	draw(screen, g.food, 0xF)
+	draw(screen, g.food, &[4]uint8{1, 1, 1, 1})
 
 	// Draw the snake
-	// --------------
-	// Draw head
-	var roundCorners uint8
-	curUnit := g.snake.unitHead
-
-	if curUnit == g.snake.unitTail {
-		roundCorners = 0xF
-	} else {
-		switch curUnit.direction {
-		case directionUp:
-			roundCorners = 0x9
-		case directionDown:
-			roundCorners = 0x6
-		case directionLeft:
-			roundCorners = 0xC
-		case directionRight:
-			roundCorners = 0x3
-		}
-	}
-	draw(screen, curUnit, roundCorners)
-
-	curUnit = curUnit.next
-	if curUnit != nil {
-		// prevDirection := g.snake.unitHead.direction
-		for curUnit != g.snake.unitTail {
-			draw(screen, curUnit, 0x0)
-			curUnit = curUnit.next
-		}
-
-		// Draw the tail
-		if curUnit != g.snake.unitHead {
-			switch curUnit.direction {
-			case directionUp:
-				roundCorners = 0x6
-			case directionDown:
-				roundCorners = 0x9
-			case directionLeft:
-				roundCorners = 0x3
-			case directionRight:
-				roundCorners = 0xC
-			}
-		}
-		draw(screen, curUnit, roundCorners)
-	}
+	g.snake.draw(screen)
 
 	g.printDebugMsgs(screen)
 }
@@ -206,6 +165,19 @@ func (g *Game) handleInput() {
 }
 
 func (g *Game) handleSettingsInputs() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyG) {
+		debugUnits = !debugUnits
+		var numUnit uint8
+		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+			color := &colorSnake1
+			if debugUnits && (numUnit%2 == 1) {
+				color = &colorSnake2
+			}
+			unit.color = color
+			numUnit++
+		}
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.paused = !g.paused
 	}

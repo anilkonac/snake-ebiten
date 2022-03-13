@@ -22,6 +22,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type directionT uint8
@@ -109,6 +111,102 @@ func (s *snake) update() {
 	s.updateTail(moveDistance)
 }
 
+func (s *snake) draw(screen *ebiten.Image) {
+	// Draw head
+	var roundCorners [4]uint8
+	curUnit := s.unitHead
+
+	if curUnit == s.unitTail {
+		roundCorners = [4]uint8{1, 1, 1, 1}
+	} else {
+		switch curUnit.direction {
+		case directionUp:
+			roundCorners[0] = 1
+			roundCorners[3] = 1
+		case directionDown:
+			roundCorners[1] = 1
+			roundCorners[2] = 1
+		case directionLeft:
+			roundCorners[0] = 1
+			roundCorners[1] = 1
+		case directionRight:
+			roundCorners[2] = 1
+			roundCorners[3] = 1
+		}
+	}
+	draw(screen, curUnit, &roundCorners)
+
+	// roundCorners = [4]uint8{} // reset
+	prevUnitDir := curUnit.direction
+	curUnit = curUnit.next
+	if curUnit != nil {
+		for curUnit != s.unitTail {
+			roundCorners = [4]uint8{} // reset
+			switch {
+			case prevUnitDir == directionUp && curUnit.direction == directionRight:
+				roundCorners[2] = 1
+			case prevUnitDir == directionLeft && curUnit.direction == directionUp:
+				roundCorners[3] = 1
+			case prevUnitDir == directionDown && curUnit.direction == directionLeft:
+				roundCorners[0] = 1
+			case prevUnitDir == directionRight && curUnit.direction == directionDown:
+				roundCorners[1] = 1
+			case prevUnitDir == directionDown && curUnit.direction == directionRight:
+				roundCorners[3] = 1
+			case prevUnitDir == directionLeft && curUnit.direction == directionDown:
+				roundCorners[2] = 1
+			case prevUnitDir == directionUp && curUnit.direction == directionLeft:
+				roundCorners[1] = 1
+			case prevUnitDir == directionRight && curUnit.direction == directionUp:
+				roundCorners[0] = 1
+			}
+			draw(screen, curUnit, &roundCorners)
+			prevUnitDir = curUnit.direction
+			curUnit = curUnit.next
+		}
+
+		roundCorners = [4]uint8{} // reset
+		// Draw the tail
+		if curUnit != s.unitHead {
+			switch curUnit.direction {
+			case directionUp:
+				roundCorners[1] = 1
+				roundCorners[2] = 1
+			case directionDown:
+				roundCorners[0] = 1
+				roundCorners[3] = 1
+			case directionLeft:
+				roundCorners[2] = 1
+				roundCorners[3] = 1
+			case directionRight:
+				roundCorners[0] = 1
+				roundCorners[1] = 1
+			}
+
+			switch {
+			case prevUnitDir == directionUp && curUnit.direction == directionRight:
+				roundCorners[2] = 1
+			case prevUnitDir == directionLeft && curUnit.direction == directionUp:
+				roundCorners[3] = 1
+			case prevUnitDir == directionDown && curUnit.direction == directionLeft:
+				roundCorners[0] = 1
+			case prevUnitDir == directionRight && curUnit.direction == directionDown:
+				roundCorners[1] = 2
+			case prevUnitDir == directionDown && curUnit.direction == directionRight:
+				roundCorners[3] = 1
+			case prevUnitDir == directionLeft && curUnit.direction == directionDown:
+				roundCorners[2] = 1
+			case prevUnitDir == directionUp && curUnit.direction == directionLeft:
+				roundCorners[1] = 1
+			case prevUnitDir == directionRight && curUnit.direction == directionUp:
+				roundCorners[0] = 1
+			}
+
+		}
+		draw(screen, curUnit, &roundCorners)
+	}
+}
+
 func (s *snake) updateHead(dist float64) {
 	// Increse head length
 	s.unitHead.length += dist
@@ -149,7 +247,10 @@ func (s *snake) updateTail(dist float64) {
 
 	// Rotate tail if its length is less than width of the snake
 	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
-		s.unitTail.direction = s.unitTail.prev.direction
+		// s.unitTail.direction = s.unitTail.prev.direction
+		s.unitTail.prev.length += s.unitTail.length
+		s.unitTail = s.unitTail.prev
+		s.unitTail.next = nil
 	}
 
 	// Destroy tail unit if its length is not positive

@@ -77,6 +77,6 @@ func (f food) Color() color.Color {
 	return colorFood
 }
 
-func (f food) totalDimension() (width, height float64) {
-	return foodLength, foodLength
+func (f food) totalDimension() *[2]float64 {
+	return &[2]float64{foodLength, foodLength}
 }

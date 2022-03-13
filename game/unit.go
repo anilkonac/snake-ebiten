@@ -155,15 +155,11 @@ func (u *unit) Color() color.Color {
 	return u.color
 }
 
-func (u *unit) totalDimension() (width, height float64) {
+func (u *unit) totalDimension() *[2]float64 {
 	if u.direction.isVertical() {
-		width = snakeWidth
-		height = u.length
-	} else {
-		width = u.length
-		height = snakeWidth
+		return &[2]float64{snakeWidth, u.length}
 	}
-	return
+	return &[2]float64{u.length, snakeWidth}
 }
 
 // func (u *unit) shader() shaderT {
