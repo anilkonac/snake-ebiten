@@ -45,17 +45,17 @@ func draw(dst *ebiten.Image, src drawable, shadedCorners *[4]uint8) {
 		return
 	}
 
-	for _, rect := range src.slice() {
-		rect.draw(dst, src.Color(), src.totalDimension(), shadedCorners)
-	}
-
-	if debugUnits {
-		switch v := src.(type) {
-		case *unit:
-			v.markHeadCenter(dst)
+	var isVertical uint8
+	switch v := src.(type) {
+	case *unit:
+		if v.direction.isVertical() {
+			isVertical = 1
 		}
 	}
 
+	for _, rect := range src.slice() {
+		rect.draw(dst, src.Color(), src.totalDimension(), shadedCorners, isVertical)
+	}
 }
 
 func collides(a, b collidable, tolerance float64) bool {
