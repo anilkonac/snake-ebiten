@@ -24,22 +24,22 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		distToCenter2 := distance(posInUnit, roundCenter2)
 
 		// Top Left Corner
-		if ShadedCorners[0] && (posInUnit.x < radius) &&
+		if (ShadedCorners[0] > 0) && (posInUnit.x < radius) &&
 			(posInUnit.y < radius) && (distToCenter1 > radius) {
 			normColor.a = 0
 		}
 		// Bottom Left Corner
-		if ShadedCorners[1] && (posInUnit.x < radius) &&
+		if (ShadedCorners[1] > 0) && (posInUnit.x < radius) &&
 			(posInUnit.y > (TotalSize.y - radius)) && (distToCenter2 > radius) {
 			normColor.a = 0
 		}
 		// Bottom Right Corner
-		if ShadedCorners[2] && (posInUnit.x > radius) &&
+		if (ShadedCorners[2] > 0) && (posInUnit.x > radius) &&
 			(posInUnit.y > (TotalSize.y - radius)) && (distToCenter2 > radius) {
 			normColor.a = 0
 		}
 		// Top Right Corner
-		if ShadedCorners[3] && (posInUnit.x > radius) &&
+		if (ShadedCorners[3] > 0) && (posInUnit.x > radius) &&
 			(posInUnit.y < radius) && (distToCenter1 > radius) {
 			normColor.a = 0
 		}
@@ -52,22 +52,22 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		distToCenter2 := distance(posInUnit, roundCenter2)
 
 		// Top Left Corner
-		if ShadedCorners[0] && (posInUnit.x < radius) &&
+		if (ShadedCorners[0] > 0) && (posInUnit.x < radius) &&
 			(posInUnit.y < radius) && (distToCenter1 > radius) {
 			normColor.a = 0
 		}
 		// Bottom Left Corner
-		if ShadedCorners[1] && (posInUnit.x < radius) &&
+		if (ShadedCorners[1] > 0) && (posInUnit.x < radius) &&
 			(posInUnit.y > radius) && (distToCenter1 > radius) {
 			normColor.a = 0
 		}
 		// Bottom Right Corner
-		if ShadedCorners[2] && (posInUnit.x > TotalSize.x-radius) &&
+		if (ShadedCorners[2] > 0) && (posInUnit.x > TotalSize.x-radius) &&
 			(posInUnit.y > radius) && (distToCenter2 > radius) {
 			normColor.a = 0
 		}
 		// Top Right Corner
-		if ShadedCorners[3] && (posInUnit.x > TotalSize.x-radius) &&
+		if (ShadedCorners[3] > 0) && (posInUnit.x > TotalSize.x-radius) &&
 			(posInUnit.y < radius) && (distToCenter2 > radius) {
 			normColor.a = 0
 		}
