@@ -1,6 +1,3 @@
-// Copyright (c) 2022 Anıl Konaç
-// This file is licensed under the MIT license.
-
 //go:build ignore
 
 package main
