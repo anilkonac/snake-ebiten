@@ -86,8 +86,8 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 func growUp(x, radius float) float {
 	// Linear interpolation between square function and semicircle function
 	heightMultip := clamp(TotalSize.y/radius, 0.0, 1.0)
-	square := heightMultip * (pow(x-radius, 2.0) / radius)
-	semicircle := radius - sqrt(radius*radius-(x-radius)*(x-radius))
+	square := squareGrowthReverse(x, radius, heightMultip)
+	semicircle := semicircleReverse(x, radius, heightMultip)
 
 	return heightMultip*semicircle + (1.0-heightMultip)*square
 }
@@ -95,8 +95,8 @@ func growUp(x, radius float) float {
 func growDown(x, radius float) float {
 	// Linear interpolation between square function and semicircle function
 	heightMultip := clamp(TotalSize.y/radius, 0.0, 1.0)
-	square := heightMultip * (0.5 - pow(x-radius, 2.0)/radius)
-	semicircle := TotalSize.y - heightMultip*radius + sqrt(pow(radius, 2.0)-pow(x-radius, 2.0))
+	square := squareGrowth(x, radius, heightMultip)
+	semicircle := TotalSize.y - radius + semicircle(x, radius, heightMultip)
 
 	return heightMultip*semicircle + (1.0-heightMultip)*square
 }
@@ -104,8 +104,8 @@ func growDown(x, radius float) float {
 func growLeft(y, radius float) float {
 	// Linear interpolation between square function and semicircle function
 	widthMultip := clamp(TotalSize.x/radius, 0.0, 1.0)
-	square := widthMultip * (pow(y-radius, 2.0) / radius)
-	semicircle := radius - sqrt(radius*radius-(y-radius)*(y-radius))
+	square := squareGrowthReverse(y, radius, widthMultip)
+	semicircle := semicircleReverse(y, radius, widthMultip)
 
 	return widthMultip*semicircle + (1.0-widthMultip)*square
 }
@@ -113,8 +113,24 @@ func growLeft(y, radius float) float {
 func growRight(y, radius float) float {
 	// Linear interpolation between square function and semicircle function
 	widthMultip := clamp(TotalSize.x/radius, 0.0, 1.0)
-	square := widthMultip * (0.5 - pow(y-radius, 2.0)/radius)
-	semicircle := TotalSize.x - widthMultip*radius + sqrt(pow(radius, 2.0)-pow(y-radius, 2.0))
+	square := squareGrowth(y, radius, widthMultip)
+	semicircle := TotalSize.x - radius + semicircle(y, radius, widthMultip)
 
 	return widthMultip*semicircle + (1.0-widthMultip)*square
+}
+
+func squareGrowth(x, radius, multiplier float) float {
+	return multiplier * (radius - pow(x-radius, 2.0)/radius)
+}
+
+func squareGrowthReverse(x, radius, multiplier float) float {
+	return multiplier * pow(x-radius, 2.0) / radius
+}
+
+func semicircle(x, radius, multiplier float) float {
+	return sqrt(pow(radius, 2.0) - pow(x-radius, 2.0))
+}
+
+func semicircleReverse(x, radius, multiplier float) float {
+	return radius - semicircle(x, radius, multiplier)
 }
