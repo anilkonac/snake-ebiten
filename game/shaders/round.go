@@ -84,45 +84,37 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 }
 
 func growUp(x, radius float) float {
-	// Linear interpolation between squared function and semicircle function
-	heightMultip := clamp(TotalSize.y/radius, 0, 1)
-	y0 := heightMultip * (pow(x-radius, 2) / radius)
-	x0 := 0.0
-	x1 := 1.0
-	y1 := radius - sqrt(radius*radius-(x-radius)*(x-radius))
+	// Linear interpolation between square function and semicircle function
+	heightMultip := clamp(TotalSize.y/radius, 0.0, 1.0)
+	square := heightMultip * (pow(x-radius, 2.0) / radius)
+	semicircle := radius - sqrt(radius*radius-(x-radius)*(x-radius))
 
-	return y0 + (heightMultip-x0)*(y1-y0)/(x1-x0)
+	return heightMultip*semicircle + (1.0-heightMultip)*square
 }
 
 func growDown(x, radius float) float {
-	// Linear interpolation between squared function and semicircle function
-	heightMultip := clamp(TotalSize.y/radius, 0, 1)
-	y0 := heightMultip * (0.5 - pow(x-radius, 2)/radius)
-	x0 := 0.0
-	x1 := 1.0
-	y1 := TotalSize.y - heightMultip*radius + sqrt(pow(radius, 2)-pow(x-radius, 2))
+	// Linear interpolation between square function and semicircle function
+	heightMultip := clamp(TotalSize.y/radius, 0.0, 1.0)
+	square := heightMultip * (0.5 - pow(x-radius, 2.0)/radius)
+	semicircle := TotalSize.y - heightMultip*radius + sqrt(pow(radius, 2.0)-pow(x-radius, 2.0))
 
-	return y0 + (heightMultip-x0)*(y1-y0)/(x1-x0)
+	return heightMultip*semicircle + (1.0-heightMultip)*square
 }
 
 func growLeft(y, radius float) float {
-	// Linear interpolation between squared function and semicircle function
-	widthMultip := clamp(TotalSize.x/radius, 0, 1)
-	y0 := widthMultip * (pow(y-radius, 2) / radius)
-	x0 := 0.0
-	x1 := 1.0
-	y1 := radius - sqrt(radius*radius-(y-radius)*(y-radius))
+	// Linear interpolation between square function and semicircle function
+	widthMultip := clamp(TotalSize.x/radius, 0.0, 1.0)
+	square := widthMultip * (pow(y-radius, 2.0) / radius)
+	semicircle := radius - sqrt(radius*radius-(y-radius)*(y-radius))
 
-	return y0 + (widthMultip-x0)*(y1-y0)/(x1-x0)
+	return widthMultip*semicircle + (1.0-widthMultip)*square
 }
 
 func growRight(y, radius float) float {
-	// Linear interpolation between squared function and semicircle function
-	witdthMultip := clamp(TotalSize.x/radius, 0, 1)
-	y0 := witdthMultip * (0.5 - pow(y-radius, 2)/radius)
-	x0 := 0.0
-	x1 := 1.0
-	y1 := TotalSize.x - witdthMultip*radius + sqrt(pow(radius, 2)-pow(y-radius, 2))
+	// Linear interpolation between square function and semicircle function
+	widthMultip := clamp(TotalSize.x/radius, 0.0, 1.0)
+	square := widthMultip * (0.5 - pow(y-radius, 2.0)/radius)
+	semicircle := TotalSize.x - widthMultip*radius + sqrt(pow(radius, 2.0)-pow(y-radius, 2.0))
 
-	return y0 + (witdthMultip-x0)*(y1-y0)/(x1-x0)
+	return widthMultip*semicircle + (1.0-widthMultip)*square
 }
