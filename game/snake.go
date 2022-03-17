@@ -205,6 +205,12 @@ func (s *snake) draw(screen *ebiten.Image) {
 		}
 		draw(screen, curUnit, &roundCorners)
 	}
+
+	if debugUnits {
+		for unit := s.unitTail; unit != nil; unit = unit.prev {
+			unit.markHeadCenter(screen)
+		}
+	}
 }
 
 func (s *snake) updateHead(dist float64) {

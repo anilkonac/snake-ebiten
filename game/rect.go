@@ -66,7 +66,7 @@ func (r rectF64) split(rects *[]rectF64) {
 	*rects = append(*rects, r)
 }
 
-func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalDimension *[2]float64, shadedCorners *[4]uint8) {
+func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalDimension *[2]float64, shadedCorners *[4]uint8, isVertical uint8) {
 	op := &ebiten.DrawRectShaderOptions{}
 	op.GeoM.Scale(r.width, r.height)
 	op.GeoM.Translate(r.x, r.y)
@@ -77,6 +77,7 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalDimension *[2]flo
 		"RectPosInUnit": []float32{float32(r.xInUnit), float32(r.yInUnit)},
 		"TotalSize":     []float32{float32(totalDimension[0]), float32(totalDimension[1])},
 		"ShadedCorners": []float32{float32(shadedCorners[0]), float32(shadedCorners[1]), float32(shadedCorners[2]), float32(shadedCorners[3])},
+		"IsVertical":    float32(isVertical),
 	}
 	if curShader == shaderHollow {
 		op.Uniforms["Thickness"] = float32(5)
