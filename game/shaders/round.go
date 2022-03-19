@@ -30,51 +30,92 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 
 	posInUnit := vec2(RectSize.x*texCoord.x, RectSize.y*texCoord.y) + RectPosInUnit
 	if IsVertical > 0 {
-		radius := TotalSize.x / 2
+		radius := TotalSize.x / 2.0
 
 		// Top Left Corner
-		if roundMult := ShadedCorners[0]; (roundMult > 0) && (posInUnit.x < radius) &&
-			(posInUnit.y < radius) && (posInUnit.y < growUp(posInUnit.x, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[0]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y < radius) { // In point is on top left corner
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.y < growUp(posInUnit.x, radius, multiplier) {
+				normColor.a = 0.0
+			}
 		}
 		// Bottom Left Corner
-		if roundMult := ShadedCorners[1]; (roundMult > 0) && (posInUnit.x < radius) &&
-			(posInUnit.y > (TotalSize.y - radius)) && (posInUnit.y > growDown(posInUnit.x, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[1]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y > (TotalSize.y - radius)) {
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.y > growDown(posInUnit.x, radius, multiplier) {
+				normColor.a = 0.0
+			}
 		}
 		// Bottom Right Corner
-		if roundMult := ShadedCorners[2]; (roundMult > 0) && (posInUnit.x > radius) &&
-			(posInUnit.y > (TotalSize.y - radius)) && (posInUnit.y > growDown(posInUnit.x, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[2]; (roundMult > 0) && (posInUnit.x > radius) && (posInUnit.y > (TotalSize.y - radius)) {
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.y > growDown(posInUnit.x, radius, multiplier) {
+				normColor.a = 0.0
+			}
 		}
 		// Top Right Corner
-		if roundMult := ShadedCorners[3]; (roundMult > 0) && (posInUnit.x > radius) &&
-			(posInUnit.y < radius) && (posInUnit.y < growUp(posInUnit.x, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[3]; (roundMult > 0) && (posInUnit.x > radius) && (posInUnit.y < radius) {
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.y < growUp(posInUnit.x, radius, multiplier) {
+				normColor.a = 0.0
+			}
+
 		}
 	} else {
 		// if TotalSize.x >= TotalSize.y {
-		radius := TotalSize.y / 2
+		radius := TotalSize.y / 2.0
 
 		// Top Left Corner
-		if roundMult := ShadedCorners[0]; (roundMult > 0) && (posInUnit.x < radius) &&
-			(posInUnit.y < radius) && (posInUnit.x < growLeft(posInUnit.y, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[0]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y < radius) {
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.x < growLeft(posInUnit.y, radius, multiplier) {
+				normColor.a = 0.0
+			}
 		}
 		// Bottom Left Corner
-		if roundMult := ShadedCorners[1]; (roundMult > 0) && (posInUnit.x < radius) &&
-			(posInUnit.y > radius) && (posInUnit.x < growLeft(posInUnit.y, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[1]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y > radius) {
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.x < growLeft(posInUnit.y, radius, multiplier) {
+				normColor.a = 0.0
+			}
 		}
 		// Bottom Right Corner
-		if roundMult := ShadedCorners[2]; (roundMult > 0) && (posInUnit.x > TotalSize.x-radius) &&
-			(posInUnit.y > radius) && (posInUnit.x > growRight(posInUnit.y, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[2]; (roundMult > 0) && (posInUnit.x > TotalSize.x-radius) && (posInUnit.y > radius) {
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.x > growRight(posInUnit.y, radius, multiplier) {
+				normColor.a = 0.0
+			}
 		}
 		// Top Right Corner
-		if roundMult := ShadedCorners[3]; (roundMult > 0) && (posInUnit.x > TotalSize.x-radius) &&
-			(posInUnit.y < radius) && (posInUnit.x > growRight(posInUnit.y, radius)) {
-			normColor.a -= roundMult
+		if roundMult := ShadedCorners[3]; (roundMult > 0) && (posInUnit.x > TotalSize.x-radius) && (posInUnit.y < radius) {
+			multiplier := 1.0
+			if (roundMult > 1.0) && (roundMult <= 2) {
+				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			}
+			if posInUnit.x > growRight(posInUnit.y, radius, multiplier) {
+				normColor.a = 0.0
+			}
 		}
 	}
 
@@ -82,62 +123,23 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	return normColor
 }
 
-func growUp(x, radius float) float {
-	// Interpolate between square function and semicircle function
-	heightMultip := clamp(TotalSize.y/radius, 0.0, 1.0)
-
-	square := squareGrowthReverse(x, radius, heightMultip)
-	semicircle := semicircleReverse(x, radius, heightMultip)
-
-	transition := pow(heightMultip, 5.0) // easeInQuint
-	return transition*semicircle + (1.0-transition)*square
+func growUp(x, radius, multiplier float) float {
+	return radius - sqrt(pow(radius*multiplier, 2.0)-pow(x-radius, 2.0))
 }
 
-func growDown(x, radius float) float {
-	// Interpolate between square function and semicircle function
-	heightMultip := clamp(TotalSize.y/radius, 0.0, 1.0)
-
-	square := TotalSize.y - heightMultip*radius + squareGrowth(x, radius, heightMultip)
-	semicircle := TotalSize.y - radius + semicircle(x, radius, heightMultip)
-
-	transition := pow(heightMultip, 5.0) // easeInQuint
-	return transition*semicircle + (1.0-transition)*square
+func growDown(x, radius, multiplier float) float {
+	return TotalSize.y - radius + sqrt(pow(radius*multiplier, 2.0)-pow(x-radius, 2.0))
 }
 
-func growLeft(y, radius float) float {
-	// Interpolate between square function and semicircle function
-	widthMultip := clamp(TotalSize.x/radius, 0.0, 1.0)
-
-	square := squareGrowthReverse(y, radius, widthMultip)
-	semicircle := semicircleReverse(y, radius, widthMultip)
-
-	transition := pow(widthMultip, 5.0) // easeInQuint
-	return transition*semicircle + (1.0-transition)*square
+func growLeft(y, radius, multiplier float) float {
+	return radius - sqrt(pow(radius*multiplier, 2.0)-pow(y-radius, 2.0))
 }
 
-func growRight(y, radius float) float {
-	// Interpolate between square function and semicircle function
-	widthMultip := clamp(TotalSize.x/radius, 0.0, 1.0)
-
-	square := TotalSize.x - widthMultip*radius + squareGrowth(y, radius, widthMultip)
-	semicircle := TotalSize.x - radius + semicircle(y, radius, widthMultip)
-
-	transition := pow(widthMultip, 5.0) // easeInQuint
-	return transition*semicircle + (1.0-transition)*square
+func growRight(y, radius, multiplier float) float {
+	return TotalSize.x - radius + sqrt(pow(radius*multiplier, 2.0)-pow(y-radius, 2.0))
 }
 
-func squareGrowth(x, radius, multiplier float) float {
-	return multiplier * (radius - pow(x-radius, 2.0)/radius)
-}
-
-func squareGrowthReverse(x, radius, multiplier float) float {
-	return multiplier * pow(x-radius, 2.0) / radius
-}
-
-func semicircle(x, radius, multiplier float) float {
-	return sqrt(pow(radius, 2.0) - pow(x-radius, 2.0))
-}
-
-func semicircleReverse(x, radius, multiplier float) float {
-	return radius - semicircle(x, radius, multiplier)
+// Taken from https://easings.net/#easeOutCirc
+func easeOutCirc(x float) float {
+	return sqrt(1.0 - pow(x-1.0, 2.0))
 }

@@ -113,11 +113,11 @@ func (s *snake) update() {
 
 func (s *snake) draw(screen *ebiten.Image) {
 	// Draw head
-	var roundCorners [4]uint8
+	var roundCorners [4]float32
 	curUnit := s.unitHead
 
 	if curUnit == s.unitTail {
-		roundCorners = [4]uint8{1, 1, 1, 1}
+		roundCorners = [4]float32{1, 1, 1, 1}
 	} else {
 		switch curUnit.direction {
 		case directionUp:
@@ -137,35 +137,60 @@ func (s *snake) draw(screen *ebiten.Image) {
 	draw(screen, curUnit, &roundCorners)
 
 	// roundCorners = [4]uint8{} // reset
+	headGrowth := float32(math.Min(s.unitHead.length*2.0/snakeWidth, 1.0))
 	prevUnitDir := curUnit.direction
 	curUnit = curUnit.next
 	if curUnit != nil {
 		for curUnit != s.unitTail {
-			roundCorners = [4]uint8{} // reset
+			roundCorners = [4]float32{} // reset
 			switch {
 			case prevUnitDir == directionUp && curUnit.direction == directionRight:
 				roundCorners[2] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[3] = 1 + headGrowth
+				}
 			case prevUnitDir == directionLeft && curUnit.direction == directionUp:
 				roundCorners[3] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[0] = 1 + headGrowth
+				}
 			case prevUnitDir == directionDown && curUnit.direction == directionLeft:
 				roundCorners[0] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[1] = 1 + headGrowth
+				}
 			case prevUnitDir == directionRight && curUnit.direction == directionDown:
 				roundCorners[1] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[2] = 1 + headGrowth
+				}
 			case prevUnitDir == directionDown && curUnit.direction == directionRight:
 				roundCorners[3] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[2] = 1 + headGrowth
+				}
 			case prevUnitDir == directionLeft && curUnit.direction == directionDown:
 				roundCorners[2] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[1] = 1 + headGrowth
+				}
 			case prevUnitDir == directionUp && curUnit.direction == directionLeft:
 				roundCorners[1] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[0] = 1 + headGrowth
+				}
 			case prevUnitDir == directionRight && curUnit.direction == directionUp:
 				roundCorners[0] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[3] = 1 + headGrowth
+				}
 			}
 			draw(screen, curUnit, &roundCorners)
 			prevUnitDir = curUnit.direction
 			curUnit = curUnit.next
 		}
 
-		roundCorners = [4]uint8{} // reset
+		roundCorners = [4]float32{} // reset
 		// Draw the tail
 		if curUnit != s.unitHead {
 			switch curUnit.direction {
@@ -186,20 +211,44 @@ func (s *snake) draw(screen *ebiten.Image) {
 			switch {
 			case prevUnitDir == directionUp && curUnit.direction == directionRight:
 				roundCorners[2] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[3] = 1 + headGrowth
+				}
 			case prevUnitDir == directionLeft && curUnit.direction == directionUp:
 				roundCorners[3] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[0] = 1 + headGrowth
+				}
 			case prevUnitDir == directionDown && curUnit.direction == directionLeft:
 				roundCorners[0] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[1] = 1 + headGrowth
+				}
 			case prevUnitDir == directionRight && curUnit.direction == directionDown:
-				roundCorners[1] = 2
+				roundCorners[1] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[2] = 1 + headGrowth
+				}
 			case prevUnitDir == directionDown && curUnit.direction == directionRight:
 				roundCorners[3] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[2] = 1 + headGrowth
+				}
 			case prevUnitDir == directionLeft && curUnit.direction == directionDown:
 				roundCorners[2] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[1] = 1 + headGrowth
+				}
 			case prevUnitDir == directionUp && curUnit.direction == directionLeft:
 				roundCorners[1] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[0] = 1 + headGrowth
+				}
 			case prevUnitDir == directionRight && curUnit.direction == directionUp:
 				roundCorners[0] = 1
+				if curUnit.prev == s.unitHead {
+					roundCorners[3] = 1 + headGrowth
+				}
 			}
 
 		}

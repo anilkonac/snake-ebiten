@@ -40,7 +40,7 @@ type drawable interface {
 	totalDimension() *[2]float64
 }
 
-func draw(dst *ebiten.Image, src drawable, shadedCorners *[4]uint8) {
+func draw(dst *ebiten.Image, src drawable, shadedCorners *[4]float32) {
 	if !src.drawEnabled() {
 		return
 	}

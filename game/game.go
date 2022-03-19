@@ -114,7 +114,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
 	// Draw the food
-	draw(screen, g.food, &[4]uint8{1, 1, 1, 1})
+	draw(screen, g.food, &[4]float32{1, 1, 1, 1})
 
 	// Draw the snake
 	g.snake.draw(screen)
