@@ -33,40 +33,48 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		radius := TotalSize.x / 2.0
 
 		// Top Left Corner
-		if roundMult := ShadedCorners[0]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y < radius) { // In point is on top left corner
+		if roundMult := ShadedCorners[0]; (roundMult != 0.0) && (posInUnit.x < radius) && (posInUnit.y < radius) { // In point is on top left corner
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.y < growUp(posInUnit.x, radius, multiplier) {
 				normColor.a = 0.0
 			}
 		}
 		// Bottom Left Corner
-		if roundMult := ShadedCorners[1]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y > (TotalSize.y - radius)) {
+		if roundMult := ShadedCorners[1]; (roundMult != 0.0) && (posInUnit.x < radius) && (posInUnit.y > (TotalSize.y - radius)) {
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.y > growDown(posInUnit.x, radius, multiplier) {
 				normColor.a = 0.0
 			}
 		}
 		// Bottom Right Corner
-		if roundMult := ShadedCorners[2]; (roundMult > 0) && (posInUnit.x > radius) && (posInUnit.y > (TotalSize.y - radius)) {
+		if roundMult := ShadedCorners[2]; (roundMult != 0.0) && (posInUnit.x > radius) && (posInUnit.y > (TotalSize.y - radius)) {
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.y > growDown(posInUnit.x, radius, multiplier) {
 				normColor.a = 0.0
 			}
 		}
 		// Top Right Corner
-		if roundMult := ShadedCorners[3]; (roundMult > 0) && (posInUnit.x > radius) && (posInUnit.y < radius) {
+		if roundMult := ShadedCorners[3]; (roundMult != 0.0) && (posInUnit.x > radius) && (posInUnit.y < radius) {
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.y < growUp(posInUnit.x, radius, multiplier) {
 				normColor.a = 0.0
@@ -78,40 +86,48 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		radius := TotalSize.y / 2.0
 
 		// Top Left Corner
-		if roundMult := ShadedCorners[0]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y < radius) {
+		if roundMult := ShadedCorners[0]; (roundMult != 0.0) && (posInUnit.x < radius) && (posInUnit.y < radius) {
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.x < growLeft(posInUnit.y, radius, multiplier) {
 				normColor.a = 0.0
 			}
 		}
 		// Bottom Left Corner
-		if roundMult := ShadedCorners[1]; (roundMult > 0) && (posInUnit.x < radius) && (posInUnit.y > radius) {
+		if roundMult := ShadedCorners[1]; (roundMult != 0.0) && (posInUnit.x < radius) && (posInUnit.y > radius) {
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.x < growLeft(posInUnit.y, radius, multiplier) {
 				normColor.a = 0.0
 			}
 		}
 		// Bottom Right Corner
-		if roundMult := ShadedCorners[2]; (roundMult > 0) && (posInUnit.x > TotalSize.x-radius) && (posInUnit.y > radius) {
+		if roundMult := ShadedCorners[2]; (roundMult != 0.0) && (posInUnit.x > TotalSize.x-radius) && (posInUnit.y > radius) {
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.x > growRight(posInUnit.y, radius, multiplier) {
 				normColor.a = 0.0
 			}
 		}
 		// Top Right Corner
-		if roundMult := ShadedCorners[3]; (roundMult > 0) && (posInUnit.x > TotalSize.x-radius) && (posInUnit.y < radius) {
+		if roundMult := ShadedCorners[3]; (roundMult != 0.0) && (posInUnit.x > TotalSize.x-radius) && (posInUnit.y < radius) {
 			multiplier := 1.0
 			if (roundMult > 1.0) && (roundMult <= 2) {
 				multiplier = 1.0 + (sqrt(2.0)-1.0)*easeOutCirc(roundMult-1.0)
+			} else if roundMult < 0 {
+				multiplier = sqrt(2) - (sqrt(2.0)-1.0)*easeInSine(-roundMult)
 			}
 			if posInUnit.x > growRight(posInUnit.y, radius, multiplier) {
 				normColor.a = 0.0
@@ -139,7 +155,12 @@ func growRight(y, radius, multiplier float) float {
 	return TotalSize.x - radius + sqrt(pow(radius*multiplier, 2.0)-pow(y-radius, 2.0))
 }
 
-// Taken from https://easings.net/#easeOutCirc
+// https://easings.net/#easeOutCirc
 func easeOutCirc(x float) float {
 	return sqrt(1.0 - pow(x-1.0, 2.0))
+}
+
+// https://easings.net/#easeInSine
+func easeInSine(x float) float {
+	return 1.0 - cos((x*3.14159)/2.0)
 }
