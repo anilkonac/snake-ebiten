@@ -438,7 +438,8 @@ func (s *snake) checkIntersection() bool {
 	}
 
 	tolerance := toleranceDefault
-	if len(curUnit.rects) > 1 { // If second unit is on an edge
+	if (len(curUnit.rects) > 1) ||
+		((s.unitTail.length <= halfSnakeWidth) && (len(s.unitTail.prev.rects) > 1)) { // If second unit is on an edge
 		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}
 
