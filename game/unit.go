@@ -20,6 +20,7 @@ package game
 
 import (
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -131,6 +132,89 @@ func (u *unit) markHeadCenter(dst *ebiten.Image) {
 	headCY := u.headCenterY
 	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
 	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
+}
+
+// Compute rounding of corners for body units
+func (u *unit) roundCornersBody(roundCorners *[4]float32, headUnit *unit) {
+	headGrowth := float32(math.Min(headUnit.length/halfSnakeWidth, 1.0))
+	roundMult := 1 - headGrowth
+	switch {
+	case u.prev.direction == directionUp && u.direction == directionRight:
+		roundCorners[2] = 1
+		if u.prev == headUnit {
+			roundCorners[3] = roundMult
+		}
+	case u.prev.direction == directionLeft && u.direction == directionUp:
+		roundCorners[3] = 1
+		if u.prev == headUnit {
+			roundCorners[0] = roundMult
+		}
+	case u.prev.direction == directionDown && u.direction == directionLeft:
+		roundCorners[0] = 1
+		if u.prev == headUnit {
+			roundCorners[1] = roundMult
+		}
+	case u.prev.direction == directionRight && u.direction == directionDown:
+		roundCorners[1] = 1
+		if u.prev == headUnit {
+			roundCorners[2] = roundMult
+		}
+	case u.prev.direction == directionDown && u.direction == directionRight:
+		roundCorners[3] = 1
+		if u.prev == headUnit {
+			roundCorners[2] = roundMult
+		}
+	case u.prev.direction == directionLeft && u.direction == directionDown:
+		roundCorners[2] = 1
+		if u.prev == headUnit {
+			roundCorners[1] = roundMult
+		}
+	case u.prev.direction == directionUp && u.direction == directionLeft:
+		roundCorners[1] = 1
+		if u.prev == headUnit {
+			roundCorners[0] = roundMult
+		}
+	case u.prev.direction == directionRight && u.direction == directionUp:
+		roundCorners[0] = 1
+		if u.prev == headUnit {
+			roundCorners[3] = roundMult
+		}
+	}
+	return
+}
+
+// Compute rounding of corners of the unit next to the tail
+func (u *unit) roundCornersPreTail(roundCorners *[4]float32, tailUnit *unit) {
+	// if next unit is tail and its length is less than half snake width
+	if (u.next == tailUnit) && (tailUnit.length < snakeWidth) {
+		tailShrink := float32(-1.0 + tailUnit.length/halfSnakeWidth)
+		switch {
+		case (u.direction == directionUp) && (tailUnit.direction == directionRight):
+			roundCorners[1] = tailShrink
+			roundCorners[2] = 1.0
+		case (u.direction == directionUp) && (tailUnit.direction == directionLeft):
+			roundCorners[1] = 1.0
+			roundCorners[2] = tailShrink
+		case (u.direction == directionDown) && (tailUnit.direction == directionLeft):
+			roundCorners[0] = 1.0
+			roundCorners[3] = tailShrink
+		case (u.direction == directionDown) && (tailUnit.direction == directionRight):
+			roundCorners[0] = tailShrink
+			roundCorners[3] = 1.0
+		case (u.direction == directionRight) && (tailUnit.direction == directionUp):
+			roundCorners[0] = 1.0
+			roundCorners[1] = tailShrink
+		case (u.direction == directionRight) && (tailUnit.direction == directionDown):
+			roundCorners[0] = tailShrink
+			roundCorners[1] = 1.0
+		case (u.direction == directionLeft) && (tailUnit.direction == directionUp):
+			roundCorners[2] = tailShrink
+			roundCorners[3] = 1.0
+		case (u.direction == directionLeft) && (tailUnit.direction == directionDown):
+			roundCorners[2] = 1.0
+			roundCorners[3] = tailShrink
+		}
+	}
 }
 
 // Implement slicer interface

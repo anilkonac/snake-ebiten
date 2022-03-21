@@ -37,9 +37,9 @@ var curShader = shaderRound
 
 func init() {
 	shaderMap = make(map[shaderT]*ebiten.Shader)
-	newShader(shaderBasic, shaders.Basic)
+	// newShader(shaderBasic, shaders.Basic)
 	newShader(shaderRound, shaders.Round)
-	newShader(shaderHollow, shaders.Hollow)
+	// newShader(shaderHollow, shaders.Hollow)
 }
 
 func newShader(shaderNum shaderT, src []byte) {

@@ -184,12 +184,6 @@ func (g *Game) handleSettingsInputs() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		printFPS = !printFPS
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		curShader++
-		if curShader >= shaderTotal {
-			curShader = 0
-		}
-	}
 }
 
 func (g *Game) checkFood() {
@@ -219,7 +213,7 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 			ScreenWidth-128, 0)
 	}
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
+	// ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
 	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d  Speed: %.3f", g.snake.foodEaten, g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d Remaining Growth: %.2f, Target Growth: %.2f", g.snake.foodEaten, g.snake.growthRemaining, g.snake.growthTarget), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
