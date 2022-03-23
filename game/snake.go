@@ -22,6 +22,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type directionT uint8
@@ -29,6 +31,7 @@ type snakeLengthT uint16
 
 const (
 	toleranceDefault    = snakeWidth / 16.0
+	toleranceFood       = snakeWidth / 8.0
 	toleranceScreenEdge = halfSnakeWidth
 )
 
@@ -146,9 +149,21 @@ func (s *snake) updateTail(dist float64) {
 	// Decrease tail length
 	s.unitTail.length -= decreaseAmount
 
-	// Rotate tail if its length is less than width of the snake
-	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
-		s.unitTail.direction = s.unitTail.prev.direction
+	// Hacks for shrinking the tail properly.
+	if (s.unitTail.prev != nil) && (s.unitTail.length > halfSnakeWidth) && (s.unitTail.length <= (snakeWidth + halfSnakeWidth)) {
+		s.unitTail.prev.length += snakeWidth
+		s.unitTail.prev.creteRects()
+		s.unitTail.length -= snakeWidth
+		switch s.unitTail.direction {
+		case directionUp:
+			s.unitTail.headCenterY += snakeWidth
+		case directionDown:
+			s.unitTail.headCenterY -= snakeWidth
+		case directionLeft:
+			s.unitTail.headCenterX += snakeWidth
+		case directionRight:
+			s.unitTail.headCenterX -= snakeWidth
+		}
 	}
 
 	// Destroy tail unit if its length is not positive
@@ -160,12 +175,98 @@ func (s *snake) updateTail(dist float64) {
 	s.unitTail.creteRects() // Update rectangles of this unit
 }
 
+func (s *snake) draw(screen *ebiten.Image) {
+	s.drawHead(screen)
+	s.drawBody(screen)
+	s.drawTail(screen)
+}
+
+func (s *snake) drawHead(screen *ebiten.Image) {
+	var roundCorners [4]float32
+	if s.unitHead == s.unitTail {
+		roundCorners = [4]float32{1, 1, 1, 1}
+	} else {
+		switch s.unitHead.direction {
+		case directionUp:
+			roundCorners[0] = 1
+			roundCorners[3] = 1
+		case directionDown:
+			roundCorners[1] = 1
+			roundCorners[2] = 1
+		case directionLeft:
+			roundCorners[0] = 1
+			roundCorners[1] = 1
+		case directionRight:
+			roundCorners[2] = 1
+			roundCorners[3] = 1
+		}
+
+		s.unitHead.roundCornersPreTail(&roundCorners, s.unitTail)
+	}
+
+	draw(screen, s.unitHead, &roundCorners)
+	if debugUnits {
+		s.unitHead.markHeadCenter(screen)
+	}
+}
+
+func (s *snake) drawBody(screen *ebiten.Image) {
+	curUnit := s.unitHead.next
+	if curUnit == nil {
+		return
+	}
+
+	for curUnit != s.unitTail {
+		roundCorners := [4]float32{}
+		curUnit.roundCornersBody(&roundCorners, s.unitHead)
+		curUnit.roundCornersPreTail(&roundCorners, s.unitTail)
+
+		draw(screen, curUnit, &roundCorners)
+		if debugUnits {
+			curUnit.markHeadCenter(screen)
+		}
+
+		curUnit = curUnit.next
+	}
+}
+
+func (s *snake) drawTail(screen *ebiten.Image) {
+	if s.unitTail == s.unitHead {
+		return
+	}
+
+	roundCorners := [4]float32{}
+	switch s.unitTail.direction {
+	case directionUp:
+		roundCorners[1] = 1
+		roundCorners[2] = 1
+	case directionDown:
+		roundCorners[0] = 1
+		roundCorners[3] = 1
+	case directionLeft:
+		roundCorners[2] = 1
+		roundCorners[3] = 1
+	case directionRight:
+		roundCorners[0] = 1
+		roundCorners[1] = 1
+	}
+
+	if s.unitTail.length > halfSnakeWidth {
+		s.unitTail.roundCornersBody(&roundCorners, s.unitHead)
+	}
+
+	draw(screen, s.unitTail, &roundCorners)
+	if debugUnits {
+		s.unitTail.markHeadCenter(screen)
+	}
+}
+
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	if !isFromQueue {
 		// Check if the new turn is dangerous (twice same turns rapidly).
 		if (s.turnPrev != nil) &&
 			(s.turnPrev.isTurningLeft == newTurn.isTurningLeft) &&
-			(s.distAfterTurn <= snakeWidth) {
+			(s.distAfterTurn+toleranceDefault <= snakeWidth) {
 			// New turn cannot be taken now, push it into the queue
 			s.turnQueue = append(s.turnQueue, newTurn)
 			return
@@ -205,7 +306,8 @@ func (s *snake) checkIntersection() bool {
 	}
 
 	tolerance := toleranceDefault
-	if len(curUnit.rects) > 1 { // If second unit is on an edge
+	if (len(curUnit.rects) > 1) ||
+		((s.unitTail.length <= halfSnakeWidth) && (len(s.unitTail.prev.rects) > 1)) { // If second unit is on an edge
 		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}
 
