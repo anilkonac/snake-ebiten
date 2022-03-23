@@ -111,6 +111,70 @@ func (s *snake) update() {
 	s.updateTail(moveDistance)
 }
 
+func (s *snake) updateHead(dist float64) {
+	// Increse head length
+	s.unitHead.length += dist
+
+	// Move head
+	switch s.unitHead.direction {
+	case directionRight:
+		s.unitHead.moveRight(dist)
+	case directionLeft:
+		s.unitHead.moveLeft(dist)
+	case directionUp:
+		s.unitHead.moveUp(dist)
+	case directionDown:
+		s.unitHead.moveDown(dist)
+	}
+
+	if s.unitHead != s.unitTail { // Avoid unnecessary updates
+		s.unitHead.creteRects() // Update rectangles of this unit
+	}
+
+	s.distAfterTurn += dist
+}
+
+func (s *snake) updateTail(dist float64) {
+	decreaseAmount := dist
+	if s.growthRemaining > 0 {
+		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
+		// f(x) = 0.75 + (x-0.5)^2 where  0 <= x <= 1
+		growthCompletion := 1 - s.growthRemaining/s.growthTarget
+		decreaseAmount *= (0.75 + (growthCompletion-0.5)*(growthCompletion-0.5))
+		s.growthRemaining -= decreaseAmount
+	} else {
+		s.growthTarget = s.growthRemaining
+	}
+
+	// Decrease tail length
+	s.unitTail.length -= decreaseAmount
+
+	// Hacks for shrinking the tail properly.
+	if (s.unitTail.prev != nil) && (s.unitTail.length > halfSnakeWidth) && (s.unitTail.length <= (snakeWidth + halfSnakeWidth)) {
+		s.unitTail.prev.length += snakeWidth
+		s.unitTail.prev.creteRects()
+		s.unitTail.length -= snakeWidth
+		switch s.unitTail.direction {
+		case directionUp:
+			s.unitTail.headCenterY += snakeWidth
+		case directionDown:
+			s.unitTail.headCenterY -= snakeWidth
+		case directionLeft:
+			s.unitTail.headCenterX += snakeWidth
+		case directionRight:
+			s.unitTail.headCenterX -= snakeWidth
+		}
+	}
+
+	// Destroy tail unit if its length is not positive
+	if s.unitTail.length <= 0 {
+		s.unitTail = s.unitTail.prev
+		s.unitTail.next = nil
+	}
+
+	s.unitTail.creteRects() // Update rectangles of this unit
+}
+
 func (s *snake) draw(screen *ebiten.Image) {
 	s.drawHead(screen)
 	s.drawBody(screen)
@@ -197,78 +261,12 @@ func (s *snake) drawTail(screen *ebiten.Image) {
 	}
 }
 
-func (s *snake) updateHead(dist float64) {
-	// Increse head length
-	s.unitHead.length += dist
-
-	// Move head
-	switch s.unitHead.direction {
-	case directionRight:
-		s.unitHead.moveRight(dist)
-	case directionLeft:
-		s.unitHead.moveLeft(dist)
-	case directionUp:
-		s.unitHead.moveUp(dist)
-	case directionDown:
-		s.unitHead.moveDown(dist)
-	}
-
-	if s.unitHead != s.unitTail { // Avoid unnecessary updates
-		s.unitHead.creteRects() // Update rectangles of this unit
-	}
-
-	s.distAfterTurn += dist
-}
-
-func (s *snake) updateTail(dist float64) {
-	decreaseAmount := dist
-	if s.growthRemaining > 0 {
-		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
-		// f(x) = 0.75 + (x-0.5)^2 where  0 <= x <= 1
-		growthCompletion := 1 - s.growthRemaining/s.growthTarget
-		decreaseAmount *= (0.75 + (growthCompletion-0.5)*(growthCompletion-0.5))
-		s.growthRemaining -= decreaseAmount
-	} else {
-		s.growthTarget = s.growthRemaining
-	}
-
-	// Decrease tail length
-	s.unitTail.length -= decreaseAmount
-
-	// Rotate tail if its length is less than width of the snake
-	if (s.unitTail.prev != nil) && (s.unitTail.length > halfSnakeWidth) && (s.unitTail.length <= (snakeWidth + halfSnakeWidth)) {
-		// s.unitTail.direction = s.unitTail.prev.direction
-		// s.unitTail.prev.length += s.unitTail.length
-		s.unitTail.prev.length += snakeWidth
-		s.unitTail.prev.creteRects()
-		s.unitTail.length -= snakeWidth
-		switch s.unitTail.direction {
-		case directionUp:
-			s.unitTail.headCenterY += snakeWidth
-		case directionDown:
-			s.unitTail.headCenterY -= snakeWidth
-		case directionLeft:
-			s.unitTail.headCenterX += snakeWidth
-		case directionRight:
-			s.unitTail.headCenterX -= snakeWidth
-		}
-	}
-
-	// Destroy tail unit if its length is not positive
-	if s.unitTail.length <= 0 {
-		s.unitTail = s.unitTail.prev
-		s.unitTail.next = nil
-	}
-
-	s.unitTail.creteRects() // Update rectangles of this unit
-}
-
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	if !isFromQueue {
 		// Check if the new turn is dangerous (twice same turns rapidly).
 		if (s.turnPrev != nil) &&
 			(s.turnPrev.isTurningLeft == newTurn.isTurningLeft) &&
-			(s.distAfterTurn <= snakeWidth) {
+			(s.distAfterTurn+toleranceDefault <= snakeWidth) {
 			// New turn cannot be taken now, push it into the queue
 			s.turnQueue = append(s.turnQueue, newTurn)
 			return

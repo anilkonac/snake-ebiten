@@ -79,9 +79,9 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color, totalDimension *[2]flo
 		"ShadedCorners": []float32{float32(shadedCorners[0]), float32(shadedCorners[1]), float32(shadedCorners[2]), float32(shadedCorners[3])},
 		"IsVertical":    float32(isVertical),
 	}
-	if curShader == shaderHollow {
-		op.Uniforms["Thickness"] = float32(5)
-	}
+	// if curShader == shaderHollow {
+	// 	op.Uniforms["Thickness"] = float32(5)
+	// }
 
 	dst.DrawRectShader(1, 1, shaderMap[curShader], op)
 

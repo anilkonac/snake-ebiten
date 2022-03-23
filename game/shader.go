@@ -27,7 +27,7 @@ type shaderT uint8
 
 const (
 	shaderBasic shaderT = iota
-	shaderHollow
+	// shaderHollow
 	shaderRound
 	shaderTotal
 )
@@ -37,7 +37,7 @@ var curShader = shaderRound
 
 func init() {
 	shaderMap = make(map[shaderT]*ebiten.Shader)
-	// newShader(shaderBasic, shaders.Basic)
+	newShader(shaderBasic, shaders.Basic)
 	newShader(shaderRound, shaders.Round)
 	// newShader(shaderHollow, shaders.Hollow)
 }
