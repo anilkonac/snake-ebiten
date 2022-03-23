@@ -43,6 +43,8 @@ const (
 	snakeSpeedFinal   = 275
 	snakeLength       = 240
 	snakeWidth        = 30
+	debugUnits        = false // Draw consecutive units with different colors and draw position info of rects.
+
 )
 
 const halfSnakeWidth = snakeWidth / 2.0
@@ -56,11 +58,7 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
-var (
-	printFPS   = true
-	debugUnits = false // Draw consecutive units with different colors and draw position info of rects.
-
-)
+var printFPS bool = false
 
 // Game implements ebiten.Game interface.
 type Game struct {
@@ -114,10 +112,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
 	// Draw the food
-	draw(screen, g.food, &[4]float32{1, 1, 1, 1})
+	draw(screen, g.food)
 
 	// Draw the snake
-	g.snake.draw(screen)
+	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+		draw(screen, unit)
+		if debugUnits {
+			unit.markHeadCenter(screen)
+		}
+	}
 
 	g.printDebugMsgs(screen)
 }
@@ -165,31 +168,11 @@ func (g *Game) handleInput() {
 }
 
 func (g *Game) handleSettingsInputs() {
-	if inpututil.IsKeyJustPressed(ebiten.KeyG) {
-		debugUnits = !debugUnits
-		var numUnit uint8
-		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
-			color := &colorSnake1
-			if debugUnits && (numUnit%2 == 1) {
-				color = &colorSnake2
-			}
-			unit.color = color
-			numUnit++
-		}
-	}
-
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.paused = !g.paused
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		printFPS = !printFPS
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		curShader++
-		if curShader >= shaderTotal {
-			curShader = 0
-		}
 	}
 }
 
@@ -207,7 +190,7 @@ func (g *Game) checkFood() {
 		return
 	}
 
-	if collides(g.snake.unitHead, g.food, toleranceFood) {
+	if collides(g.snake.unitHead, g.food, toleranceDefault) {
 		g.snake.grow()
 		g.food = newFoodRandLoc()
 		return
@@ -217,10 +200,9 @@ func (g *Game) checkFood() {
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()),
-			ScreenWidth-128, 0)
+			ScreenWidth-130, 0)
 	}
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
 	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d  Speed: %.3f", g.snake.foodEaten, g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d Remaining Growth: %.2f, Target Growth: %.2f", g.snake.foodEaten, g.snake.growthRemaining, g.snake.growthTarget), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)

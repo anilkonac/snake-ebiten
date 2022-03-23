@@ -37,24 +37,15 @@ type drawable interface {
 	slicer
 	drawEnabled() bool
 	Color() color.Color
-	totalDimension() *[2]float64
 }
 
-func draw(dst *ebiten.Image, src drawable, shadedCorners *[4]float32) {
+func draw(dst *ebiten.Image, src drawable) {
 	if !src.drawEnabled() {
 		return
 	}
 
-	var isVertical uint8
-	switch v := src.(type) {
-	case *unit:
-		if v.direction.isVertical() {
-			isVertical = 1
-		}
-	}
-
 	for _, rect := range src.slice() {
-		rect.draw(dst, src.Color(), src.totalDimension(), shadedCorners, isVertical)
+		rect.draw(dst, src.Color())
 	}
 }
 
