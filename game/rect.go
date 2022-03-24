@@ -66,7 +66,46 @@ func (r rectF64) split(rects *[]rectF64) {
 }
 
 func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
-	ebitenutil.DrawRect(dst, r.x, r.y, r.width, r.height, clr)
+	vertices := []ebiten.Vertex{
+		{
+			DstX: float32(r.x),
+			DstY: float32(r.y),
+			SrcX: 0,
+			SrcY: 0,
+		},
+		{
+			DstX: float32(r.x + r.width),
+			DstY: float32(r.y),
+			SrcX: float32(r.width),
+			SrcY: 0,
+		},
+		{
+			DstX: float32(r.x),
+			DstY: float32(r.y + r.height),
+			SrcX: 0,
+			SrcY: float32(r.height),
+		},
+		{
+			DstX: float32(r.x + r.width),
+			DstY: float32(r.y + r.height),
+			SrcX: float32(r.width),
+			SrcY: float32(r.height),
+		},
+	}
+
+	indices := []uint16{
+		1, 0, 2,
+		2, 3, 1,
+	}
+	cr, cg, cb, ca := clr.RGBA()
+	op := &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Color": []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
+		},
+	}
+
+	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], op)
+
 	if debugUnits {
 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)
 		bottomX := r.x + r.width
