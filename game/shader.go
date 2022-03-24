@@ -29,11 +29,12 @@ const (
 	shaderBasic shaderT = iota
 	// shaderHollow
 	// shaderRound
-	shaderTotal
+	// shaderTotal
 )
 
 var shaderMap map[shaderT]*ebiten.Shader
-var curShader = shaderBasic
+
+// var curShader = shaderBasic
 
 func init() {
 	shaderMap = make(map[shaderT]*ebiten.Shader)

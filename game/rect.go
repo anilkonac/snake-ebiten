@@ -26,14 +26,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-// Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
-type rectF64 struct {
-	x, y          float64
-	width, height float64
+// Rectangle compatible with float32 type parameters of the ebiten.DrawTriangleShader function.
+type rectF32 struct {
+	x, y             float32
+	width, height    float32
+	xInUnit, yInUnit float32
 }
 
 // Divide rectangle up to 4 based on where it is off-screen.
-func (r rectF64) split(rects *[]rectF64) {
+func (r rectF32) split(rects *[]rectF32) {
 	if r.width <= 0 || r.height <= 0 {
 		return
 	}
@@ -42,22 +43,22 @@ func (r rectF64) split(rects *[]rectF64) {
 	bottomY := r.y + r.height
 
 	if r.x < 0 { // left part is off-screen
-		rectF64{r.x + ScreenWidth, r.y, -r.x, r.height}.split(rects) // teleported left part
-		rectF64{0, r.y, rightX, r.height}.split(rects)               // part in the screen
+		rectF32{r.x + ScreenWidth, r.y, -r.x, r.height, 0, 0}.split(rects) // teleported left part
+		rectF32{0, r.y, rightX, r.height, -r.x, 0}.split(rects)            // part in the screen
 		return
 	} else if rightX > ScreenWidth { // right part is off-screen
-		rectF64{0, r.y, rightX - ScreenWidth, r.height}.split(rects) // teleported right part
-		rectF64{r.x, r.y, ScreenWidth - r.x, r.height}.split(rects)  // part in the screen
+		rectF32{0, r.y, rightX - ScreenWidth, r.height, ScreenWidth - r.x, 0}.split(rects) // teleported right part
+		rectF32{r.x, r.y, ScreenWidth - r.x, r.height, 0, 0}.split(rects)                  // part in the screen
 		return
 	}
 
 	if r.y < 0 { // upper part is off-screen
-		rectF64{r.x, ScreenHeight + r.y, r.width, -r.y}.split(rects) // teleported upper part
-		rectF64{r.x, 0, r.width, bottomY}.split(rects)               // part in the screen
+		rectF32{r.x, ScreenHeight + r.y, r.width, -r.y, r.xInUnit, 0}.split(rects) // teleported upper part
+		rectF32{r.x, 0, r.width, bottomY, r.xInUnit, -r.y}.split(rects)            // part in the screen
 		return
 	} else if bottomY > ScreenHeight { // bottom part is off-screen
-		rectF64{r.x, 0, r.width, bottomY - ScreenHeight}.split(rects) // teleported bottom part
-		rectF64{r.x, r.y, r.width, ScreenHeight - r.y}.split(rects)   // part in the screen
+		rectF32{r.x, 0, r.width, bottomY - ScreenHeight, r.xInUnit, ScreenHeight - r.y}.split(rects) // teleported bottom part
+		rectF32{r.x, r.y, r.width, ScreenHeight - r.y, r.xInUnit, 0}.split(rects)                    // part in the screen
 		return
 	}
 
@@ -65,31 +66,49 @@ func (r rectF64) split(rects *[]rectF64) {
 	*rects = append(*rects, r)
 }
 
-func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
+func (r rectF32) draw(dst *ebiten.Image, clr color.Color) {
+	cr, cg, cb, ca := clr.RGBA()
+	fR, fG, fB, fA := float32(cr), float32(cg), float32(cb), float32(ca)
 	vertices := []ebiten.Vertex{
 		{
-			DstX: float32(r.x),
-			DstY: float32(r.y),
-			SrcX: 0,
-			SrcY: 0,
+			DstX:   r.x,
+			DstY:   r.y,
+			SrcX:   0,
+			SrcY:   0,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
 		},
 		{
-			DstX: float32(r.x + r.width),
-			DstY: float32(r.y),
-			SrcX: float32(r.width),
-			SrcY: 0,
+			DstX:   r.x + r.width,
+			DstY:   r.y,
+			SrcX:   r.width,
+			SrcY:   0,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
 		},
 		{
-			DstX: float32(r.x),
-			DstY: float32(r.y + r.height),
-			SrcX: 0,
-			SrcY: float32(r.height),
+			DstX:   r.x,
+			DstY:   r.y + r.height,
+			SrcX:   0,
+			SrcY:   r.height,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
 		},
 		{
-			DstX: float32(r.x + r.width),
-			DstY: float32(r.y + r.height),
-			SrcX: float32(r.width),
-			SrcY: float32(r.height),
+			DstX:   r.x + r.width,
+			DstY:   r.y + r.height,
+			SrcX:   r.width,
+			SrcY:   r.height,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
 		},
 	}
 
@@ -97,12 +116,7 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
 		1, 0, 2,
 		2, 3, 1,
 	}
-	cr, cg, cb, ca := clr.RGBA()
-	op := &ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"Color": []float32{float32(cr), float32(cg), float32(cb), float32(ca)},
-		},
-	}
+	op := &ebiten.DrawTrianglesShaderOptions{}
 
 	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], op)
 
@@ -114,7 +128,7 @@ func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
 	}
 }
 
-func intersects(rectA, rectB rectF64, tolerance float64) bool {
+func intersects(rectA, rectB rectF32, tolerance float32) bool {
 	aRightX := rectA.x + rectA.width
 	bRightX := rectB.x + rectB.width
 	aBottomY := rectA.y + rectA.height

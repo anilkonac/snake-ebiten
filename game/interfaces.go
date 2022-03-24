@@ -25,7 +25,7 @@ import (
 )
 
 type slicer interface {
-	slice() []rectF64
+	slice() []rectF32
 }
 
 type collidable interface {
@@ -49,7 +49,7 @@ func draw(dst *ebiten.Image, src drawable) {
 	}
 }
 
-func collides(a, b collidable, tolerance float64) bool {
+func collides(a, b collidable, tolerance float32) bool {
 	if !a.collEnabled() || !b.collEnabled() {
 		return false
 	}

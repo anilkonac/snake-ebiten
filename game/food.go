@@ -30,16 +30,16 @@ const (
 
 type food struct {
 	isActive bool
-	rects    []rectF64
+	rects    []rectF32
 }
 
-func newFood(centerX, centerY float64) *food {
+func newFood(centerX, centerY float32) *food {
 	newFood := &food{
-		rects: make([]rectF64, 0, 4),
+		rects: make([]rectF32, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
-	pureRect := rectF64{
+	pureRect := rectF32{
 		x:      centerX - halfFoodLength,
 		y:      centerY - halfFoodLength,
 		width:  foodLength,
@@ -52,12 +52,12 @@ func newFood(centerX, centerY float64) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight)))
+	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
 }
 
 // Implement slicer interface
 // --------------------------
-func (f food) slice() []rectF64 {
+func (f food) slice() []rectF32 {
 	return f.rects
 }
 

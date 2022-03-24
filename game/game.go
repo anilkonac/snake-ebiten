@@ -115,12 +115,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	draw(screen, g.food)
 
 	// Draw the snake
-	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
-		draw(screen, unit)
-		if debugUnits {
-			unit.markHeadCenter(screen)
-		}
-	}
+	g.snake.draw(screen)
 
 	g.printDebugMsgs(screen)
 }
