@@ -133,24 +133,12 @@ func (u *unit) markHeadCenter(dst *ebiten.Image) {
 	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
 }
 
-// Implement slicer interface
-// --------------------------
-func (u *unit) slice() []rectF32 {
-	return u.rects
-}
-
 // Implement collidable interface
 // ------------------------------
 func (u *unit) collEnabled() bool {
 	return true
 }
 
-// Implement drawable interface
-// ------------------------------
-func (u *unit) drawEnabled() bool {
-	return true
-}
-
-func (u *unit) Color() color.Color {
-	return u.color
+func (u *unit) Rects() []rectF32 {
+	return u.rects
 }

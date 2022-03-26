@@ -19,11 +19,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 // Rectangle compatible with float32 type parameters of the ebiten.DrawTriangleShader function.
@@ -66,69 +64,7 @@ func (r rectF32) split(rects *[]rectF32) {
 	*rects = append(*rects, r)
 }
 
-func (r rectF32) draw(dst *ebiten.Image, clr color.Color) {
-	cr, cg, cb, ca := clr.RGBA()
-	fR, fG, fB, fA := float32(cr), float32(cg), float32(cb), float32(ca)
-	vertices := []ebiten.Vertex{
-		{
-			DstX:   r.x,
-			DstY:   r.y,
-			SrcX:   0,
-			SrcY:   0,
-			ColorR: fR,
-			ColorG: fG,
-			ColorB: fB,
-			ColorA: fA,
-		},
-		{
-			DstX:   r.x + r.width,
-			DstY:   r.y,
-			SrcX:   r.width,
-			SrcY:   0,
-			ColorR: fR,
-			ColorG: fG,
-			ColorB: fB,
-			ColorA: fA,
-		},
-		{
-			DstX:   r.x,
-			DstY:   r.y + r.height,
-			SrcX:   0,
-			SrcY:   r.height,
-			ColorR: fR,
-			ColorG: fG,
-			ColorB: fB,
-			ColorA: fA,
-		},
-		{
-			DstX:   r.x + r.width,
-			DstY:   r.y + r.height,
-			SrcX:   r.width,
-			SrcY:   r.height,
-			ColorR: fR,
-			ColorG: fG,
-			ColorB: fB,
-			ColorA: fA,
-		},
-	}
-
-	indices := []uint16{
-		1, 0, 2,
-		2, 3, 1,
-	}
-	op := &ebiten.DrawTrianglesShaderOptions{}
-
-	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], op)
-
-	if debugUnits {
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)
-		bottomX := r.x + r.width
-		bottomY := r.y + r.height
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-	}
-}
-
-func intersects(rectA, rectB rectF32, tolerance float32) bool {
+func intersects(rectA, rectB *rectF32, tolerance float32) bool {
 	aRightX := rectA.x + rectA.width
 	bRightX := rectB.x + rectB.width
 	aBottomY := rectA.y + rectA.height

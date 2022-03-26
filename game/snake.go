@@ -292,3 +292,50 @@ func (s *snake) lastDirection() directionT {
 	// return current head direction
 	return s.unitHead.direction
 }
+
+// Implement drawable interface
+// ------------------------------
+func (s *snake) drawEnabled() bool {
+	return true
+}
+
+func (s *snake) triangles() (vertices []ebiten.Vertex, indices []uint16) {
+	// Inits
+	indices = make([]uint16, 0)
+	vertices = make([]ebiten.Vertex, 0)
+	var offset uint16
+
+	// Identify vertices
+	for unit := s.unitHead; unit != nil; unit = unit.next {
+		for iRect := range unit.rects {
+			rect := &unit.rects[iRect]
+
+			verticesRect := rect.vertices(unit.color)
+			indicesRect := []uint16{
+				offset + 1, offset, offset + 2,
+				offset + 2, offset + 3, offset + 1,
+			}
+
+			vertices = append(vertices, verticesRect...)
+			indices = append(indices, indicesRect...)
+
+			offset += 4
+		}
+	}
+	return
+}
+
+func (s *snake) drawDebugInfo(dst *ebiten.Image) {
+	for unit := s.unitHead; unit != nil; unit = unit.next {
+		for iRect := range unit.rects {
+			rect := &unit.rects[iRect]
+
+			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
+			bottomX := rect.x + rect.width
+			bottomY := rect.y + rect.height
+			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+		}
+
+		unit.markHeadCenter(dst)
+	}
+}
