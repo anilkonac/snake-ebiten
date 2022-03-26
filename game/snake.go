@@ -19,9 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type directionT uint8
@@ -48,14 +52,14 @@ func (d directionT) isVertical() bool {
 }
 
 type snake struct {
-	speed           float64
+	speed           float32
 	unitHead        *unit
 	unitTail        *unit
 	turnPrev        *turn
 	turnQueue       []*turn
-	distAfterTurn   float64
-	growthRemaining float64
-	growthTarget    float64
+	distAfterTurn   float32
+	growthRemaining float32
+	growthTarget    float32
 	foodEaten       uint8
 }
 
@@ -63,7 +67,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeLengthT) *snake {
+func newSnake(centerX, centerY float32, direction directionT, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -78,7 +82,7 @@ func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeL
 		panic("Initial snake intersects itself.")
 	}
 
-	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
+	initialUnit := newUnit(centerX, centerY, float32(snakeLength), direction, &colorSnake1)
 
 	snake := &snake{
 		speed:    snakeSpeedInitial,
@@ -89,13 +93,13 @@ func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeL
 	return snake
 }
 
-func newSnakeRandDir(centerX, centerY float64, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(centerX, centerY float32, snakeLength snakeLengthT) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
 	return newSnake(centerX, centerY, direction, snakeLength)
 }
 
 func (s *snake) update() {
-	moveDistance := float64(s.speed) * deltaTime
+	moveDistance := float32(s.speed) * deltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
 	if (len(s.turnQueue) > 0) && (s.distAfterTurn+toleranceDefault >= snakeWidth) {
@@ -108,7 +112,7 @@ func (s *snake) update() {
 	s.updateTail(moveDistance)
 }
 
-func (s *snake) updateHead(dist float64) {
+func (s *snake) updateHead(dist float32) {
 	// Increse head length
 	s.unitHead.length += dist
 
@@ -131,7 +135,7 @@ func (s *snake) updateHead(dist float64) {
 	s.distAfterTurn += dist
 }
 
-func (s *snake) updateTail(dist float64) {
+func (s *snake) updateTail(dist float32) {
 	decreaseAmount := dist
 	if s.growthRemaining > 0 {
 		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
@@ -165,7 +169,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 		// Check if the new turn is dangerous (twice same turns rapidly).
 		if (s.turnPrev != nil) &&
 			(s.turnPrev.isTurningLeft == newTurn.isTurningLeft) &&
-			(s.distAfterTurn <= snakeWidth) {
+			(s.distAfterTurn+toleranceDefault <= snakeWidth) {
 			// New turn cannot be taken now, push it into the queue
 			s.turnQueue = append(s.turnQueue, newTurn)
 			return
@@ -204,7 +208,7 @@ func (s *snake) checkIntersection() bool {
 		return false
 	}
 
-	tolerance := toleranceDefault
+	var tolerance float32 = toleranceDefault
 	if len(curUnit.rects) > 1 { // If second unit is on an edge
 		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}
@@ -221,14 +225,14 @@ func (s *snake) checkIntersection() bool {
 
 func (s *snake) grow() {
 	// Compute the total length of the snake.
-	var totalLength float64
+	var totalLength float32
 	for unit := s.unitHead; unit != nil; unit = unit.next {
 		totalLength += unit.length
 	}
 
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=20/(e^(0.0125x))
-	increasePercent := 20.0 / math.Exp(0.0125*float64(s.foodEaten))
+	increasePercent := float32(20.0 / math.Exp(0.0125*float64(s.foodEaten)))
 	curGrowth := totalLength * increasePercent / 100.0
 	s.growthRemaining += curGrowth
 	s.growthTarget += curGrowth
@@ -236,7 +240,7 @@ func (s *snake) grow() {
 
 	// Update snake speed
 	// f(x)=275+25/e^(0.010625x)
-	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.010625*float64(s.foodEaten))
+	s.speed = float32(snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.010625*float64(s.foodEaten)))
 }
 
 func (s *snake) lastDirection() directionT {
@@ -247,4 +251,51 @@ func (s *snake) lastDirection() directionT {
 
 	// return current head direction
 	return s.unitHead.direction
+}
+
+// Implement drawable interface
+// ------------------------------
+func (s *snake) drawEnabled() bool {
+	return true
+}
+
+func (s *snake) triangles() (vertices []ebiten.Vertex, indices []uint16) {
+	// Inits
+	indices = make([]uint16, 0)
+	vertices = make([]ebiten.Vertex, 0)
+	var offset uint16
+
+	// Identify vertices
+	for unit := s.unitHead; unit != nil; unit = unit.next {
+		for iRect := range unit.rects {
+			rect := &unit.rects[iRect]
+
+			verticesRect := rect.vertices(unit.color)
+			indicesRect := []uint16{
+				offset + 1, offset, offset + 2,
+				offset + 2, offset + 3, offset + 1,
+			}
+
+			vertices = append(vertices, verticesRect...)
+			indices = append(indices, indicesRect...)
+
+			offset += 4
+		}
+	}
+	return
+}
+
+func (s *snake) drawDebugInfo(dst *ebiten.Image) {
+	for unit := s.unitHead; unit != nil; unit = unit.next {
+		for iRect := range unit.rects {
+			rect := &unit.rects[iRect]
+
+			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
+			bottomX := rect.x + rect.width
+			bottomY := rect.y + rect.height
+			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+		}
+
+		unit.markHeadCenter(dst)
+	}
 }

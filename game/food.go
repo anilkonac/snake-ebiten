@@ -19,8 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"image/color"
+	"fmt"
 	"math/rand"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
@@ -30,16 +33,16 @@ const (
 
 type food struct {
 	isActive bool
-	rects    []rectF64
+	rects    []rectF32
 }
 
-func newFood(centerX, centerY float64) *food {
+func newFood(centerX, centerY float32) *food {
 	newFood := &food{
-		rects: make([]rectF64, 0, 4),
+		rects: make([]rectF32, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
-	pureRect := rectF64{
+	pureRect := rectF32{
 		x:      centerX - halfFoodLength,
 		y:      centerY - halfFoodLength,
 		width:  foodLength,
@@ -52,13 +55,7 @@ func newFood(centerX, centerY float64) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight)))
-}
-
-// Implement slicer interface
-// --------------------------
-func (f food) slice() []rectF64 {
-	return f.rects
+	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
 }
 
 // Implement collidable interface
@@ -67,12 +64,45 @@ func (f food) collEnabled() bool {
 	return true
 }
 
+func (f food) Rects() []rectF32 {
+	return f.rects
+}
+
 // Implement drawable interface
 // ------------------------------
 func (f food) drawEnabled() bool {
 	return f.isActive
 }
 
-func (f food) Color() color.Color {
-	return colorFood
+func (f food) triangles() (vertices []ebiten.Vertex, indices []uint16) {
+	vertices = make([]ebiten.Vertex, 0)
+	indices = make([]uint16, 0)
+	var offset uint16
+
+	for iRect := range f.rects {
+		rect := &f.rects[iRect]
+
+		verticesRect := rect.vertices(colorFood)
+		indicesRect := []uint16{
+			offset + 1, offset, offset + 2,
+			offset + 2, offset + 3, offset + 1,
+		}
+
+		vertices = append(vertices, verticesRect...)
+		indices = append(indices, indicesRect...)
+
+		offset += 4
+	}
+	return
+}
+
+func (f food) drawDebugInfo(dst *ebiten.Image) {
+	for iRect := range f.rects {
+		rect := &f.rects[iRect]
+
+		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
+		bottomX := rect.x + rect.width
+		bottomY := rect.y + rect.height
+		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+	}
 }

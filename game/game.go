@@ -43,8 +43,6 @@ const (
 	snakeSpeedFinal   = 275
 	snakeLength       = 240
 	snakeWidth        = 30
-	debugUnits        = false // Draw consecutive units with different colors and draw position info of rects.
-
 )
 
 const halfSnakeWidth = snakeWidth / 2.0
@@ -58,7 +56,10 @@ var (
 	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
 )
 
-var printFPS bool = false
+var (
+	printFPS   bool = true
+	debugUnits      = false // Draw consecutive units with different colors and draw position info of rects.
+)
 
 // Game implements ebiten.Game interface.
 type Game struct {
@@ -111,16 +112,8 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
-	// Draw the food
 	draw(screen, g.food)
-
-	// Draw the snake
-	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
-		draw(screen, unit)
-		if debugUnits {
-			unit.markHeadCenter(screen)
-		}
-	}
+	draw(screen, g.snake)
 
 	g.printDebugMsgs(screen)
 }
@@ -168,6 +161,19 @@ func (g *Game) handleInput() {
 }
 
 func (g *Game) handleSettingsInputs() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyG) {
+		debugUnits = !debugUnits
+		var numUnit uint8
+		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+			color := &colorSnake1
+			if debugUnits && (numUnit%2 == 1) {
+				color = &colorSnake2
+			}
+			unit.color = color
+			numUnit++
+		}
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.paused = !g.paused
 	}

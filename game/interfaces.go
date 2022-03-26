@@ -19,24 +19,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type slicer interface {
-	slice() []rectF64
-}
-
 type collidable interface {
-	slicer
 	collEnabled() bool
+	Rects() []rectF32
 }
 
 type drawable interface {
-	slicer
 	drawEnabled() bool
-	Color() color.Color
+	triangles() (vertices []ebiten.Vertex, indices []uint16)
+	drawDebugInfo(dst *ebiten.Image)
 }
 
 func draw(dst *ebiten.Image, src drawable) {
@@ -44,18 +38,26 @@ func draw(dst *ebiten.Image, src drawable) {
 		return
 	}
 
-	for _, rect := range src.slice() {
-		rect.draw(dst, src.Color())
+	vertices, indices := src.triangles()
+	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], new(ebiten.DrawTrianglesShaderOptions))
+
+	if debugUnits {
+		src.drawDebugInfo(dst)
 	}
 }
 
-func collides(a, b collidable, tolerance float64) bool {
+func collides(a, b collidable, tolerance float32) bool {
 	if !a.collEnabled() || !b.collEnabled() {
 		return false
 	}
 
-	for _, rectA := range a.slice() {
-		for _, rectB := range b.slice() {
+	rectsA := a.Rects()
+	rectsB := b.Rects()
+
+	for iRectA := range rectsA {
+		rectA := &rectsA[iRectA]
+		for iRectB := range b.Rects() {
+			rectB := &rectsB[iRectB]
 			if !intersects(rectA, rectB, tolerance) {
 				continue
 			}

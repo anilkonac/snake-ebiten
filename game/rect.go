@@ -19,21 +19,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-// Rectangle compatible with float64 type parameters of the ebitenutil.DrawRect function.
-type rectF64 struct {
-	x, y          float64
-	width, height float64
+// Rectangle compatible with float32 type parameters of the ebiten.DrawTriangleShader function.
+type rectF32 struct {
+	x, y             float32
+	width, height    float32
+	xInUnit, yInUnit float32
 }
 
 // Divide rectangle up to 4 based on where it is off-screen.
-func (r rectF64) split(rects *[]rectF64) {
+func (r rectF32) split(rects *[]rectF32) {
 	if r.width <= 0 || r.height <= 0 {
 		return
 	}
@@ -42,22 +41,22 @@ func (r rectF64) split(rects *[]rectF64) {
 	bottomY := r.y + r.height
 
 	if r.x < 0 { // left part is off-screen
-		rectF64{r.x + ScreenWidth, r.y, -r.x, r.height}.split(rects) // teleported left part
-		rectF64{0, r.y, rightX, r.height}.split(rects)               // part in the screen
+		rectF32{r.x + ScreenWidth, r.y, -r.x, r.height, 0, 0}.split(rects) // teleported left part
+		rectF32{0, r.y, rightX, r.height, -r.x, 0}.split(rects)            // part in the screen
 		return
 	} else if rightX > ScreenWidth { // right part is off-screen
-		rectF64{0, r.y, rightX - ScreenWidth, r.height}.split(rects) // teleported right part
-		rectF64{r.x, r.y, ScreenWidth - r.x, r.height}.split(rects)  // part in the screen
+		rectF32{0, r.y, rightX - ScreenWidth, r.height, ScreenWidth - r.x, 0}.split(rects) // teleported right part
+		rectF32{r.x, r.y, ScreenWidth - r.x, r.height, 0, 0}.split(rects)                  // part in the screen
 		return
 	}
 
 	if r.y < 0 { // upper part is off-screen
-		rectF64{r.x, ScreenHeight + r.y, r.width, -r.y}.split(rects) // teleported upper part
-		rectF64{r.x, 0, r.width, bottomY}.split(rects)               // part in the screen
+		rectF32{r.x, ScreenHeight + r.y, r.width, -r.y, r.xInUnit, 0}.split(rects) // teleported upper part
+		rectF32{r.x, 0, r.width, bottomY, r.xInUnit, -r.y}.split(rects)            // part in the screen
 		return
 	} else if bottomY > ScreenHeight { // bottom part is off-screen
-		rectF64{r.x, 0, r.width, bottomY - ScreenHeight}.split(rects) // teleported bottom part
-		rectF64{r.x, r.y, r.width, ScreenHeight - r.y}.split(rects)   // part in the screen
+		rectF32{r.x, 0, r.width, bottomY - ScreenHeight, r.xInUnit, ScreenHeight - r.y}.split(rects) // teleported bottom part
+		rectF32{r.x, r.y, r.width, ScreenHeight - r.y, r.xInUnit, 0}.split(rects)                    // part in the screen
 		return
 	}
 
@@ -65,17 +64,7 @@ func (r rectF64) split(rects *[]rectF64) {
 	*rects = append(*rects, r)
 }
 
-func (r rectF64) draw(dst *ebiten.Image, clr color.Color) {
-	ebitenutil.DrawRect(dst, r.x, r.y, r.width, r.height, clr)
-	if debugUnits {
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", r.x, r.y), int(r.x)-90, int(r.y)-15)
-		bottomX := r.x + r.width
-		bottomY := r.y + r.height
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-	}
-}
-
-func intersects(rectA, rectB rectF64, tolerance float64) bool {
+func intersects(rectA, rectB *rectF32, tolerance float32) bool {
 	aRightX := rectA.x + rectA.width
 	bRightX := rectB.x + rectB.width
 	aBottomY := rectA.y + rectA.height
@@ -98,4 +87,52 @@ func intersects(rectA, rectB rectF64, tolerance float64) bool {
 	}
 
 	return true
+}
+
+func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
+	uR, uG, uB, uA := color.RGBA()
+	fR, fG, fB, fA := float32(uR), float32(uG), float32(uB), float32(uA)
+	vertices := []ebiten.Vertex{
+		{ // Top Left corner
+			DstX:   r.x,
+			DstY:   r.y,
+			SrcX:   r.xInUnit,
+			SrcY:   r.yInUnit,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+		{ // Top Right Corner
+			DstX:   r.x + r.width,
+			DstY:   r.y,
+			SrcX:   r.xInUnit + r.width,
+			SrcY:   r.yInUnit,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+		{ // Bottom Left Corner
+			DstX:   r.x,
+			DstY:   r.y + r.height,
+			SrcX:   r.xInUnit,
+			SrcY:   r.yInUnit + r.height,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+		{ // Bottom Right Corner
+			DstX:   r.x + r.width,
+			DstY:   r.y + r.height,
+			SrcX:   r.xInUnit + r.width,
+			SrcY:   r.yInUnit + r.height,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+	}
+	return vertices
 }
