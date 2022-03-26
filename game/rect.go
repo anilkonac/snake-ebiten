@@ -93,7 +93,7 @@ func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 	uR, uG, uB, uA := color.RGBA()
 	fR, fG, fB, fA := float32(uR), float32(uG), float32(uB), float32(uA)
 	vertices := []ebiten.Vertex{
-		{
+		{ // Top Left corner
 			DstX:   r.x,
 			DstY:   r.y,
 			SrcX:   r.xInUnit,
@@ -103,7 +103,7 @@ func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 			ColorB: fB,
 			ColorA: fA,
 		},
-		{
+		{ // Top Right Corner
 			DstX:   r.x + r.width,
 			DstY:   r.y,
 			SrcX:   r.xInUnit + r.width,
@@ -113,7 +113,7 @@ func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 			ColorB: fB,
 			ColorA: fA,
 		},
-		{
+		{ // Bottom Left Corner
 			DstX:   r.x,
 			DstY:   r.y + r.height,
 			SrcX:   r.xInUnit,
@@ -123,7 +123,7 @@ func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 			ColorB: fB,
 			ColorA: fA,
 		},
-		{
+		{ // Bottom Right Corner
 			DstX:   r.x + r.width,
 			DstY:   r.y + r.height,
 			SrcX:   r.xInUnit + r.width,

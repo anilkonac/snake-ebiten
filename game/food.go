@@ -105,5 +105,4 @@ func (f food) drawDebugInfo(dst *ebiten.Image) {
 		bottomY := rect.y + rect.height
 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
 	}
-
 }

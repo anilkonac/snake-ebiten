@@ -164,46 +164,6 @@ func (s *snake) updateTail(dist float32) {
 	s.unitTail.creteRects() // Update rectangles of this unit
 }
 
-func (s *snake) draw(dst *ebiten.Image) {
-	// Inits
-	indices := make([]uint16, 0)
-	vertices := make([]ebiten.Vertex, 0)
-	var offset uint16
-
-	// Identify vertices
-	for unit := s.unitHead; unit != nil; unit = unit.next {
-		for iRect := range unit.rects {
-			rect := &unit.rects[iRect]
-
-			verticesRect := rect.vertices(unit.color)
-			indicesRect := []uint16{
-				offset + 1, offset, offset + 2,
-				offset + 2, offset + 3, offset + 1,
-			}
-
-			vertices = append(vertices, verticesRect...)
-			indices = append(indices, indicesRect...)
-
-			if debugUnits {
-				ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
-				bottomX := rect.x + rect.width
-				bottomY := rect.y + rect.height
-				ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-			}
-			offset += 4
-		}
-
-		if debugUnits {
-			unit.markHeadCenter(dst)
-		}
-	}
-
-	// Draw vertices
-	op := &ebiten.DrawTrianglesShaderOptions{}
-	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], op)
-
-}
-
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	if !isFromQueue {
 		// Check if the new turn is dangerous (twice same turns rapidly).

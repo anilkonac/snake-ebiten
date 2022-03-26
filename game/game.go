@@ -57,7 +57,7 @@ var (
 )
 
 var (
-	printFPS   bool = false
+	printFPS   bool = true
 	debugUnits      = false // Draw consecutive units with different colors and draw position info of rects.
 )
 
