@@ -152,3 +152,51 @@ func intersects(rectA, rectB rectF32, tolerance float32) bool {
 
 	return true
 }
+
+func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
+	uR, uG, uB, uA := color.RGBA()
+	fR, fG, fB, fA := float32(uR), float32(uG), float32(uB), float32(uA)
+	vertices := []ebiten.Vertex{
+		{
+			DstX:   r.x,
+			DstY:   r.y,
+			SrcX:   r.xInUnit,
+			SrcY:   r.yInUnit,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+		{
+			DstX:   r.x + r.width,
+			DstY:   r.y,
+			SrcX:   r.xInUnit + r.width,
+			SrcY:   r.yInUnit,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+		{
+			DstX:   r.x,
+			DstY:   r.y + r.height,
+			SrcX:   r.xInUnit,
+			SrcY:   r.yInUnit + r.height,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+		{
+			DstX:   r.x + r.width,
+			DstY:   r.y + r.height,
+			SrcX:   r.xInUnit + r.width,
+			SrcY:   r.yInUnit + r.height,
+			ColorR: fR,
+			ColorG: fG,
+			ColorB: fB,
+			ColorA: fA,
+		},
+	}
+	return vertices
+}

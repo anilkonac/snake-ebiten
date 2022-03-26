@@ -168,64 +168,14 @@ func (s *snake) draw(dst *ebiten.Image) {
 	// Inits
 	indices := make([]uint16, 0)
 	vertices := make([]ebiten.Vertex, 0)
-	op := &ebiten.DrawTrianglesShaderOptions{}
-	var uR, uG, uB, uA uint32
-	var fR, fG, fB, fA float32
-	var numPrevRects uint16
+	var offset uint16
 
 	// Identify vertices
 	for unit := s.unitHead; unit != nil; unit = unit.next {
-		if unit.prev != nil {
-			numPrevRects += uint16(len(unit.prev.rects))
-		}
-		uR, uG, uB, uA = unit.color.RGBA()
-		fR, fG, fB, fA = float32(uR), float32(uG), float32(uB), float32(uA)
-		for iRect := 0; iRect < len(unit.rects); iRect++ {
+		for iRect := range unit.rects {
 			rect := &unit.rects[iRect]
 
-			verticesRect := []ebiten.Vertex{
-				{
-					DstX:   rect.x,
-					DstY:   rect.y,
-					SrcX:   rect.xInUnit,
-					SrcY:   rect.yInUnit,
-					ColorR: fR,
-					ColorG: fG,
-					ColorB: fB,
-					ColorA: fA,
-				},
-				{
-					DstX:   rect.x + rect.width,
-					DstY:   rect.y,
-					SrcX:   rect.xInUnit + rect.width,
-					SrcY:   rect.yInUnit,
-					ColorR: fR,
-					ColorG: fG,
-					ColorB: fB,
-					ColorA: fA,
-				},
-				{
-					DstX:   rect.x,
-					DstY:   rect.y + rect.height,
-					SrcX:   rect.xInUnit,
-					SrcY:   rect.yInUnit + rect.height,
-					ColorR: fR,
-					ColorG: fG,
-					ColorB: fB,
-					ColorA: fA,
-				},
-				{
-					DstX:   rect.x + rect.width,
-					DstY:   rect.y + rect.height,
-					SrcX:   rect.xInUnit + rect.width,
-					SrcY:   rect.yInUnit + rect.height,
-					ColorR: fR,
-					ColorG: fG,
-					ColorB: fB,
-					ColorA: fA,
-				},
-			}
-			offset := numPrevRects*4 + uint16(iRect)*4
+			verticesRect := rect.vertices(unit.color)
 			indicesRect := []uint16{
 				offset + 1, offset, offset + 2,
 				offset + 2, offset + 3, offset + 1,
@@ -240,10 +190,16 @@ func (s *snake) draw(dst *ebiten.Image) {
 				bottomY := rect.y + rect.height
 				ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
 			}
+			offset += 4
+		}
+
+		if debugUnits {
+			unit.markHeadCenter(dst)
 		}
 	}
 
 	// Draw vertices
+	op := &ebiten.DrawTrianglesShaderOptions{}
 	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], op)
 
 }
