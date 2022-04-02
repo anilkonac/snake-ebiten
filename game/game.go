@@ -112,8 +112,8 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
-	draw(screen, g.food)
-	draw(screen, g.snake)
+	g.snake.draw(screen)
+	g.food.draw((screen))
 
 	g.printDebugMsgs(screen)
 }
@@ -179,6 +179,12 @@ func (g *Game) handleSettingsInputs() {
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		printFPS = !printFPS
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		curShader++
+		if curShader >= shaderTotal {
+			curShader = 0
+		}
 	}
 }
 

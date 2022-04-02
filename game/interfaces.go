@@ -18,33 +18,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package game
 
-import (
-	"github.com/hajimehoshi/ebiten/v2"
-)
-
 type collidable interface {
 	collEnabled() bool
 	Rects() []rectF32
 }
 
-type drawable interface {
-	drawEnabled() bool
-	triangles() (vertices []ebiten.Vertex, indices []uint16)
-	drawDebugInfo(dst *ebiten.Image)
-}
+// type drawable interface {
+// 	drawEnabled() bool
+// 	triangles() (vertices []ebiten.Vertex, indices []uint16)
+// 	drawDebugInfo(dst *ebiten.Image)
+// }
 
-func draw(dst *ebiten.Image, src drawable) {
-	if !src.drawEnabled() {
-		return
-	}
+// func draw(dst *ebiten.Image, src drawable) {
+// 	if !src.drawEnabled() {
+// 		return
+// 	}
 
-	vertices, indices := src.triangles()
-	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], new(ebiten.DrawTrianglesShaderOptions))
+// 	vertices, indices := src.triangles()
+// 	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], new(ebiten.DrawTrianglesShaderOptions))
 
-	if debugUnits {
-		src.drawDebugInfo(dst)
-	}
-}
+// 	if debugUnits {
+// 		src.drawDebugInfo(dst)
+// 	}
+// }
 
 func collides(a, b collidable, tolerance float32) bool {
 	if !a.collEnabled() || !b.collEnabled() {

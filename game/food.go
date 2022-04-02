@@ -19,16 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
-	foodLength     = snakeWidth / 2.0
-	halfFoodLength = halfSnakeWidth
+	foodLength     = 16
+	halfFoodLength = foodLength / 2.0
 )
 
 type food struct {
@@ -58,6 +56,22 @@ func newFoodRandLoc() *food {
 	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
 }
 
+func (f food) draw(dst *ebiten.Image) {
+	if !f.isActive {
+		return
+	}
+
+	vertices, indices := f.triangles()
+	op := &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius":     float32(halfFoodLength),
+			"IsVertical": float32(1.0),
+			"Dimension":  []float32{foodLength, foodLength},
+		},
+	}
+	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderRound], op)
+}
+
 // Implement collidable interface
 // ------------------------------
 func (f food) collEnabled() bool {
@@ -68,11 +82,11 @@ func (f food) Rects() []rectF32 {
 	return f.rects
 }
 
-// Implement drawable interface
-// ------------------------------
-func (f food) drawEnabled() bool {
-	return f.isActive
-}
+// // Implement drawable interface
+// // ------------------------------
+// func (f food) drawEnabled() bool {
+// 	return f.isActive
+// }
 
 func (f food) triangles() (vertices []ebiten.Vertex, indices []uint16) {
 	vertices = make([]ebiten.Vertex, 0)
@@ -96,13 +110,13 @@ func (f food) triangles() (vertices []ebiten.Vertex, indices []uint16) {
 	return
 }
 
-func (f food) drawDebugInfo(dst *ebiten.Image) {
-	for iRect := range f.rects {
-		rect := &f.rects[iRect]
+// func (f food) drawDebugInfo(dst *ebiten.Image) {
+// 	for iRect := range f.rects {
+// 		rect := &f.rects[iRect]
 
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
-		bottomX := rect.x + rect.width
-		bottomY := rect.y + rect.height
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-	}
-}
+// 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
+// 		bottomX := rect.x + rect.width
+// 		bottomY := rect.y + rect.height
+// 		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+// 	}
+// }

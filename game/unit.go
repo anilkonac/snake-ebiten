@@ -131,6 +131,72 @@ func (u *unit) markHeadCenter(dst *ebiten.Image) {
 	headCY := float64(u.headCenterY)
 	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
 	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
+
+	switch u.direction {
+	case directionUp:
+		headCY = float64(u.headCenterY+u.length) - snakeWidth
+	case directionDown:
+		headCY = float64(u.headCenterY-u.length) + snakeWidth
+	case directionRight:
+		headCX = float64(u.headCenterX-u.length) + snakeWidth
+	case directionLeft:
+		headCX = float64(u.headCenterX+u.length) - snakeWidth
+	}
+	// mark head center at the other side
+	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
+	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
+}
+
+func (u *unit) draw(dst *ebiten.Image) {
+	vertices, indices := u.triangles()
+
+	var isVertical float32 = 0.0
+	if u.direction.isVertical() {
+		isVertical = 1.0
+	}
+
+	op := &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius":     float32(halfSnakeWidth),
+			"IsVertical": isVertical,
+			"Dimension":  (*u.dimension())[:],
+		},
+	}
+	dst.DrawTrianglesShader(vertices, indices, shaderMap[curShader], op)
+
+	if debugUnits {
+		u.markHeadCenter(dst)
+	}
+}
+
+func (u *unit) triangles() (vertices []ebiten.Vertex, indices []uint16) {
+	vertices = make([]ebiten.Vertex, 0, 16)
+	indices = make([]uint16, 0, 24)
+	var offset uint16
+
+	for iRect := range u.rects {
+		rect := &u.rects[iRect]
+
+		verticesRect := rect.vertices(u.color)
+		indicesRect := []uint16{
+			offset + 1, offset, offset + 2,
+			offset + 2, offset + 3, offset + 1,
+		}
+
+		vertices = append(vertices, verticesRect...)
+		indices = append(indices, indicesRect...)
+
+		offset += 4
+	}
+
+	return
+}
+
+func (u *unit) dimension() *[2]float32 {
+	if u.direction.isVertical() {
+		return &[2]float32{snakeWidth, u.length}
+	}
+	return &[2]float32{u.length, snakeWidth}
 }
 
 // Implement collidable interface

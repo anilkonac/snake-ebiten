@@ -19,13 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type directionT uint8
@@ -150,18 +148,30 @@ func (s *snake) updateTail(dist float32) {
 	// Decrease tail length
 	s.unitTail.length -= decreaseAmount
 
-	// Rotate tail if its length is less than width of the snake
+	// Delete tail if its length is less than width of the snake
 	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
-		s.unitTail.direction = s.unitTail.prev.direction
-	}
-
-	// Destroy tail unit if its length is not positive
-	if s.unitTail.length <= 0 {
 		s.unitTail = s.unitTail.prev
+		s.unitTail.length += snakeWidth
 		s.unitTail.next = nil
 	}
 
 	s.unitTail.creteRects() // Update rectangles of this unit
+}
+
+func (s *snake) draw(dst *ebiten.Image) {
+	// Create units between head centers
+	var drawableUnits []*unit
+
+	for unit := s.unitHead; unit.next != nil; unit = unit.next {
+		newUnit := newUnit(unit.headCenterX, unit.headCenterY, unit.length+snakeWidth, unit.direction, unit.color)
+		drawableUnits = append(drawableUnits, newUnit)
+	}
+	drawableUnits = append(drawableUnits, s.unitTail)
+
+	// Draw these units
+	for iUnit := len(drawableUnits) - 1; iUnit >= 0; iUnit-- {
+		drawableUnits[iUnit].draw(dst)
+	}
 }
 
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
@@ -255,47 +265,47 @@ func (s *snake) lastDirection() directionT {
 
 // Implement drawable interface
 // ------------------------------
-func (s *snake) drawEnabled() bool {
-	return true
-}
+// func (s *snake) drawEnabled() bool {
+// 	return true
+// }
 
-func (s *snake) triangles() (vertices []ebiten.Vertex, indices []uint16) {
-	// Inits
-	indices = make([]uint16, 0)
-	vertices = make([]ebiten.Vertex, 0)
-	var offset uint16
+// func (s *snake) triangles() (vertices []ebiten.Vertex, indices []uint16) {
+// 	// Inits
+// 	indices = make([]uint16, 0)
+// 	vertices = make([]ebiten.Vertex, 0)
+// 	var offset uint16
 
-	// Identify vertices
-	for unit := s.unitHead; unit != nil; unit = unit.next {
-		for iRect := range unit.rects {
-			rect := &unit.rects[iRect]
+// 	// Identify vertices
+// 	for unit := s.unitHead; unit != nil; unit = unit.next {
+// 		for iRect := range unit.rects {
+// 			rect := &unit.rects[iRect]
 
-			verticesRect := rect.vertices(unit.color)
-			indicesRect := []uint16{
-				offset + 1, offset, offset + 2,
-				offset + 2, offset + 3, offset + 1,
-			}
+// 			verticesRect := rect.vertices(unit.color)
+// 			indicesRect := []uint16{
+// 				offset + 1, offset, offset + 2,
+// 				offset + 2, offset + 3, offset + 1,
+// 			}
 
-			vertices = append(vertices, verticesRect...)
-			indices = append(indices, indicesRect...)
+// 			vertices = append(vertices, verticesRect...)
+// 			indices = append(indices, indicesRect...)
 
-			offset += 4
-		}
-	}
-	return
-}
+// 			offset += 4
+// 		}
+// 	}
+// 	return
+// }
 
-func (s *snake) drawDebugInfo(dst *ebiten.Image) {
-	for unit := s.unitHead; unit != nil; unit = unit.next {
-		for iRect := range unit.rects {
-			rect := &unit.rects[iRect]
+// func (s *snake) drawDebugInfo(dst *ebiten.Image) {
+// 	for unit := s.unitHead; unit != nil; unit = unit.next {
+// 		for iRect := range unit.rects {
+// 			rect := &unit.rects[iRect]
 
-			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
-			bottomX := rect.x + rect.width
-			bottomY := rect.y + rect.height
-			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-		}
+// 			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
+// 			bottomX := rect.x + rect.width
+// 			bottomY := rect.y + rect.height
+// 			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+// 		}
 
-		unit.markHeadCenter(dst)
-	}
-}
+// 		unit.markHeadCenter(dst)
+// 	}
+// }
