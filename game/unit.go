@@ -22,7 +22,6 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type unit struct {
@@ -126,11 +125,10 @@ func (u *unit) moveLeft(dist float32) {
 	}
 }
 
-func (u *unit) markHeadCenter(dst *ebiten.Image) {
+func (u *unit) markHeadCenters(dst *ebiten.Image) {
 	headCX := float64(u.headCenterX)
 	headCY := float64(u.headCenterY)
-	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
-	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
+	markPoint(dst, headCX, headCY, colorFood)
 
 	switch u.direction {
 	case directionUp:
@@ -143,30 +141,23 @@ func (u *unit) markHeadCenter(dst *ebiten.Image) {
 		headCX = float64(u.headCenterX+u.length) - snakeWidth
 	}
 	// mark head center at the other side
-	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
-	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
+	markPoint(dst, headCX, headCY, colorFood)
 }
 
-func (u *unit) draw(dst *ebiten.Image) {
-	vertices, indices := u.triangles()
+// Implement collidable interface
+// ------------------------------
+func (u *unit) collEnabled() bool {
+	return true
+}
 
-	var isVertical float32 = 0.0
-	if u.direction.isVertical() {
-		isVertical = 1.0
-	}
+func (u *unit) Rects() []rectF32 {
+	return u.rects
+}
 
-	op := &ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"Radius":     float32(halfSnakeWidth),
-			"IsVertical": isVertical,
-			"Dimension":  (*u.dimension())[:],
-		},
-	}
-	dst.DrawTrianglesShader(vertices, indices, shaderMap[curShader], op)
-
-	if debugUnits {
-		u.markHeadCenter(dst)
-	}
+// Implement drawable interface
+// ----------------------------
+func (u *unit) drawEnabled() bool {
+	return true
 }
 
 func (u *unit) triangles() (vertices []ebiten.Vertex, indices []uint16) {
@@ -199,12 +190,6 @@ func (u *unit) dimension() *[2]float32 {
 	return &[2]float32{u.length, snakeWidth}
 }
 
-// Implement collidable interface
-// ------------------------------
-func (u *unit) collEnabled() bool {
-	return true
-}
-
-func (u *unit) Rects() []rectF32 {
-	return u.rects
+func (u *unit) drawDebugInfo(dst *ebiten.Image) {
+	u.markHeadCenters(dst)
 }

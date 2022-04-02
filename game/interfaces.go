@@ -18,29 +18,53 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package game
 
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
 type collidable interface {
 	collEnabled() bool
 	Rects() []rectF32
 }
 
-// type drawable interface {
-// 	drawEnabled() bool
-// 	triangles() (vertices []ebiten.Vertex, indices []uint16)
-// 	drawDebugInfo(dst *ebiten.Image)
-// }
+type drawable interface {
+	drawEnabled() bool
+	triangles() (vertices []ebiten.Vertex, indices []uint16)
+	dimension() *[2]float32
+	drawDebugInfo(dst *ebiten.Image)
+}
 
-// func draw(dst *ebiten.Image, src drawable) {
-// 	if !src.drawEnabled() {
-// 		return
-// 	}
+func draw(dst *ebiten.Image, src drawable) {
+	if !src.drawEnabled() {
+		return
+	}
 
-// 	vertices, indices := src.triangles()
-// 	dst.DrawTrianglesShader(vertices, indices, shaderMap[shaderBasic], new(ebiten.DrawTrianglesShaderOptions))
+	var radius float32
+	var isVertical float32
+	switch v := src.(type) {
+	case *unit:
+		radius = halfSnakeWidth
+		if v.direction.isVertical() {
+			isVertical = 1.0
+		}
+	case *food:
+		radius = halfFoodLength
+	}
 
-// 	if debugUnits {
-// 		src.drawDebugInfo(dst)
-// 	}
-// }
+	vertices, indices := src.triangles()
+	op := &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius":     radius,
+			"IsVertical": isVertical,
+			"Dimension":  (*src.dimension())[:],
+		},
+	}
+	dst.DrawTrianglesShader(vertices, indices, shaderMap[curShader], op)
+
+	if debugUnits {
+		src.drawDebugInfo(dst)
+	}
+}
 
 func collides(a, b collidable, tolerance float32) bool {
 	if !a.collEnabled() || !b.collEnabled() {

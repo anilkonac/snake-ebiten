@@ -13,7 +13,11 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	alpha := 0.0
 
 	headCenter1 := vec2(Radius, Radius)
-	if IsVertical > 0.0 {
+	if Dimension.x == Dimension.y {
+		if distance(texCoord, headCenter1) <= Radius {
+			alpha = normColor.a
+		}
+	} else if IsVertical > 0.0 {
 		headCenter2 := vec2(Radius, Dimension.y-Radius)
 
 		if (texCoord.y < headCenter1.y) && (distance(texCoord, headCenter1) <= Radius) {
