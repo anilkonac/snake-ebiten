@@ -72,10 +72,6 @@ func (f food) collEnabled() bool {
 	return true
 }
 
-func (f food) Rects() []rectF32 {
-	return f.rects
-}
-
 // Implement drawable interface
 // ------------------------------
 func (f food) drawEnabled() bool {
