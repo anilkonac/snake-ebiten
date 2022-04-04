@@ -19,13 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type directionT uint8
@@ -34,6 +32,7 @@ type snakeLengthT uint16
 const (
 	toleranceDefault    = snakeWidth / 16.0
 	toleranceScreenEdge = halfSnakeWidth
+	toleranceFood       = snakeWidth / 4.0
 )
 
 const (
@@ -52,14 +51,14 @@ func (d directionT) isVertical() bool {
 }
 
 type snake struct {
-	speed           float32
+	speed           float64
 	unitHead        *unit
 	unitTail        *unit
 	turnPrev        *turn
 	turnQueue       []*turn
-	distAfterTurn   float32
-	growthRemaining float32
-	growthTarget    float32
+	distAfterTurn   float64
+	growthRemaining float64
+	growthTarget    float64
 	foodEaten       uint8
 }
 
@@ -67,7 +66,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(centerX, centerY float32, direction directionT, snakeLength snakeLengthT) *snake {
+func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -82,7 +81,7 @@ func newSnake(centerX, centerY float32, direction directionT, snakeLength snakeL
 		panic("Initial snake intersects itself.")
 	}
 
-	initialUnit := newUnit(centerX, centerY, float32(snakeLength), direction, &colorSnake1)
+	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
 
 	snake := &snake{
 		speed:    snakeSpeedInitial,
@@ -93,13 +92,13 @@ func newSnake(centerX, centerY float32, direction directionT, snakeLength snakeL
 	return snake
 }
 
-func newSnakeRandDir(centerX, centerY float32, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(centerX, centerY float64, snakeLength snakeLengthT) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
 	return newSnake(centerX, centerY, direction, snakeLength)
 }
 
 func (s *snake) update() {
-	moveDistance := float32(s.speed) * deltaTime
+	moveDistance := s.speed * deltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
 	if (len(s.turnQueue) > 0) && (s.distAfterTurn+toleranceDefault >= snakeWidth) {
@@ -112,7 +111,7 @@ func (s *snake) update() {
 	s.updateTail(moveDistance)
 }
 
-func (s *snake) updateHead(dist float32) {
+func (s *snake) updateHead(dist float64) {
 	// Increse head length
 	s.unitHead.length += dist
 
@@ -135,7 +134,7 @@ func (s *snake) updateHead(dist float32) {
 	s.distAfterTurn += dist
 }
 
-func (s *snake) updateTail(dist float32) {
+func (s *snake) updateTail(dist float64) {
 	decreaseAmount := dist
 	if s.growthRemaining > 0 {
 		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
@@ -150,18 +149,30 @@ func (s *snake) updateTail(dist float32) {
 	// Decrease tail length
 	s.unitTail.length -= decreaseAmount
 
-	// Rotate tail if its length is less than width of the snake
+	// Delete tail if its length is less than width of the snake
 	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
-		s.unitTail.direction = s.unitTail.prev.direction
-	}
-
-	// Destroy tail unit if its length is not positive
-	if s.unitTail.length <= 0 {
 		s.unitTail = s.unitTail.prev
+		s.unitTail.length += snakeWidth
 		s.unitTail.next = nil
 	}
 
 	s.unitTail.creteRects() // Update rectangles of this unit
+}
+
+func (s *snake) draw(dst *ebiten.Image) {
+	// Create units between head centers
+	var drawableUnits []*unit
+
+	for unit := s.unitHead; unit.next != nil; unit = unit.next {
+		newUnit := newUnit(unit.headCenterX, unit.headCenterY, unit.length+snakeWidth, unit.direction, unit.color)
+		drawableUnits = append(drawableUnits, newUnit)
+	}
+	drawableUnits = append(drawableUnits, s.unitTail)
+
+	// Draw these units
+	for iUnit := len(drawableUnits) - 1; iUnit >= 0; iUnit-- {
+		draw(dst, drawableUnits[iUnit])
+	}
 }
 
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
@@ -225,14 +236,14 @@ func (s *snake) checkIntersection() bool {
 
 func (s *snake) grow() {
 	// Compute the total length of the snake.
-	var totalLength float32
+	var totalLength float64
 	for unit := s.unitHead; unit != nil; unit = unit.next {
 		totalLength += unit.length
 	}
 
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=20/(e^(0.0125x))
-	increasePercent := float32(20.0 / math.Exp(0.0125*float64(s.foodEaten)))
+	increasePercent := 20.0 / math.Exp(0.0125*float64(s.foodEaten))
 	curGrowth := totalLength * increasePercent / 100.0
 	s.growthRemaining += curGrowth
 	s.growthTarget += curGrowth
@@ -240,7 +251,7 @@ func (s *snake) grow() {
 
 	// Update snake speed
 	// f(x)=275+25/e^(0.010625x)
-	s.speed = float32(snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.010625*float64(s.foodEaten)))
+	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.010625*float64(s.foodEaten))
 }
 
 func (s *snake) lastDirection() directionT {
@@ -251,51 +262,4 @@ func (s *snake) lastDirection() directionT {
 
 	// return current head direction
 	return s.unitHead.direction
-}
-
-// Implement drawable interface
-// ------------------------------
-func (s *snake) drawEnabled() bool {
-	return true
-}
-
-func (s *snake) triangles() (vertices []ebiten.Vertex, indices []uint16) {
-	// Inits
-	indices = make([]uint16, 0)
-	vertices = make([]ebiten.Vertex, 0)
-	var offset uint16
-
-	// Identify vertices
-	for unit := s.unitHead; unit != nil; unit = unit.next {
-		for iRect := range unit.rects {
-			rect := &unit.rects[iRect]
-
-			verticesRect := rect.vertices(unit.color)
-			indicesRect := []uint16{
-				offset + 1, offset, offset + 2,
-				offset + 2, offset + 3, offset + 1,
-			}
-
-			vertices = append(vertices, verticesRect...)
-			indices = append(indices, indicesRect...)
-
-			offset += 4
-		}
-	}
-	return
-}
-
-func (s *snake) drawDebugInfo(dst *ebiten.Image) {
-	for unit := s.unitHead; unit != nil; unit = unit.next {
-		for iRect := range unit.rects {
-			rect := &unit.rects[iRect]
-
-			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
-			bottomX := rect.x + rect.width
-			bottomY := rect.y + rect.height
-			ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
-		}
-
-		unit.markHeadCenter(dst)
-	}
 }

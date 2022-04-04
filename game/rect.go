@@ -22,6 +22,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 // Rectangle compatible with float32 type parameters of the ebiten.DrawTriangleShader function.
@@ -135,4 +136,17 @@ func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 		},
 	}
 	return vertices
+}
+
+func (r rectF32) drawOuterRect(dst *ebiten.Image, clr color.Color) {
+	x64 := float64(r.x)
+	y64 := float64(r.y)
+	width64 := float64(r.width)
+	height64 := float64(r.height)
+	ebitenutil.DrawRect(dst, x64, y64, width64, height64, color.RGBA{255, 255, 255, 96})
+}
+
+func markPoint(dst *ebiten.Image, pX, pY float64, clr color.Color) {
+	ebitenutil.DrawLine(dst, pX-3, pY, pX+3, pY, clr)
+	ebitenutil.DrawLine(dst, pX, pY-3, pX, pY+3, clr)
 }

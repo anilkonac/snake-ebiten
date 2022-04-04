@@ -19,26 +19,28 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"fmt"
+	"image/color"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
-	foodLength     = snakeWidth / 2.0
-	halfFoodLength = halfSnakeWidth
+	foodLength     = 16
+	halfFoodLength = foodLength / 2.0
 )
 
 type food struct {
-	isActive bool
-	rects    []rectF32
+	isActive         bool
+	centerX, centerY float32 // for debugging purposes
+	rects            []rectF32
 }
 
 func newFood(centerX, centerY float32) *food {
 	newFood := &food{
-		rects: make([]rectF32, 0, 4),
+		centerX: centerX,
+		centerY: centerY,
+		rects:   make([]rectF32, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
@@ -58,6 +60,12 @@ func newFoodRandLoc() *food {
 	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
 }
 
+// Implement slicer interface
+// --------------------------
+func (f food) slice() []rectF32 {
+	return f.rects
+}
+
 // Implement collidable interface
 // ------------------------------
 func (f food) collEnabled() bool {
@@ -74,35 +82,20 @@ func (f food) drawEnabled() bool {
 	return f.isActive
 }
 
-func (f food) triangles() (vertices []ebiten.Vertex, indices []uint16) {
-	vertices = make([]ebiten.Vertex, 0)
-	indices = make([]uint16, 0)
-	var offset uint16
+func (f food) Color() color.Color {
+	return colorFood
+}
 
-	for iRect := range f.rects {
-		rect := &f.rects[iRect]
-
-		verticesRect := rect.vertices(colorFood)
-		indicesRect := []uint16{
-			offset + 1, offset, offset + 2,
-			offset + 2, offset + 3, offset + 1,
-		}
-
-		vertices = append(vertices, verticesRect...)
-		indices = append(indices, indicesRect...)
-
-		offset += 4
-	}
-	return
+func (f food) dimension() *[2]float32 {
+	return &[2]float32{foodLength, foodLength}
 }
 
 func (f food) drawDebugInfo(dst *ebiten.Image) {
+	cX := float64(f.centerX)
+	cY := float64(f.centerY)
+	markPoint(dst, cX, cY, colorSnake1)
 	for iRect := range f.rects {
-		rect := &f.rects[iRect]
-
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", rect.x, rect.y), int(rect.x)-90, int(rect.y)-15)
-		bottomX := rect.x + rect.width
-		bottomY := rect.y + rect.height
-		ebitenutil.DebugPrintAt(dst, fmt.Sprintf("%3.3f, %3.3f", bottomX, bottomY), int(bottomX), int(bottomY))
+		rect := f.rects[iRect]
+		rect.drawOuterRect(dst, colorSnake1)
 	}
 }

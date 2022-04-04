@@ -20,15 +20,15 @@ package game
 
 import (
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type unit struct {
-	headCenterX float32
-	headCenterY float32
-	length      float32
+	headCenterX float64
+	headCenterY float64
+	length      float64
 	direction   directionT
 	rects       []rectF32 // rectangles that are used for both collision checking and drawing
 	color       *color.RGBA
@@ -36,7 +36,7 @@ type unit struct {
 	prev        *unit
 }
 
-func newUnit(headCenterX, headCenterY, length float32, direction directionT, color *color.RGBA) *unit {
+func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
 	newUnit := &unit{
 		headCenterX: headCenterX,
 		headCenterY: headCenterY,
@@ -52,35 +52,37 @@ func newUnit(headCenterX, headCenterY, length float32, direction directionT, col
 func (u *unit) creteRects() {
 	// Create the rectangle to split.
 	var pureRect rectF32
-	lengthF32 := float32(u.length)
+	length32 := float32(math.Floor(u.length))
+	x32 := float32(math.Floor(u.headCenterX))
+	y32 := float32(math.Floor(u.headCenterY))
 	switch u.direction {
 	case directionRight:
 		pureRect = rectF32{
-			x:      u.headCenterX - lengthF32 + halfSnakeWidth,
-			y:      u.headCenterY - halfSnakeWidth,
-			width:  lengthF32,
+			x:      x32 - length32 + halfSnakeWidth,
+			y:      y32 - halfSnakeWidth,
+			width:  length32,
 			height: snakeWidth,
 		}
 	case directionLeft:
 		pureRect = rectF32{
-			x:      u.headCenterX - halfSnakeWidth,
-			y:      u.headCenterY - halfSnakeWidth,
-			width:  lengthF32,
+			x:      x32 - halfSnakeWidth,
+			y:      y32 - halfSnakeWidth,
+			width:  length32,
 			height: snakeWidth,
 		}
 	case directionUp:
 		pureRect = rectF32{
-			x:      u.headCenterX - halfSnakeWidth,
-			y:      u.headCenterY - halfSnakeWidth,
+			x:      x32 - halfSnakeWidth,
+			y:      y32 - halfSnakeWidth,
 			width:  snakeWidth,
-			height: lengthF32,
+			height: length32,
 		}
 	case directionDown:
 		pureRect = rectF32{
-			x:      u.headCenterX - halfSnakeWidth,
-			y:      u.headCenterY - lengthF32 + halfSnakeWidth,
+			x:      x32 - halfSnakeWidth,
+			y:      y32 - length32 + halfSnakeWidth,
 			width:  snakeWidth,
-			height: lengthF32,
+			height: length32,
 		}
 	default:
 		panic("Wrong unit direction!!")
@@ -90,7 +92,7 @@ func (u *unit) creteRects() {
 	pureRect.split(&u.rects)        // Create split rectangles on screen edges.
 }
 
-func (u *unit) moveUp(dist float32) {
+func (u *unit) moveUp(dist float64) {
 	u.headCenterY -= dist
 
 	// teleport if head center is offscreen.
@@ -99,7 +101,7 @@ func (u *unit) moveUp(dist float32) {
 	}
 }
 
-func (u *unit) moveDown(dist float32) {
+func (u *unit) moveDown(dist float64) {
 	u.headCenterY += dist
 
 	// teleport if head center is offscreen.
@@ -108,7 +110,7 @@ func (u *unit) moveDown(dist float32) {
 	}
 }
 
-func (u *unit) moveRight(dist float32) {
+func (u *unit) moveRight(dist float64) {
 	u.headCenterX += dist
 
 	// teleport if head center is offscreen.
@@ -117,7 +119,7 @@ func (u *unit) moveRight(dist float32) {
 	}
 }
 
-func (u *unit) moveLeft(dist float32) {
+func (u *unit) moveLeft(dist float64) {
 	u.headCenterX -= dist
 
 	// teleport if head center is offscreen.
@@ -126,11 +128,29 @@ func (u *unit) moveLeft(dist float32) {
 	}
 }
 
-func (u *unit) markHeadCenter(dst *ebiten.Image) {
+func (u *unit) markHeadCenters(dst *ebiten.Image) {
 	headCX := float64(u.headCenterX)
 	headCY := float64(u.headCenterY)
-	ebitenutil.DrawLine(dst, headCX-3, headCY, headCX+3, headCY, colorFood)
-	ebitenutil.DrawLine(dst, headCX, headCY-3, headCX, headCY+3, colorFood)
+	markPoint(dst, headCX, headCY, colorFood)
+
+	switch u.direction {
+	case directionUp:
+		headCY = float64(u.headCenterY+u.length) - snakeWidth
+	case directionDown:
+		headCY = float64(u.headCenterY-u.length) + snakeWidth
+	case directionRight:
+		headCX = float64(u.headCenterX-u.length) + snakeWidth
+	case directionLeft:
+		headCX = float64(u.headCenterX+u.length) - snakeWidth
+	}
+	// mark head center at the other side
+	markPoint(dst, headCX, headCY, colorFood)
+}
+
+// Implement slicer interface
+// --------------------------
+func (u *unit) slice() []rectF32 {
+	return u.rects
 }
 
 // Implement collidable interface
@@ -141,4 +161,30 @@ func (u *unit) collEnabled() bool {
 
 func (u *unit) Rects() []rectF32 {
 	return u.rects
+}
+
+// Implement drawable interface
+// ----------------------------
+func (u *unit) drawEnabled() bool {
+	return true
+}
+
+func (u *unit) Color() color.Color {
+	return u.color
+}
+
+func (u *unit) dimension() *[2]float32 {
+	flooredLength := float32(math.Floor(u.length))
+	if u.direction.isVertical() {
+		return &[2]float32{snakeWidth, flooredLength}
+	}
+	return &[2]float32{flooredLength, snakeWidth}
+}
+
+func (u *unit) drawDebugInfo(dst *ebiten.Image) {
+	u.markHeadCenters(dst)
+	for iRect := range u.rects {
+		rect := u.rects[iRect]
+		rect.drawOuterRect(dst, colorFood)
+	}
 }
