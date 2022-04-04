@@ -147,6 +147,12 @@ func (u *unit) markHeadCenters(dst *ebiten.Image) {
 	markPoint(dst, headCX, headCY, colorFood)
 }
 
+// Implement slicer interface
+// --------------------------
+func (u *unit) slice() []rect {
+	return u.rects
+}
+
 // Implement collidable interface
 // ------------------------------
 func (u *unit) collEnabled() bool {
@@ -163,27 +169,8 @@ func (u *unit) drawEnabled() bool {
 	return true
 }
 
-func (u *unit) triangles() (vertices []ebiten.Vertex, indices []uint16) {
-	vertices = make([]ebiten.Vertex, 0, 16)
-	indices = make([]uint16, 0, 24)
-	var offset uint16
-
-	for iRect := range u.rects {
-		rect := &u.rects[iRect]
-
-		verticesRect := rect.vertices(u.color)
-		indicesRect := []uint16{
-			offset + 1, offset, offset + 2,
-			offset + 2, offset + 3, offset + 1,
-		}
-
-		vertices = append(vertices, verticesRect...)
-		indices = append(indices, indicesRect...)
-
-		offset += 4
-	}
-
-	return
+func (u *unit) Color() color.Color {
+	return u.color
 }
 
 func (u *unit) dimension() *[2]float32 {

@@ -19,17 +19,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+type slicer interface {
+	slice() []rect
+}
+
 type collidable interface {
+	slicer
 	collEnabled() bool
-	Rects() []rect
 }
 
 type drawable interface {
+	slicer
 	drawEnabled() bool
-	triangles() (vertices []ebiten.Vertex, indices []uint16)
+	Color() color.Color
 	dimension() *[2]float32
 	drawDebugInfo(dst *ebiten.Image)
 }
@@ -51,7 +58,7 @@ func draw(dst *ebiten.Image, src drawable) {
 		radius = halfFoodLength
 	}
 
-	vertices, indices := src.triangles()
+	vertices, indices := triangles(src)
 	op := &ebiten.DrawTrianglesShaderOptions{
 		Uniforms: map[string]interface{}{
 			"Radius":     radius,
@@ -66,17 +73,41 @@ func draw(dst *ebiten.Image, src drawable) {
 	}
 }
 
+func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
+	vertices = make([]ebiten.Vertex, 0, 16)
+	indices = make([]uint16, 0, 24)
+	var offset uint16
+
+	rects := src.slice()
+	for iRect := range rects {
+		rect := &rects[iRect]
+
+		verticesRect := rect.vertices(src.Color())
+		indicesRect := []uint16{
+			offset + 1, offset, offset + 2,
+			offset + 2, offset + 3, offset + 1,
+		}
+
+		vertices = append(vertices, verticesRect...)
+		indices = append(indices, indicesRect...)
+
+		offset += 4
+	}
+
+	return
+}
+
 func collides(a, b collidable, tolerance int16) bool {
 	if !a.collEnabled() || !b.collEnabled() {
 		return false
 	}
 
-	rectsA := a.Rects()
-	rectsB := b.Rects()
+	rectsA := a.slice()
+	rectsB := b.slice()
 
 	for iRectA := range rectsA {
 		rectA := &rectsA[iRectA]
-		for iRectB := range b.Rects() {
+		for iRectB := range rectsB {
 			rectB := &rectsB[iRectB]
 			if !intersects(rectA, rectB, tolerance) {
 				continue

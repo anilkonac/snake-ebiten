@@ -7,7 +7,6 @@ import (
 
 func main() {
 	ebiten.SetWindowSize(g.ScreenWidth, g.ScreenHeight)
-	// ebiten.SetWindowSize(1280, 960)
 	ebiten.SetWindowTitle("Ssnake")
 	ebiten.RunGame(g.NewGame())
 }

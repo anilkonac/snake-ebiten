@@ -92,43 +92,45 @@ func intersects(rectA, rectB *rect, tolerance int16) bool {
 func (r rect) vertices(color color.Color) []ebiten.Vertex {
 	uR, uG, uB, uA := color.RGBA()
 	fR, fG, fB, fA := float32(uR), float32(uG), float32(uB), float32(uA)
-	// fX, fY := float32(r.x), float32(fY)
+	fX, fY := float32(r.x), float32(r.y)
+	fWidth, fHeight := float32(r.width), float32(r.height)
+	fXInUnit, fYInUnit := float32(r.xInUnit), float32(r.yInUnit)
 	vertices := []ebiten.Vertex{
 		{ // Top Left corner
-			DstX:   float32(r.x),
-			DstY:   float32(r.y),
-			SrcX:   float32(r.xInUnit),
-			SrcY:   float32(r.yInUnit),
+			DstX:   fX,
+			DstY:   fY,
+			SrcX:   fXInUnit,
+			SrcY:   fYInUnit,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
 			ColorA: fA,
 		},
 		{ // Top Right Corner
-			DstX:   float32(r.x + r.width),
-			DstY:   float32(r.y),
-			SrcX:   float32(r.xInUnit + r.width),
-			SrcY:   float32(r.yInUnit),
+			DstX:   fX + fWidth,
+			DstY:   fY,
+			SrcX:   fXInUnit + fWidth,
+			SrcY:   fYInUnit,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
 			ColorA: fA,
 		},
 		{ // Bottom Left Corner
-			DstX:   float32(r.x),
-			DstY:   float32(r.y + r.height),
-			SrcX:   float32(r.xInUnit),
-			SrcY:   float32(r.yInUnit + r.height),
+			DstX:   fX,
+			DstY:   fY + fHeight,
+			SrcX:   fXInUnit,
+			SrcY:   fYInUnit + fHeight,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
 			ColorA: fA,
 		},
 		{ // Bottom Right Corner
-			DstX:   float32(r.x + r.width),
-			DstY:   float32(r.y + r.height),
-			SrcX:   float32(r.xInUnit + r.width),
-			SrcY:   float32(r.yInUnit + r.height),
+			DstX:   fX + fWidth,
+			DstY:   fY + fHeight,
+			SrcX:   fXInUnit + fWidth,
+			SrcY:   fYInUnit + fHeight,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
@@ -141,12 +143,9 @@ func (r rect) vertices(color color.Color) []ebiten.Vertex {
 func (r rect) drawOuterRect(dst *ebiten.Image, clr color.Color) {
 	x64 := float64(r.x)
 	y64 := float64(r.y)
-	xRight64 := float64(r.x + r.width)
-	yBottom64 := float64(r.y + r.height)
-	ebitenutil.DrawLine(dst, x64, y64, xRight64, y64, clr)
-	ebitenutil.DrawLine(dst, x64, yBottom64, xRight64, yBottom64, clr)
-	ebitenutil.DrawLine(dst, x64+1, y64, x64+1, yBottom64, clr)
-	ebitenutil.DrawLine(dst, xRight64, y64, xRight64, yBottom64, clr)
+	width64 := float64(r.width)
+	height64 := float64(r.height)
+	ebitenutil.DrawRect(dst, x64, y64, width64, height64, color.RGBA{255, 255, 255, 96})
 }
 
 func markPoint(dst *ebiten.Image, pX, pY float64, clr color.Color) {

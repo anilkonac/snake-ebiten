@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
+	"image/color"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -59,6 +60,12 @@ func newFoodRandLoc() *food {
 	return newFood(int16(rand.Intn(ScreenWidth)), int16(rand.Intn(ScreenHeight)))
 }
 
+// Implement slicer interface
+// --------------------------
+func (f food) slice() []rect {
+	return f.rects
+}
+
 // Implement collidable interface
 // ------------------------------
 func (f food) collEnabled() bool {
@@ -75,26 +82,8 @@ func (f food) drawEnabled() bool {
 	return f.isActive
 }
 
-func (f food) triangles() (vertices []ebiten.Vertex, indices []uint16) {
-	vertices = make([]ebiten.Vertex, 0)
-	indices = make([]uint16, 0)
-	var offset uint16
-
-	for iRect := range f.rects {
-		rect := &f.rects[iRect]
-
-		verticesRect := rect.vertices(colorFood)
-		indicesRect := []uint16{
-			offset + 1, offset, offset + 2,
-			offset + 2, offset + 3, offset + 1,
-		}
-
-		vertices = append(vertices, verticesRect...)
-		indices = append(indices, indicesRect...)
-
-		offset += 4
-	}
-	return
+func (f food) Color() color.Color {
+	return colorFood
 }
 
 func (f food) dimension() *[2]float32 {
