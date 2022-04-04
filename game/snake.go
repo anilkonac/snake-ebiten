@@ -30,9 +30,9 @@ type directionT uint8
 type snakeLengthT uint16
 
 const (
-	toleranceDefault    = 2.0 //snakeWidth / 16.0
+	toleranceDefault    = snakeWidth / 16.0
 	toleranceScreenEdge = halfSnakeWidth
-	toleranceFood       = 7.0 //snakeWidth / 4.0
+	toleranceFood       = snakeWidth / 4.0
 )
 
 const (
@@ -219,7 +219,7 @@ func (s *snake) checkIntersection() bool {
 		return false
 	}
 
-	var tolerance int16 = toleranceDefault
+	var tolerance float32 = toleranceDefault
 	if len(curUnit.rects) > 1 { // If second unit is on an edge
 		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}

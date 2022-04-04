@@ -25,7 +25,7 @@ import (
 )
 
 type slicer interface {
-	slice() []rect
+	slice() []rectF32
 }
 
 type collidable interface {
@@ -97,7 +97,7 @@ func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
 	return
 }
 
-func collides(a, b collidable, tolerance int16) bool {
+func collides(a, b collidable, tolerance float32) bool {
 	if !a.collEnabled() || !b.collEnabled() {
 		return false
 	}

@@ -30,7 +30,7 @@ type unit struct {
 	headCenterY float64
 	length      float64
 	direction   directionT
-	rects       []rect // rectangles that are used for both collision checking and drawing
+	rects       []rectF32 // rectangles that are used for both collision checking and drawing
 	color       *color.RGBA
 	next        *unit
 	prev        *unit
@@ -51,45 +51,45 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 
 func (u *unit) creteRects() {
 	// Create the rectangle to split.
-	var pureRect rect
-	iLength := int16(u.length)
-	iCX := int16(u.headCenterX)
-	iCY := int16(u.headCenterY)
+	var pureRect rectF32
+	length32 := float32(math.Floor(u.length))
+	x32 := float32(math.Floor(u.headCenterX))
+	y32 := float32(math.Floor(u.headCenterY))
 	switch u.direction {
 	case directionRight:
-		pureRect = rect{
-			x:      iCX - iLength + halfSnakeWidth,
-			y:      iCY - halfSnakeWidth,
-			width:  iLength,
+		pureRect = rectF32{
+			x:      x32 - length32 + halfSnakeWidth,
+			y:      y32 - halfSnakeWidth,
+			width:  length32,
 			height: snakeWidth,
 		}
 	case directionLeft:
-		pureRect = rect{
-			x:      iCX - halfSnakeWidth,
-			y:      iCY - halfSnakeWidth,
-			width:  iLength,
+		pureRect = rectF32{
+			x:      x32 - halfSnakeWidth,
+			y:      y32 - halfSnakeWidth,
+			width:  length32,
 			height: snakeWidth,
 		}
 	case directionUp:
-		pureRect = rect{
-			x:      iCX - halfSnakeWidth,
-			y:      iCY - halfSnakeWidth,
+		pureRect = rectF32{
+			x:      x32 - halfSnakeWidth,
+			y:      y32 - halfSnakeWidth,
 			width:  snakeWidth,
-			height: iLength,
+			height: length32,
 		}
 	case directionDown:
-		pureRect = rect{
-			x:      iCX - halfSnakeWidth,
-			y:      iCY - iLength + halfSnakeWidth,
+		pureRect = rectF32{
+			x:      x32 - halfSnakeWidth,
+			y:      y32 - length32 + halfSnakeWidth,
 			width:  snakeWidth,
-			height: iLength,
+			height: length32,
 		}
 	default:
 		panic("Wrong unit direction!!")
 	}
 
-	u.rects = make([]rect, 0, 4) // Remove old rectangles
-	pureRect.split(&u.rects)     // Create split rectangles on screen edges.
+	u.rects = make([]rectF32, 0, 4) // Remove old rectangles
+	pureRect.split(&u.rects)        // Create split rectangles on screen edges.
 }
 
 func (u *unit) moveUp(dist float64) {
@@ -149,7 +149,7 @@ func (u *unit) markHeadCenters(dst *ebiten.Image) {
 
 // Implement slicer interface
 // --------------------------
-func (u *unit) slice() []rect {
+func (u *unit) slice() []rectF32 {
 	return u.rects
 }
 
@@ -159,7 +159,7 @@ func (u *unit) collEnabled() bool {
 	return true
 }
 
-func (u *unit) Rects() []rect {
+func (u *unit) Rects() []rectF32 {
 	return u.rects
 }
 

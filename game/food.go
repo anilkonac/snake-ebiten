@@ -32,19 +32,19 @@ const (
 
 type food struct {
 	isActive         bool
-	centerX, centerY int16 // for debugging purposes
-	rects            []rect
+	centerX, centerY float32 // for debugging purposes
+	rects            []rectF32
 }
 
-func newFood(centerX, centerY int16) *food {
+func newFood(centerX, centerY float32) *food {
 	newFood := &food{
 		centerX: centerX,
 		centerY: centerY,
-		rects:   make([]rect, 0, 4),
+		rects:   make([]rectF32, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
-	pureRect := rect{
+	pureRect := rectF32{
 		x:      centerX - halfFoodLength,
 		y:      centerY - halfFoodLength,
 		width:  foodLength,
@@ -57,12 +57,12 @@ func newFood(centerX, centerY int16) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(int16(rand.Intn(ScreenWidth)), int16(rand.Intn(ScreenHeight)))
+	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
 }
 
 // Implement slicer interface
 // --------------------------
-func (f food) slice() []rect {
+func (f food) slice() []rectF32 {
 	return f.rects
 }
 
@@ -72,7 +72,7 @@ func (f food) collEnabled() bool {
 	return true
 }
 
-func (f food) Rects() []rect {
+func (f food) Rects() []rectF32 {
 	return f.rects
 }
 
