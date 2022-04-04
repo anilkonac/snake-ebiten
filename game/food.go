@@ -31,19 +31,19 @@ const (
 
 type food struct {
 	isActive         bool
-	centerX, centerY float32 // for debugging purposes
-	rects            []rectF32
+	centerX, centerY int16 // for debugging purposes
+	rects            []rect
 }
 
-func newFood(centerX, centerY float32) *food {
+func newFood(centerX, centerY int16) *food {
 	newFood := &food{
 		centerX: centerX,
 		centerY: centerY,
-		rects:   make([]rectF32, 0, 4),
+		rects:   make([]rect, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
-	pureRect := rectF32{
+	pureRect := rect{
 		x:      centerX - halfFoodLength,
 		y:      centerY - halfFoodLength,
 		width:  foodLength,
@@ -56,7 +56,7 @@ func newFood(centerX, centerY float32) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
+	return newFood(int16(rand.Intn(ScreenWidth)), int16(rand.Intn(ScreenHeight)))
 }
 
 // Implement collidable interface
@@ -65,7 +65,7 @@ func (f food) collEnabled() bool {
 	return true
 }
 
-func (f food) Rects() []rectF32 {
+func (f food) Rects() []rect {
 	return f.rects
 }
 
@@ -105,4 +105,8 @@ func (f food) drawDebugInfo(dst *ebiten.Image) {
 	cX := float64(f.centerX)
 	cY := float64(f.centerY)
 	markPoint(dst, cX, cY, colorSnake1)
+	for iRect := range f.rects {
+		rect := f.rects[iRect]
+		rect.drawOuterRect(dst, colorSnake1)
+	}
 }

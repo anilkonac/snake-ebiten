@@ -24,7 +24,7 @@ import (
 
 type collidable interface {
 	collEnabled() bool
-	Rects() []rectF32
+	Rects() []rect
 }
 
 type drawable interface {
@@ -66,7 +66,7 @@ func draw(dst *ebiten.Image, src drawable) {
 	}
 }
 
-func collides(a, b collidable, tolerance float32) bool {
+func collides(a, b collidable, tolerance int16) bool {
 	if !a.collEnabled() || !b.collEnabled() {
 		return false
 	}

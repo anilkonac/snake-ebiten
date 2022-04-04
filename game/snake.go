@@ -30,9 +30,9 @@ type directionT uint8
 type snakeLengthT uint16
 
 const (
-	toleranceDefault    = snakeWidth / 16.0
+	toleranceDefault    = 2.0 //snakeWidth / 16.0
 	toleranceScreenEdge = halfSnakeWidth
-	toleranceFood       = snakeWidth / 4.0
+	toleranceFood       = 7.0 //snakeWidth / 4.0
 )
 
 const (
@@ -51,14 +51,14 @@ func (d directionT) isVertical() bool {
 }
 
 type snake struct {
-	speed           float32
+	speed           float64
 	unitHead        *unit
 	unitTail        *unit
 	turnPrev        *turn
 	turnQueue       []*turn
-	distAfterTurn   float32
-	growthRemaining float32
-	growthTarget    float32
+	distAfterTurn   float64
+	growthRemaining float64
+	growthTarget    float64
 	foodEaten       uint8
 }
 
@@ -66,7 +66,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(centerX, centerY float32, direction directionT, snakeLength snakeLengthT) *snake {
+func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -81,7 +81,7 @@ func newSnake(centerX, centerY float32, direction directionT, snakeLength snakeL
 		panic("Initial snake intersects itself.")
 	}
 
-	initialUnit := newUnit(centerX, centerY, float32(snakeLength), direction, &colorSnake1)
+	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
 
 	snake := &snake{
 		speed:    snakeSpeedInitial,
@@ -92,7 +92,7 @@ func newSnake(centerX, centerY float32, direction directionT, snakeLength snakeL
 	return snake
 }
 
-func newSnakeRandDir(centerX, centerY float32, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(centerX, centerY float64, snakeLength snakeLengthT) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
 	return newSnake(centerX, centerY, direction, snakeLength)
 }
@@ -111,7 +111,7 @@ func (s *snake) update() {
 	s.updateTail(moveDistance)
 }
 
-func (s *snake) updateHead(dist float32) {
+func (s *snake) updateHead(dist float64) {
 	// Increse head length
 	s.unitHead.length += dist
 
@@ -134,7 +134,7 @@ func (s *snake) updateHead(dist float32) {
 	s.distAfterTurn += dist
 }
 
-func (s *snake) updateTail(dist float32) {
+func (s *snake) updateTail(dist float64) {
 	decreaseAmount := dist
 	if s.growthRemaining > 0 {
 		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
@@ -219,7 +219,7 @@ func (s *snake) checkIntersection() bool {
 		return false
 	}
 
-	var tolerance float32 = toleranceDefault
+	var tolerance int16 = toleranceDefault
 	if len(curUnit.rects) > 1 { // If second unit is on an edge
 		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}
@@ -236,14 +236,14 @@ func (s *snake) checkIntersection() bool {
 
 func (s *snake) grow() {
 	// Compute the total length of the snake.
-	var totalLength float32
+	var totalLength float64
 	for unit := s.unitHead; unit != nil; unit = unit.next {
 		totalLength += unit.length
 	}
 
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=20/(e^(0.0125x))
-	increasePercent := float32(20.0 / math.Exp(0.0125*float64(s.foodEaten)))
+	increasePercent := 20.0 / math.Exp(0.0125*float64(s.foodEaten))
 	curGrowth := totalLength * increasePercent / 100.0
 	s.growthRemaining += curGrowth
 	s.growthTarget += curGrowth
@@ -251,7 +251,7 @@ func (s *snake) grow() {
 
 	// Update snake speed
 	// f(x)=275+25/e^(0.010625x)
-	s.speed = float32(snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.010625*float64(s.foodEaten)))
+	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.010625*float64(s.foodEaten))
 }
 
 func (s *snake) lastDirection() directionT {
