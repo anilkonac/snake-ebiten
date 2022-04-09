@@ -32,6 +32,14 @@ type rectF32 struct {
 	xInUnit, yInUnit float32
 }
 
+func newRect(x, y, width, height float32) *rectF32 {
+	return &rectF32{x, y, width, height, 0, 0}
+}
+
+func copyRect(src *rectF32) *rectF32 {
+	return &rectF32{src.x, src.y, src.width, src.height, src.xInUnit, src.yInUnit}
+}
+
 // Divide rectangle up to 4 based on where it is off-screen.
 func (r rectF32) split(rects *[]rectF32) {
 	if r.width <= 0 || r.height <= 0 {

@@ -22,8 +22,6 @@ import (
 	"math"
 	"math/rand"
 	"time"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type directionT uint8
@@ -159,22 +157,6 @@ func (s *snake) updateTail(dist float64) {
 	s.unitTail.creteRects() // Update rectangles of this unit
 }
 
-func (s *snake) draw(dst *ebiten.Image) {
-	// Create units between head centers
-	var drawableUnits []*unit
-
-	for unit := s.unitHead; unit.next != nil; unit = unit.next {
-		newUnit := newUnit(unit.headCenterX, unit.headCenterY, unit.length+snakeWidth, unit.direction, unit.color)
-		drawableUnits = append(drawableUnits, newUnit)
-	}
-	drawableUnits = append(drawableUnits, s.unitTail)
-
-	// Draw these units
-	for iUnit := len(drawableUnits) - 1; iUnit >= 0; iUnit-- {
-		draw(dst, drawableUnits[iUnit])
-	}
-}
-
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	if !isFromQueue {
 		// Check if the new turn is dangerous (twice same turns rapidly).
@@ -213,25 +195,25 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	s.turnPrev = newTurn
 }
 
-func (s *snake) checkIntersection() bool {
+func (s *snake) checkIntersection(intersected *bool) {
+	*intersected = false
 	curUnit := s.unitHead.next
 	if curUnit == nil {
-		return false
+		return
 	}
 
 	var tolerance float32 = toleranceDefault
-	if len(curUnit.rects) > 1 { // If second unit is on an edge
+	if len(curUnit.rectsCollision) > 1 { // If second unit is on an edge
 		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
 	}
 
 	for curUnit != nil {
 		if collides(s.unitHead, curUnit, tolerance) {
-			return true
+			*intersected = true
+			return
 		}
 		curUnit = curUnit.next
 	}
-
-	return false
 }
 
 func (s *snake) grow() {

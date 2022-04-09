@@ -102,7 +102,7 @@ func (g *Game) Update() error {
 
 	g.handleInput()
 	g.snake.update()
-	g.gameOver = g.snake.checkIntersection()
+	g.snake.checkIntersection(&g.gameOver)
 	g.checkFood()
 
 	return nil
@@ -112,12 +112,18 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colorBackground)
 
+	// Draw food
 	draw(screen, g.food)
-	g.snake.draw(screen)
+
+	// Draw snake
+	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+		draw(screen, unit)
+	}
 
 	if debugUnits {
 		x, y := ebiten.CursorPosition()
-		ebitenutil.DrawRect(screen, float64(x), float64(y), 1, 1, color.White)
+		ebitenutil.DrawRect(screen, float64(x), float64(y), 1, 1, color.White) // Draw the pixel pointed by the mouse in white.
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%d %d", x, y), 0, 15)     // Print mouse coordinates
 	}
 
 	g.printDebugMsgs(screen)
@@ -221,8 +227,7 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	}
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
 	ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
-	// x, y := ebiten.CursorPosition()
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%d %d", x, y), 0, 0)
+
 	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d  Speed: %.3f", g.snake.foodEaten, g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d Remaining Growth: %.2f, Target Growth: %.2f", g.snake.foodEaten, g.snake.growthRemaining, g.snake.growthTarget), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)

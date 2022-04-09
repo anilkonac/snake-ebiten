@@ -26,14 +26,15 @@ import (
 )
 
 type unit struct {
-	headCenterX float64
-	headCenterY float64
-	length      float64
-	direction   directionT
-	rects       []rectF32 // rectangles that are used for both collision checking and drawing
-	color       *color.RGBA
-	next        *unit
-	prev        *unit
+	headCenterX    float64
+	headCenterY    float64
+	length         float64
+	direction      directionT
+	rectsCollision []rectF32
+	rectsDrawable  []rectF32
+	color          *color.RGBA
+	next           *unit
+	prev           *unit
 }
 
 func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
@@ -50,46 +51,49 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 }
 
 func (u *unit) creteRects() {
-	// Create the rectangle to split.
-	var pureRect rectF32
+	// Create rectangles for drawing and collision. They are going to split.
+	var rectDraw, rectColl *rectF32
 	length32 := float32(math.Floor(u.length))
-	x32 := float32(math.Floor(u.headCenterX))
-	y32 := float32(math.Floor(u.headCenterY))
+	cX32 := float32(math.Floor(u.headCenterX))
+	cY32 := float32(math.Floor(u.headCenterY))
 	switch u.direction {
 	case directionRight:
-		pureRect = rectF32{
-			x:      x32 - length32 + halfSnakeWidth,
-			y:      y32 - halfSnakeWidth,
-			width:  length32,
-			height: snakeWidth,
+		rectColl = newRect(cX32-length32+halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
+		rectDraw = copyRect(rectColl)
+		if u.next != nil {
+			rectDraw.x -= snakeWidth
+			rectDraw.width += snakeWidth
 		}
 	case directionLeft:
-		pureRect = rectF32{
-			x:      x32 - halfSnakeWidth,
-			y:      y32 - halfSnakeWidth,
-			width:  length32,
-			height: snakeWidth,
+		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
+		rectDraw = copyRect(rectColl)
+		if u.next != nil {
+			rectDraw.width += snakeWidth
 		}
 	case directionUp:
-		pureRect = rectF32{
-			x:      x32 - halfSnakeWidth,
-			y:      y32 - halfSnakeWidth,
-			width:  snakeWidth,
-			height: length32,
+		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, snakeWidth, length32)
+		rectDraw = copyRect(rectColl)
+		if u.next != nil {
+			rectDraw.height += snakeWidth
 		}
 	case directionDown:
-		pureRect = rectF32{
-			x:      x32 - halfSnakeWidth,
-			y:      y32 - length32 + halfSnakeWidth,
-			width:  snakeWidth,
-			height: length32,
+		rectColl = newRect(cX32-halfSnakeWidth, cY32-length32+halfSnakeWidth, snakeWidth, length32)
+		rectDraw = copyRect(rectColl)
+		if u.next != nil {
+			rectDraw.y -= snakeWidth
+			rectDraw.height += snakeWidth
 		}
 	default:
 		panic("Wrong unit direction!!")
 	}
 
-	u.rects = make([]rectF32, 0, 4) // Remove old rectangles
-	pureRect.split(&u.rects)        // Create split rectangles on screen edges.
+	// Remove old rectangles
+	u.rectsDrawable = make([]rectF32, 0, 4)
+	u.rectsCollision = make([]rectF32, 0, 4)
+
+	// Create split rectangles on screen edges.
+	rectDraw.split(&u.rectsDrawable)
+	rectColl.split(&u.rectsCollision)
 }
 
 func (u *unit) moveUp(dist float64) {
@@ -133,24 +137,22 @@ func (u *unit) markHeadCenters(dst *ebiten.Image) {
 	headCY := float64(u.headCenterY)
 	markPoint(dst, headCX, headCY, colorFood)
 
+	var offset float64 = 0
+	if u.next == nil {
+		offset = snakeWidth
+	}
 	switch u.direction {
 	case directionUp:
-		headCY = float64(u.headCenterY+u.length) - snakeWidth
+		headCY = u.headCenterY + u.length - offset
 	case directionDown:
-		headCY = float64(u.headCenterY-u.length) + snakeWidth
+		headCY = float64(u.headCenterY-u.length) + offset
 	case directionRight:
-		headCX = float64(u.headCenterX-u.length) + snakeWidth
+		headCX = float64(u.headCenterX-u.length) + offset
 	case directionLeft:
-		headCX = float64(u.headCenterX+u.length) - snakeWidth
+		headCX = float64(u.headCenterX+u.length) - offset
 	}
 	// mark head center at the other side
 	markPoint(dst, headCX, headCY, colorFood)
-}
-
-// Implement slicer interface
-// --------------------------
-func (u *unit) slice() []rectF32 {
-	return u.rects
 }
 
 // Implement collidable interface
@@ -159,8 +161,8 @@ func (u *unit) collEnabled() bool {
 	return true
 }
 
-func (u *unit) Rects() []rectF32 {
-	return u.rects
+func (u *unit) collisionRects() []rectF32 {
+	return u.rectsCollision
 }
 
 // Implement drawable interface
@@ -169,12 +171,19 @@ func (u *unit) drawEnabled() bool {
 	return true
 }
 
+func (u *unit) drawableRects() []rectF32 {
+	return u.rectsDrawable
+}
+
 func (u *unit) Color() color.Color {
 	return u.color
 }
 
-func (u *unit) dimension() *[2]float32 {
+func (u *unit) drawDimension() *[2]float32 {
 	flooredLength := float32(math.Floor(u.length))
+	if u.next != nil {
+		flooredLength += snakeWidth
+	}
 	if u.direction.isVertical() {
 		return &[2]float32{snakeWidth, flooredLength}
 	}
@@ -183,8 +192,8 @@ func (u *unit) dimension() *[2]float32 {
 
 func (u *unit) drawDebugInfo(dst *ebiten.Image) {
 	u.markHeadCenters(dst)
-	for iRect := range u.rects {
-		rect := u.rects[iRect]
+	for iRect := range u.rectsDrawable {
+		rect := u.rectsDrawable[iRect]
 		rect.drawOuterRect(dst, colorFood)
 	}
 }

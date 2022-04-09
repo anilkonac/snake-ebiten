@@ -24,20 +24,16 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type slicer interface {
-	slice() []rectF32
-}
-
 type collidable interface {
-	slicer
 	collEnabled() bool
+	collisionRects() []rectF32
 }
 
 type drawable interface {
-	slicer
 	drawEnabled() bool
+	drawableRects() []rectF32
 	Color() color.Color
-	dimension() *[2]float32
+	drawDimension() *[2]float32
 	drawDebugInfo(dst *ebiten.Image)
 }
 
@@ -63,7 +59,7 @@ func draw(dst *ebiten.Image, src drawable) {
 		Uniforms: map[string]interface{}{
 			"Radius":     radius,
 			"IsVertical": isVertical,
-			"Dimension":  (*src.dimension())[:],
+			"Dimension":  (*src.drawDimension())[:],
 		},
 	}
 	dst.DrawTrianglesShader(vertices, indices, shaderMap[curShader], op)
@@ -78,7 +74,7 @@ func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
 	indices = make([]uint16, 0, 24)
 	var offset uint16
 
-	rects := src.slice()
+	rects := src.drawableRects()
 	for iRect := range rects {
 		rect := &rects[iRect]
 
@@ -102,8 +98,8 @@ func collides(a, b collidable, tolerance float32) bool {
 		return false
 	}
 
-	rectsA := a.slice()
-	rectsB := b.slice()
+	rectsA := a.collisionRects()
+	rectsB := b.collisionRects()
 
 	for iRectA := range rectsA {
 		rectA := &rectsA[iRectA]

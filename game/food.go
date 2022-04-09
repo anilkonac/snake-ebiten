@@ -60,16 +60,14 @@ func newFoodRandLoc() *food {
 	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
 }
 
-// Implement slicer interface
-// --------------------------
-func (f food) slice() []rectF32 {
-	return f.rects
-}
-
 // Implement collidable interface
 // ------------------------------
 func (f food) collEnabled() bool {
 	return true
+}
+
+func (f food) collisionRects() []rectF32 {
+	return f.rects
 }
 
 // Implement drawable interface
@@ -78,11 +76,15 @@ func (f food) drawEnabled() bool {
 	return f.isActive
 }
 
+func (f food) drawableRects() []rectF32 {
+	return f.rects
+}
+
 func (f food) Color() color.Color {
 	return colorFood
 }
 
-func (f food) dimension() *[2]float32 {
+func (f food) drawDimension() *[2]float32 {
 	return &[2]float32{foodLength, foodLength}
 }
 
