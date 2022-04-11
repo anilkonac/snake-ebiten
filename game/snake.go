@@ -134,8 +134,8 @@ func (s *snake) updateTail(dist float64) {
 
 	// Delete tail if its length is less than width of the snake
 	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
+		s.unitTail.prev.length += s.unitTail.length
 		s.unitTail = s.unitTail.prev
-		s.unitTail.length += snakeWidth
 		s.unitTail.next = nil
 	}
 
