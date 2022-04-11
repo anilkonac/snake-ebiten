@@ -59,29 +59,23 @@ func (u *unit) creteRects() {
 	switch u.direction {
 	case directionRight:
 		rectColl = newRect(cX32-length32+halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
-		rectDraw = copyRect(rectColl)
 		if u.next != nil {
-			rectDraw.x -= snakeWidth
-			rectDraw.width += snakeWidth
+			rectDraw = newRect(rectColl.x-snakeWidth, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
 		}
 	case directionLeft:
 		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
-		rectDraw = copyRect(rectColl)
 		if u.next != nil {
-			rectDraw.width += snakeWidth
+			rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
 		}
 	case directionUp:
 		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, snakeWidth, length32)
-		rectDraw = copyRect(rectColl)
 		if u.next != nil {
-			rectDraw.height += snakeWidth
+			rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width, rectColl.height+snakeWidth)
 		}
 	case directionDown:
 		rectColl = newRect(cX32-halfSnakeWidth, cY32-length32+halfSnakeWidth, snakeWidth, length32)
-		rectDraw = copyRect(rectColl)
 		if u.next != nil {
-			rectDraw.y -= snakeWidth
-			rectDraw.height += snakeWidth
+			rectDraw = newRect(rectColl.x, rectColl.y-snakeWidth, rectColl.width, rectColl.height+snakeWidth)
 		}
 	default:
 		panic("Wrong unit direction!!")
@@ -92,8 +86,12 @@ func (u *unit) creteRects() {
 	u.rectsCollision = make([]rectF32, 0, 4)
 
 	// Create split rectangles on screen edges.
-	rectDraw.split(&u.rectsDrawable)
 	rectColl.split(&u.rectsCollision)
+	if u.next == nil {
+		u.rectsDrawable = u.rectsCollision
+		return
+	}
+	rectDraw.split(&u.rectsDrawable)
 }
 
 func (u *unit) moveUp(dist float64) {

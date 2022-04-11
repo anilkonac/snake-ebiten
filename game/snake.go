@@ -33,21 +33,6 @@ const (
 	toleranceFood       = snakeWidth / 4.0
 )
 
-const (
-	directionUp directionT = iota
-	directionDown
-	directionLeft
-	directionRight
-	directionTotal
-)
-
-func (d directionT) isVertical() bool {
-	if d >= directionTotal {
-		panic("wrong direction")
-	}
-	return (d == directionUp) || (d == directionDown)
-}
-
 type snake struct {
 	speed           float64
 	unitHead        *unit

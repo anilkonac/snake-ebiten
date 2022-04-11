@@ -18,6 +18,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package game
 
+const (
+	directionUp directionT = iota
+	directionDown
+	directionLeft
+	directionRight
+	directionTotal
+)
+
+func (d directionT) isVertical() bool {
+	if d >= directionTotal {
+		panic("wrong direction")
+	}
+	return (d == directionUp) || (d == directionDown)
+}
+
 type turn struct {
 	directionTo   directionT
 	isTurningLeft bool

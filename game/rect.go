@@ -147,10 +147,8 @@ func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 }
 
 func (r rectF32) drawOuterRect(dst *ebiten.Image, clr color.Color) {
-	x64 := float64(r.x)
-	y64 := float64(r.y)
-	width64 := float64(r.width)
-	height64 := float64(r.height)
+	x64, y64 := float64(r.x), float64(r.y)
+	width64, height64 := float64(r.width), float64(r.height)
 	ebitenutil.DrawRect(dst, x64, y64, width64, height64, color.RGBA{255, 255, 255, 96})
 }
 
