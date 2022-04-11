@@ -24,11 +24,11 @@ import (
 	"time"
 )
 
-type directionT uint8
 type snakeLengthT uint16
 
+// Snake collision tolerances must be an integer or false collisions will occur.
 const (
-	toleranceDefault    = snakeWidth / 16.0
+	toleranceDefault    = 2 //snakeWidth / 16.0
 	toleranceScreenEdge = halfSnakeWidth
 	toleranceFood       = snakeWidth / 4.0
 )
@@ -211,9 +211,9 @@ func (s *snake) grow() {
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=20/(e^(0.0125x))
 	increasePercent := 20.0 / math.Exp(0.0125*float64(s.foodEaten))
-	curGrowth := totalLength * increasePercent / 100.0
-	s.growthRemaining += curGrowth
-	s.growthTarget += curGrowth
+	newGrowth := totalLength * increasePercent / 100.0
+	s.growthRemaining += newGrowth
+	s.growthTarget += newGrowth
 	s.foodEaten++
 
 	// Update snake speed

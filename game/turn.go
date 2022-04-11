@@ -18,6 +18,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 package game
 
+type directionT uint8
+
 const (
 	directionUp directionT = iota
 	directionDown

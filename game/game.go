@@ -122,8 +122,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if debugUnits {
 		x, y := ebiten.CursorPosition()
-		ebitenutil.DrawRect(screen, float64(x), float64(y), 1, 1, color.White) // Draw the pixel pointed by the mouse in white.
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%d %d", x, y), 0, 15)     // Print mouse coordinates
+		markPoint(screen, float64(x), float64(y), color.White)
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%d %d", x, y), 0, 15) // Print mouse coordinates
 	}
 
 	g.printDebugMsgs(screen)
@@ -197,6 +197,11 @@ func (g *Game) handleSettingsInputs() {
 			curShader = 0
 		}
 	}
+
+	// if inpututil.IsKeyJustPressed(ebiten.KeyN) {
+	// 	g.snake.grow()
+	// 	g.snake.grow()
+	// }
 }
 
 func (g *Game) checkFood() {
