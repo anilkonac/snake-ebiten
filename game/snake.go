@@ -202,15 +202,9 @@ func (s *snake) checkIntersection(intersected *bool) {
 }
 
 func (s *snake) grow() {
-	// Compute the total length of the snake.
-	var totalLength float64
-	for unit := s.unitHead; unit != nil; unit = unit.next {
-		totalLength += unit.length
-	}
-
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=50+5*log2(x/10.0+1)
-	newGrowth := 50.0 + 5*math.Log2(float64(s.foodEaten)/10+1)
+	newGrowth := 50.0 + 5.0*math.Log2(float64(s.foodEaten)/10.0+1.0)
 	s.growthRemaining += newGrowth
 	s.growthTarget += newGrowth
 	s.foodEaten++

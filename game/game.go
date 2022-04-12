@@ -57,8 +57,8 @@ var (
 )
 
 var (
-	printFPS   bool = true
-	debugUnits      = false // Draw consecutive units with different colors and draw position info of rects.
+	printFPS   = true
+	debugUnits = false // Draw consecutive units with different colors
 )
 
 // Game implements ebiten.Game interface.
@@ -236,9 +236,7 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 	// 	totalLength += unit.length
 	// }
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Snake length: %.1f", totalLength), 0, 15)
-	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d  Speed: %.3f", g.snake.foodEaten, g.snake.speed))
-	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d   Snake length: %.2f", g.snake.foodEaten, totalLength))
+	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d   Snake length: %.2f   Speed: %.3f", g.snake.foodEaten, totalLength,  g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }
