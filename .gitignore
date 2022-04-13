@@ -8,3 +8,5 @@ snake-ebiten
 *.zip
 
 ssnake-linux64
+
+*.wav

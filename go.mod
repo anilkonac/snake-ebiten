@@ -6,6 +6,7 @@ require github.com/hajimehoshi/ebiten/v2 v2.2.6
 
 require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220320163800-277f93cfa958 // indirect
+	github.com/hajimehoshi/oto/v2 v2.1.0-alpha.2 // indirect
 	github.com/jezek/xgb v1.0.0 // indirect
 	golang.org/x/exp/shiny v0.0.0-20220407100705-7b9b53b0aca4 // indirect
 	golang.org/x/image v0.0.0-20220412021310-99f80d0ecbab // indirect
