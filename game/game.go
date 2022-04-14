@@ -19,14 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"bytes"
 	"fmt"
 	"image/color"
 
-	sound "github.com/anilkonac/snake-ebiten/game/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -51,8 +47,6 @@ const (
 
 const halfSnakeWidth = snakeWidth / 2.0
 
-const sampleRate = 44100
-
 // Colors to be used in the drawing.
 // Palette: https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
 var (
@@ -67,8 +61,6 @@ var (
 	debugUnits = false // Draw consecutive units with different colors
 )
 
-var audioPlayer *audio.Player
-
 // Game implements ebiten.Game interface.
 type Game struct {
 	snake             *snake
@@ -79,24 +71,12 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	game := &Game{
+	prepareAudio()
+
+	return &Game{
 		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeLength),
 		food:  newFoodRandLoc(),
 	}
-
-	stream, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(sound.Eating))
-	if err != nil {
-		panic(err)
-	}
-
-	audioContext := audio.NewContext(sampleRate)
-	audioPlayer, err = audioContext.NewPlayer(stream)
-	if err != nil {
-		panic(err)
-	}
-
-	return game
-
 }
 
 func (g *Game) restart() {
@@ -243,8 +223,7 @@ func (g *Game) checkFood() {
 	if collides(g.snake.unitHead, g.food, toleranceFood) {
 		g.snake.grow()
 		g.food = newFoodRandLoc()
-		audioPlayer.Rewind()
-		audioPlayer.Play()
+		play(soundEating)
 		return
 	}
 }

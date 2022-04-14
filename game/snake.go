@@ -195,6 +195,7 @@ func (s *snake) checkIntersection(intersected *bool) {
 	for curUnit != nil {
 		if collides(s.unitHead, curUnit, tolerance) {
 			*intersected = true
+			play(soundSlap)
 			return
 		}
 		curUnit = curUnit.next
