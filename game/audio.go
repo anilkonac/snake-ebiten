@@ -2,6 +2,7 @@ package game
 
 import (
 	"bytes"
+	"math/rand"
 
 	sound "github.com/anilkonac/snake-ebiten/game/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -18,27 +19,43 @@ const (
 const sampleRate = 44100
 
 var (
-	audioContext *audio.Context
-	audioPlayers map[soundE]*audio.Player
+	audioContext  *audio.Context
+	slapPlayer    *audio.Player
+	eatingPlayers []*audio.Player
+	eatingSound   int // For debugging
 )
+
+func init() {
+	prepareAudio()
+}
 
 func prepareAudio() {
 	audioContext = audio.NewContext(sampleRate)
-	audioPlayers = make(map[soundE]*audio.Player, soundTotal)
+	eatingPlayers = make([]*audio.Player, 0)
 
-	addPlayer(soundEating, sound.Eating)
-	addPlayer(soundSlap, sound.Slap)
+	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating))
+	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating2))
+	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating3))
+	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating4))
+	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating6))
+	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating7))
+	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating8))
+
+	slapPlayer = createPlayer(sound.Slap)
 }
 
-func addPlayer(sound soundE, src []byte) {
+func createPlayer(src []byte) *audio.Player {
 	stream, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
 	if err != nil {
 		panic(err)
 	}
-	audioPlayers[sound], err = audioContext.NewPlayer(stream)
+
+	player, err := audioContext.NewPlayer(stream)
 	if err != nil {
 		panic(err)
 	}
+
+	return player
 }
 
 func play(sound soundE) {
@@ -46,7 +63,17 @@ func play(sound soundE) {
 		panic("Wrong sound enum")
 	}
 
-	player := audioPlayers[sound]
+	var player *audio.Player
+	if sound == soundEating {
+		randIndex := rand.Intn(len(eatingPlayers))
+		player = eatingPlayers[randIndex]
+		eatingSound = randIndex
+		showSlap = false
+	} else if sound == soundSlap {
+		player = slapPlayer
+		showSlap = true
+	}
+
 	player.Rewind()
 	player.Play()
 }

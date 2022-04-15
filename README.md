@@ -6,3 +6,6 @@ A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 Play the current development version at https://anilkonac.github.io/snake-ebiten/.
 
 Play possibly the more stable (and older) version at https://anilkonac.itch.io/ssnake.
+
+### Credits
+Eating sounds ("Biting, Crunchy, A.wav") by InspectorJ (www.jshaw.co.uk) of Freesound.org

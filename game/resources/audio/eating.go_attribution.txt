@@ -1,9 +1,0 @@
-eating.go
-
-Downloaded 20279__koops__apple-crunch-16.wav file from 
-https://freesound.org/people/Koops/sounds/20279/, trimmed and converted to byte slice.
-
-Creator: Koops (https://freesound.org/people/Koops/)
-
-This work is licensed under the Attribution 4.0 License.
-https://creativecommons.org/licenses/by/4.0/
