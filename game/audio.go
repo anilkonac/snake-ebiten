@@ -37,9 +37,6 @@ func prepareAudio() {
 	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating2))
 	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating3))
 	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating4))
-	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating6))
-	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating7))
-	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating8))
 
 	slapPlayer = createPlayer(sound.Slap)
 }
