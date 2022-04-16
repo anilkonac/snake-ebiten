@@ -88,6 +88,11 @@ func (g *Game) restart() {
 func (g *Game) Update() error {
 	g.handleSettingsInputs()
 
+	if playMusic && !musicPlayer.IsPlaying() {
+		musicPlayer.Rewind()
+		musicPlayer.Play()
+	}
+
 	if g.paused {
 		return nil
 	}
@@ -191,6 +196,16 @@ func (g *Game) handleSettingsInputs() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		printFPS = !printFPS
 	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
+		playMusic = !playMusic
+		if playMusic {
+			musicPlayer.Play()
+		} else {
+			musicPlayer.Pause()
+		}
+	}
+
 	// if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 	// 	curShader++
 	// 	if curShader >= shaderTotal {
@@ -240,6 +255,7 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	} else if g.snake.foodEaten > 0 {
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Last played sound: Eating #%d", eatingSound), ScreenWidth/2-88, 0)
 	}
+	ebitenutil.DebugPrintAt(screen, "Press M to stop/start music", 0, ScreenHeight-15)
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 	// 	totalLength += unit.length
