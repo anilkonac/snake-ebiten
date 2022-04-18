@@ -53,13 +53,13 @@ func prepareAudio() {
 	audioContext = audio.NewContext(sampleRate)
 	// pickupPlayers = make([]*audio.Player, 0)
 
-	playersEating[0] = createPlayer(sound.Eating, 0.6)
-	playersEating[1] = createPlayer(sound.Eating2, 0.55)
+	playersEating[0] = createPlayer(sound.Eating, 0.5)
+	playersEating[1] = createPlayer(sound.Eating2, 0.45)
 
 	playerHit = createPlayer(sound.Hit, 1.0)
 
 	playerMusic = createMusicPlayer(sound.Music)
-	playerMusic.SetVolume(0.5)
+	playerMusic.SetVolume(0.4)
 	playerMusic.Play()
 }
 
@@ -99,9 +99,9 @@ func play(sound soundE) {
 
 	var player *audio.Player
 	if sound == soundPickup {
-		randIndex := rand.Intn(11)
+		randIndex := rand.Intn(12)
 		var eatingIndex uint8
-		if randIndex < 8 {
+		if randIndex < 9 {
 			eatingIndex = 0
 		} else {
 			eatingIndex = 1
