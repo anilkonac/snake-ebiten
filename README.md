@@ -9,10 +9,10 @@ Play possibly the more stable (and older) version at https://anilkonac.itch.io/s
 
 ### Credits
 #### Sounds
-Eating sounds ("Biting, Crunchy, A.wav") by InspectorJ (www.jshaw.co.uk) of Freesound.org
+"Chewing, Carrot, A.wav" by InspectorJ (www.jshaw.co.uk) of Freesound.org
+[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
 #### Music
-Powerful Trap Beat | Strong by Alex-Productions | https://www.youtube.com/channel/UCx0_M61F81Nfb-BRXE-SeVA
-Music promoted by https://www.chosic.com/free-music/all/
-Creative Commons CC BY 3.0
-https://creativecommons.org/licenses/by/3.0/
-
+Bye, Bye Brain! by Alexander Nakarada | https://www.serpentsoundstudios.com
+Music promoted on https://www.chosic.com/free-music/all/
+[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
+ 

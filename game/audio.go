@@ -1,3 +1,21 @@
+/*
+snake-ebiten
+Copyright (C) 2022 Anıl Konaç
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 package game
 
 import (
@@ -13,18 +31,17 @@ import (
 type soundE uint8
 
 const (
-	soundEating soundE = iota
-	soundSlap
+	soundPickup soundE = iota
+	soundHit
 	soundTotal
 )
 const sampleRate = 44100
 
 var (
 	audioContext  *audio.Context
-	slapPlayer    *audio.Player
-	eatingPlayers []*audio.Player
-	eatingSound   int // For debugging
-	musicPlayer   *audio.Player
+	playerHit     *audio.Player
+	playersEating [2]*audio.Player
+	playerMusic   *audio.Player
 	playMusic     bool = true
 )
 
@@ -34,21 +51,19 @@ func init() {
 
 func prepareAudio() {
 	audioContext = audio.NewContext(sampleRate)
-	eatingPlayers = make([]*audio.Player, 0)
+	// pickupPlayers = make([]*audio.Player, 0)
 
-	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating))
-	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating2))
-	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating3))
-	eatingPlayers = append(eatingPlayers, createPlayer(sound.Eating4))
+	playersEating[0] = createPlayer(sound.Eating, 0.6)
+	playersEating[1] = createPlayer(sound.Eating2, 0.55)
 
-	slapPlayer = createPlayer(sound.Slap)
+	playerHit = createPlayer(sound.Hit, 1.0)
 
-	musicPlayer = createMusicPlayer(sound.Music)
-	musicPlayer.SetVolume(0.3)
-	musicPlayer.Play()
+	playerMusic = createMusicPlayer(sound.Music)
+	playerMusic.SetVolume(0.5)
+	playerMusic.Play()
 }
 
-func createPlayer(src []byte) *audio.Player {
+func createPlayer(src []byte, volume float64) *audio.Player {
 	stream, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
 	if err != nil {
 		panic(err)
@@ -59,11 +74,12 @@ func createPlayer(src []byte) *audio.Player {
 		panic(err)
 	}
 
+	player.SetVolume(volume)
 	return player
 }
 
 func createMusicPlayer(src []byte) *audio.Player {
-	stream, err := mp3.Decode(audioContext, bytes.NewReader(sound.Music))
+	stream, err := mp3.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
 	if err != nil {
 		panic(err)
 	}
@@ -82,13 +98,18 @@ func play(sound soundE) {
 	}
 
 	var player *audio.Player
-	if sound == soundEating {
-		randIndex := rand.Intn(len(eatingPlayers))
-		player = eatingPlayers[randIndex]
-		eatingSound = randIndex
+	if sound == soundPickup {
+		randIndex := rand.Intn(11)
+		var eatingIndex uint8
+		if randIndex < 8 {
+			eatingIndex = 0
+		} else {
+			eatingIndex = 1
+		}
+		player = playersEating[eatingIndex]
 		showSlap = false
-	} else if sound == soundSlap {
-		player = slapPlayer
+	} else if sound == soundHit {
+		player = playerHit
 		showSlap = true
 	}
 
