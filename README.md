@@ -2,10 +2,14 @@
 # snake-ebiten
 A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 
-## Play
-Play the current development version at https://anilkonac.github.io/snake-ebiten/.
+## Features
+- Smooth movement
+- No grid system
+- Pixel-precise teleportation
 
-Play possibly the more stable (and older) version at https://anilkonac.itch.io/ssnake.
+## Play
+- Play the current development version at https://anilkonac.github.io/snake-ebiten/.
+- Play possibly the more stable (and older) version at https://anilkonac.itch.io/ssnake.
 
 ### Credits
 [Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/master/game/resources/audio/Credits.md)
