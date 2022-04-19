@@ -28,39 +28,38 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 )
 
-type soundE uint8
-
 const (
-	soundPickup soundE = iota
-	soundHit
-	soundTotal
+	sampleRate   = 44100
+	volumeEating = 0.45
+	volumeMusic  = 0.4
+	volumeHit    = 1.0
+	probEatingA  = 0.78
 )
-const sampleRate = 44100
 
 var (
 	audioContext  *audio.Context
 	playerHit     *audio.Player
-	playersEating [2]*audio.Player
 	playerMusic   *audio.Player
+	playerEatingA *audio.Player
+	playerEatingB *audio.Player
 	playMusic     bool = true
 )
 
 func init() {
 	prepareAudio()
+	playerMusic.Play()
 }
 
 func prepareAudio() {
 	audioContext = audio.NewContext(sampleRate)
-	// pickupPlayers = make([]*audio.Player, 0)
 
-	playersEating[0] = createPlayer(sound.Eating, 0.5)
-	playersEating[1] = createPlayer(sound.Eating2, 0.45)
+	playerEatingA = createPlayer(sound.Eating, volumeEating)
+	playerEatingB = createPlayer(sound.Eating2, volumeEating)
 
-	playerHit = createPlayer(sound.Hit, 1.0)
+	playerHit = createPlayer(sound.Hit, volumeHit)
 
 	playerMusic = createMusicPlayer(sound.Music)
-	playerMusic.SetVolume(0.4)
-	playerMusic.Play()
+	playerMusic.SetVolume(volumeMusic)
 }
 
 func createPlayer(src []byte, volume float64) *audio.Player {
@@ -92,27 +91,18 @@ func createMusicPlayer(src []byte) *audio.Player {
 	return player
 }
 
-func play(sound soundE) {
-	if sound >= soundTotal {
-		panic("Wrong sound enum")
-	}
-
+func playSoundEating() {
 	var player *audio.Player
-	if sound == soundPickup {
-		randIndex := rand.Intn(12)
-		var eatingIndex uint8
-		if randIndex < 9 {
-			eatingIndex = 0
-		} else {
-			eatingIndex = 1
-		}
-		player = playersEating[eatingIndex]
-		showSlap = false
-	} else if sound == soundHit {
-		player = playerHit
-		showSlap = true
+	if rand.Float32() < probEatingA {
+		player = playerEatingA
+	} else {
+		player = playerEatingB
 	}
-
 	player.Rewind()
 	player.Play()
+}
+
+func playSoundHit() {
+	playerHit.Rewind()
+	playerHit.Play()
 }

@@ -236,7 +236,7 @@ func (g *Game) checkFood() {
 	if collides(g.snake.unitHead, g.food, toleranceFood) {
 		g.snake.grow()
 		g.food = newFoodRandLoc()
-		play(soundPickup)
+		playSoundEating()
 		return
 	}
 }
