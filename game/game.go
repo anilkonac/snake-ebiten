@@ -88,6 +88,11 @@ func (g *Game) restart() {
 func (g *Game) Update() error {
 	g.handleSettingsInputs()
 
+	if playMusic && !playerMusic.IsPlaying() {
+		playerMusic.Rewind()
+		playerMusic.Play()
+	}
+
 	if g.paused {
 		return nil
 	}
@@ -191,12 +196,22 @@ func (g *Game) handleSettingsInputs() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		printFPS = !printFPS
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		curShader++
-		if curShader >= shaderTotal {
-			curShader = 0
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
+		playMusic = !playMusic
+		if playMusic {
+			playerMusic.Play()
+		} else {
+			playerMusic.Pause()
 		}
 	}
+
+	// if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+	// 	curShader++
+	// 	if curShader >= shaderTotal {
+	// 		curShader = 0
+	// 	}
+	// }
 
 	// if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 	// 	g.snake.grow()
@@ -221,9 +236,12 @@ func (g *Game) checkFood() {
 	if collides(g.snake.unitHead, g.food, toleranceFood) {
 		g.snake.grow()
 		g.food = newFoodRandLoc()
+		playSoundEating()
 		return
 	}
 }
+
+var showSlap bool
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
@@ -231,7 +249,8 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 			ScreenWidth-130, 0)
 	}
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
+	// ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
+	ebitenutil.DebugPrintAt(screen, "Press M to stop/start music", 0, ScreenHeight-15)
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 	// 	totalLength += unit.length

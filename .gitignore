@@ -8,3 +8,11 @@ snake-ebiten
 *.zip
 
 ssnake-linux64
+
+*.wav
+
+ssnake-win64
+
+*.mp3
+
+*.ogg
