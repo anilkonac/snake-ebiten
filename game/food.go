@@ -84,7 +84,7 @@ func (f food) Color() color.Color {
 	return colorFood
 }
 
-func (f food) drawDimension() *[2]float32 {
+func (f food) drawingSize() *[2]float32 {
 	return &[2]float32{foodLength, foodLength}
 }
 

@@ -34,7 +34,7 @@ type drawable interface {
 	drawEnabled() bool
 	drawableRects() []rectF32
 	Color() color.Color
-	drawDimension() *[2]float32
+	drawingSize() *[2]float32
 	drawDebugInfo(dst *ebiten.Image)
 }
 
@@ -70,7 +70,7 @@ func draw(dst *ebiten.Image, src drawable) {
 		Uniforms: map[string]interface{}{
 			"Radius":     radius,
 			"IsVertical": isVertical,
-			"Dimension":  (*src.drawDimension())[:],
+			"Dimension":  (*src.drawingSize())[:],
 		},
 	}
 	dst.DrawTrianglesShader(vertices, indices, shaderRound, op)

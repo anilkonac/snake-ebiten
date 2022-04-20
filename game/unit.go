@@ -82,8 +82,10 @@ func (u *unit) creteRects() {
 	}
 
 	// Remove old rectangles
-	u.rectsDrawable = make([]rectF32, 0, 4)
 	u.rectsCollision = make([]rectF32, 0, 4)
+	if u.next != nil {
+		u.rectsDrawable = make([]rectF32, 0, 4)
+	}
 
 	// Create split rectangles on screen edges.
 	rectColl.split(&u.rectsCollision)
@@ -177,7 +179,7 @@ func (u *unit) Color() color.Color {
 	return u.color
 }
 
-func (u *unit) drawDimension() *[2]float32 {
+func (u *unit) drawingSize() *[2]float32 {
 	flooredLength := float32(math.Floor(u.length))
 	if u.next != nil {
 		flooredLength += snakeWidth

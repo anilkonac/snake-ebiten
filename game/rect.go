@@ -97,7 +97,7 @@ func intersects(rectA, rectB *rectF32, tolerance float32) bool {
 func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 	uR, uG, uB, uA := color.RGBA()
 	fR, fG, fB, fA := float32(uR), float32(uG), float32(uB), float32(uA)
-	vertices := []ebiten.Vertex{
+	return []ebiten.Vertex{
 		{ // Top Left corner
 			DstX:   r.x,
 			DstY:   r.y,
@@ -139,7 +139,6 @@ func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
 			ColorA: fA,
 		},
 	}
-	return vertices
 }
 
 func (r rectF32) drawOuterRect(dst *ebiten.Image, clr color.Color) {

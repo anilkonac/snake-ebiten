@@ -120,7 +120,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw food
 	draw(screen, g.food)
 
-	// Draw snake
+	// Draw the snake
 	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 		draw(screen, unit)
 	}
@@ -206,13 +206,6 @@ func (g *Game) handleSettingsInputs() {
 		}
 	}
 
-	// if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-	// 	curShader++
-	// 	if curShader >= shaderTotal {
-	// 		curShader = 0
-	// 	}
-	// }
-
 	// if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 	// 	g.snake.grow()
 	// 	g.snake.grow()
@@ -222,8 +215,8 @@ func (g *Game) handleSettingsInputs() {
 func (g *Game) checkFood() {
 	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
-		for curUnit := g.snake.unitHead; curUnit != nil; curUnit = curUnit.next {
-			if collides(curUnit, g.food, toleranceDefault) {
+		for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+			if collides(unit, g.food, toleranceDefault) {
 				g.food = newFoodRandLoc()
 				return
 			}
@@ -240,8 +233,6 @@ func (g *Game) checkFood() {
 		return
 	}
 }
-
-var showSlap bool
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
