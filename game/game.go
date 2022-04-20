@@ -249,7 +249,6 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 			ScreenWidth-130, 0)
 	}
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
-	// ebitenutil.DebugPrintAt(screen, "Press R to switch the shader.", ScreenWidth/2-86, 0)
 	ebitenutil.DebugPrintAt(screen, "Press M to stop/start music", 0, ScreenHeight-15)
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {

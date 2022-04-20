@@ -21,6 +21,7 @@ package game
 import (
 	"image/color"
 
+	"github.com/anilkonac/snake-ebiten/game/shaders"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -35,6 +36,16 @@ type drawable interface {
 	Color() color.Color
 	drawDimension() *[2]float32
 	drawDebugInfo(dst *ebiten.Image)
+}
+
+var shaderRound *ebiten.Shader
+
+func init() {
+	var err error
+	shaderRound, err = ebiten.NewShader(shaders.Round)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func draw(dst *ebiten.Image, src drawable) {
@@ -62,7 +73,7 @@ func draw(dst *ebiten.Image, src drawable) {
 			"Dimension":  (*src.drawDimension())[:],
 		},
 	}
-	dst.DrawTrianglesShader(vertices, indices, shaderMap[curShader], op)
+	dst.DrawTrianglesShader(vertices, indices, shaderRound, op)
 
 	if debugUnits {
 		src.drawDebugInfo(dst)
