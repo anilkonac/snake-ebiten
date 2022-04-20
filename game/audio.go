@@ -24,13 +24,13 @@ import (
 
 	sound "github.com/anilkonac/snake-ebiten/game/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 )
 
 const (
 	sampleRate   = 44100
-	volumeEating = 0.45
+	volumeEating = 0.425
 	volumeMusic  = 0.4
 	volumeHit    = 1.0
 	probEatingA  = 0.78
@@ -78,7 +78,7 @@ func createPlayer(src []byte, volume float64) *audio.Player {
 }
 
 func createMusicPlayer(src []byte) *audio.Player {
-	stream, err := mp3.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
+	stream, err := vorbis.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
 	if err != nil {
 		panic(err)
 	}
