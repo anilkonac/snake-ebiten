@@ -30,7 +30,7 @@ import (
 
 const (
 	sampleRate   = 44100
-	volumeEating = 0.42
+	volumeEating = 0.35
 	volumeMusic  = 0.4
 	volumeHit    = 1.0
 	probEatingA  = 0.78
@@ -42,7 +42,8 @@ var (
 	playerMusic   *audio.Player
 	playerEatingA *audio.Player
 	playerEatingB *audio.Player
-	playMusic     bool = true
+	playMusic     = true
+	playSounds    = true
 )
 
 func init() {
@@ -92,6 +93,10 @@ func createMusicPlayer(src []byte) *audio.Player {
 }
 
 func playSoundEating() {
+	if !playSounds {
+		return
+	}
+
 	var player *audio.Player
 	if rand.Float32() < probEatingA {
 		player = playerEatingA
@@ -103,6 +108,9 @@ func playSoundEating() {
 }
 
 func playSoundHit() {
+	if !playSounds {
+		return
+	}
 	playerHit.Rewind()
 	playerHit.Play()
 }

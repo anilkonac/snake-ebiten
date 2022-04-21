@@ -206,6 +206,10 @@ func (g *Game) handleSettingsInputs() {
 		}
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
+		playSounds = !playSounds
+	}
+
 	// if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 	// 	g.snake.grow()
 	// 	g.snake.grow()
@@ -240,7 +244,7 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 			ScreenWidth-130, 0)
 	}
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Press M to stop/start music", 0, ScreenHeight-15)
+	ebitenutil.DebugPrintAt(screen, "Press M to pause/play music", 0, ScreenHeight-15)
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 	// 	totalLength += unit.length
