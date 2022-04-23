@@ -147,7 +147,7 @@ func (r rectF32) drawOuterRect(dst *ebiten.Image, clr color.Color) {
 	ebitenutil.DrawRect(dst, x64, y64, width64, height64, color.RGBA{255, 255, 255, 96})
 }
 
-func markPoint(dst *ebiten.Image, pX, pY float64, clr color.Color) {
-	ebitenutil.DrawLine(dst, pX-3, pY, pX+3, pY, clr)
-	ebitenutil.DrawLine(dst, pX, pY-3, pX, pY+3, clr)
+func markPoint(dst *ebiten.Image, pX, pY, length float64, clr color.Color) {
+	ebitenutil.DrawLine(dst, pX-length, pY, pX+length, pY, clr)
+	ebitenutil.DrawLine(dst, pX, pY-length, pX, pY+length, clr)
 }

@@ -91,7 +91,7 @@ func (f food) drawingSize() *[2]float32 {
 func (f food) drawDebugInfo(dst *ebiten.Image) {
 	cX := float64(f.centerX)
 	cY := float64(f.centerY)
-	markPoint(dst, cX, cY, colorSnake1)
+	markPoint(dst, cX, cY, 4, colorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
 		rect.drawOuterRect(dst, colorSnake1)

@@ -22,9 +22,12 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/anilkonac/snake-ebiten/game/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 // Game constants
@@ -47,19 +50,63 @@ const (
 
 const halfSnakeWidth = snakeWidth / 2.0
 
+const (
+	dpi             = 84
+	fontSizeScore   = 24
+	fontSizeDebug   = 16
+	scoreTextShiftX = 10
+	scoreTextShiftY = 8
+	fpsTextShiftX   = 3
+	fpsTextShiftY   = 2
+)
+
 // Colors to be used in the drawing.
-// Palette: https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
+// Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
 var (
-	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
-	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
-	colorSnake2     = color.RGBA{6, 214, 160, 255}   // Caribbean Green
-	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
+	colorBackground = color.RGBA{0, 48, 73, 255}     // ~ Prussian Blue
+	colorSnake1     = color.RGBA{252, 191, 73, 255}  // ~ Maximum Yellow Red
+	colorSnake2     = color.RGBA{247, 127, 0, 255}   // ~ Orange
+	colorFood       = color.RGBA{214, 40, 40, 255}   // ~ Maximum Red
+	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
+	colorDebug      = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
 )
 
 var (
 	printFPS   = true
 	debugUnits = false // Draw consecutive units with different colors
+	fontScore  font.Face
+	fontDebug  font.Face
 )
+
+func init() {
+	tt, err := opentype.Parse(fonts.Rounded)
+	if err != nil {
+		panic(err)
+	}
+
+	fontScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    fontSizeScore,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	tt, err = opentype.Parse(fonts.Debug)
+	if err != nil {
+		panic(err)
+	}
+
+	fontDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    fontSizeDebug,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		panic(err)
+	}
+}
 
 // Game implements ebiten.Game interface.
 type Game struct {
@@ -122,13 +169,27 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		draw(screen, unit)
 	}
 
+	// Draw score text
+	g.drawScore(screen)
+
 	if debugUnits {
+		// Mark cursor
 		x, y := ebiten.CursorPosition()
-		markPoint(screen, float64(x), float64(y), color.White)
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%d %d", x, y), 0, 15) // Print mouse coordinates
+		markPoint(screen, float64(x), float64(y), 5, colorSnake2)
+
+		// Print mouse coordinates
+		msg := fmt.Sprintf("%d %d", x, y)
+		rect := text.BoundString(fontDebug, msg)
+		text.Draw(screen, msg, fontDebug, 0, -rect.Min.Y+ScreenHeight-rect.Size().Y, colorDebug)
 	}
 
 	g.printDebugMsgs(screen)
+}
+
+func (g *Game) drawScore(screen *ebiten.Image) {
+	msg := fmt.Sprintf("Score: %d", g.snake.foodEaten)
+	bound := text.BoundString(fontScore, msg)
+	text.Draw(screen, msg, fontScore, scoreTextShiftX, -bound.Min.Y+scoreTextShiftY, colorScore)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
@@ -242,11 +303,10 @@ func (g *Game) checkFood() {
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()),
-			ScreenWidth-130, 0)
+		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
+		bound := text.BoundString(fontDebug, msg)
+		text.Draw(screen, msg, fontDebug, ScreenWidth-bound.Size().X-fpsTextShiftX, -bound.Min.Y+fpsTextShiftY, colorDebug)
 	}
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Press M to pause/play music", 0, ScreenHeight-15)
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 	// 	totalLength += unit.length
