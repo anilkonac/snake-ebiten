@@ -33,7 +33,7 @@ const (
 	volumeEating = 0.35
 	volumeMusic  = 0.4
 	volumeHit    = 1.0
-	probEatingA  = 0.78
+	probEatingA  = 0.74
 )
 
 var (
@@ -113,4 +113,11 @@ func playSoundHit() {
 	}
 	playerHit.Rewind()
 	playerHit.Play()
+}
+
+func repeatMusic() {
+	if playMusic && !playerMusic.IsPlaying() {
+		playerMusic.Rewind()
+		playerMusic.Play()
+	}
 }

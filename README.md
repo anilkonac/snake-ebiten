@@ -3,8 +3,7 @@
 A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 
 ## Features
-- Smooth movement
-- No grid system
+- Smooth and gridless movement.
 - Pixel-precise teleportation
 
 ## Play

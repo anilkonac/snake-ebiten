@@ -88,14 +88,11 @@ func (g *Game) restart() {
 func (g *Game) Update() error {
 	g.handleSettingsInputs()
 
-	if playMusic && !playerMusic.IsPlaying() {
-		playerMusic.Rewind()
-		playerMusic.Play()
-	}
-
 	if g.paused {
 		return nil
 	}
+
+	repeatMusic()
 
 	if g.gameOver {
 		g.timeAfterGameOver += deltaTime
@@ -192,6 +189,11 @@ func (g *Game) handleSettingsInputs() {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.paused = !g.paused
+		if g.paused {
+			playerMusic.Pause()
+		} else {
+			playerMusic.Play()
+		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
 		printFPS = !printFPS
