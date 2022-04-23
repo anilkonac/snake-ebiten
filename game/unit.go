@@ -53,33 +53,9 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 func (u *unit) creteRects() {
 	// Create rectangles for drawing and collision. They are going to split.
 	var rectDraw, rectColl *rectF32
-	length32 := float32(math.Floor(u.length))
-	cX32 := float32(math.Floor(u.headCenterX))
-	cY32 := float32(math.Floor(u.headCenterY))
-	switch u.direction {
-	case directionRight:
-		rectColl = newRect(cX32-length32+halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
-		if u.next != nil {
-			rectDraw = newRect(rectColl.x-snakeWidth, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
-		}
-	case directionLeft:
-		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
-		if u.next != nil {
-			rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
-		}
-	case directionUp:
-		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, snakeWidth, length32)
-		if u.next != nil {
-			rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width, rectColl.height+snakeWidth)
-		}
-	case directionDown:
-		rectColl = newRect(cX32-halfSnakeWidth, cY32-length32+halfSnakeWidth, snakeWidth, length32)
-		if u.next != nil {
-			rectDraw = newRect(rectColl.x, rectColl.y-snakeWidth, rectColl.width, rectColl.height+snakeWidth)
-		}
-	default:
-		panic("Wrong unit direction!!")
-	}
+
+	rectColl = u.createRectColl()
+	rectDraw = u.createRectDraw(rectColl)
 
 	// Remove old rectangles
 	u.rectsCollision = make([]rectF32, 0, 4)
@@ -94,6 +70,48 @@ func (u *unit) creteRects() {
 		return
 	}
 	rectDraw.split(&u.rectsDrawable)
+}
+
+func (u *unit) createRectColl() (rectColl *rectF32) {
+	length32 := float32(math.Floor(u.length))
+	cX32 := float32(math.Floor(u.headCenterX))
+	cY32 := float32(math.Floor(u.headCenterY))
+
+	switch u.direction {
+	case directionRight:
+		rectColl = newRect(cX32-length32+halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
+	case directionLeft:
+		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
+	case directionUp:
+		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, snakeWidth, length32)
+	case directionDown:
+		rectColl = newRect(cX32-halfSnakeWidth, cY32-length32+halfSnakeWidth, snakeWidth, length32)
+	default:
+		panic("Wrong unit direction!!")
+	}
+
+	return
+}
+
+func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
+	if u.next == nil {
+		return
+	}
+
+	switch u.direction {
+	case directionRight:
+		rectDraw = newRect(rectColl.x-snakeWidth, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
+	case directionLeft:
+		rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
+	case directionUp:
+		rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width, rectColl.height+snakeWidth)
+	case directionDown:
+		rectDraw = newRect(rectColl.x, rectColl.y-snakeWidth, rectColl.width, rectColl.height+snakeWidth)
+	default:
+		panic("Wrong unit direction!!")
+	}
+
+	return
 }
 
 func (u *unit) moveUp(dist float64) {
