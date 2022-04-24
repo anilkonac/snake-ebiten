@@ -95,6 +95,7 @@ func (u *unit) createRectColl() (rectColl *rectF32) {
 
 func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 	if u.next == nil {
+		rectDraw = rectColl
 		return
 	}
 

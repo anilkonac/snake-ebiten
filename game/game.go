@@ -67,8 +67,7 @@ var (
 	colorSnake1     = color.RGBA{252, 191, 73, 255}  // ~ Maximum Yellow Red
 	colorSnake2     = color.RGBA{247, 127, 0, 255}   // ~ Orange
 	colorFood       = color.RGBA{214, 40, 40, 255}   // ~ Maximum Red
-	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
-	colorDebug      = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
+	colorText       = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
 )
 
 var (
@@ -180,7 +179,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		// Print mouse coordinates
 		msg := fmt.Sprintf("%d %d", x, y)
 		rect := text.BoundString(fontDebug, msg)
-		text.Draw(screen, msg, fontDebug, 0, -rect.Min.Y+ScreenHeight-rect.Size().Y, colorDebug)
+		text.Draw(screen, msg, fontDebug, 0, -rect.Min.Y+ScreenHeight-rect.Size().Y, colorText)
 	}
 
 	g.printDebugMsgs(screen)
@@ -189,7 +188,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) drawScore(screen *ebiten.Image) {
 	msg := fmt.Sprintf("Score: %d", g.snake.foodEaten)
 	bound := text.BoundString(fontScore, msg)
-	text.Draw(screen, msg, fontScore, scoreTextShiftX, -bound.Min.Y+scoreTextShiftY, colorScore)
+	text.Draw(screen, msg, fontScore, scoreTextShiftX, -bound.Min.Y+scoreTextShiftY, colorText)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
@@ -305,7 +304,7 @@ func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
 		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
 		bound := text.BoundString(fontDebug, msg)
-		text.Draw(screen, msg, fontDebug, ScreenWidth-bound.Size().X-fpsTextShiftX, -bound.Min.Y+fpsTextShiftY, colorDebug)
+		text.Draw(screen, msg, fontDebug, ScreenWidth-bound.Size().X-fpsTextShiftX, -bound.Min.Y+fpsTextShiftY, colorText)
 	}
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
