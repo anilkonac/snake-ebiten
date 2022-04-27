@@ -22,12 +22,9 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/anilkonac/snake-ebiten/game/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 )
 
 // Game constants
@@ -50,16 +47,6 @@ const (
 
 const halfSnakeWidth = snakeWidth / 2.0
 
-const (
-	dpi             = 84
-	fontSizeScore   = 24
-	fontSizeDebug   = 16
-	scoreTextShiftX = 10
-	scoreTextShiftY = 8
-	fpsTextShiftX   = 3
-	fpsTextShiftY   = 2
-)
-
 // Colors to be used in the drawing.
 // Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
 var (
@@ -74,39 +61,7 @@ var (
 var (
 	printFPS   = true
 	debugUnits = false // Draw consecutive units with different colors
-	fontScore  font.Face
-	fontDebug  font.Face
 )
-
-func init() {
-	tt, err := opentype.Parse(fonts.Rounded)
-	if err != nil {
-		panic(err)
-	}
-
-	fontScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    fontSizeScore,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	tt, err = opentype.Parse(fonts.Debug)
-	if err != nil {
-		panic(err)
-	}
-
-	fontDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    fontSizeDebug,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
-	if err != nil {
-		panic(err)
-	}
-}
 
 // Game implements ebiten.Game interface.
 type Game struct {

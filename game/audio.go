@@ -30,7 +30,7 @@ import (
 
 const (
 	sampleRate   = 44100
-	volumeEating = 0.35
+	volumeEating = 0.4
 	volumeMusic  = 0.4
 	volumeHit    = 1.0
 	probEatingA  = 0.74
