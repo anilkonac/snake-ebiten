@@ -70,6 +70,7 @@ type Game struct {
 	gameOver          bool
 	paused            bool
 	timeAfterGameOver float32
+	scoreAnimList     []*scoreAnim
 }
 
 func NewGame() *Game {
@@ -107,9 +108,19 @@ func (g *Game) Update() error {
 	g.handleInput()
 	g.snake.update()
 	g.snake.checkIntersection(&g.gameOver)
+	g.updateScoreAnims()
 	g.checkFood()
 
 	return nil
+}
+
+func (g *Game) updateScoreAnims() {
+	for index, scoreAnim := range g.scoreAnimList {
+		if scoreAnim.update() {
+			g.scoreAnimList = append(g.scoreAnimList[:index], g.scoreAnimList[index+1:]...) // Delete score anim
+			break
+		}
+	}
 }
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
@@ -127,6 +138,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw score text
 	g.drawScore(screen)
 
+	// Draw score anim
+	for _, scoreAnim := range g.scoreAnimList {
+		scoreAnim.draw(screen)
+	}
+
 	if debugUnits {
 		// Mark cursor
 		x, y := ebiten.CursorPosition()
@@ -142,7 +158,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) drawScore(screen *ebiten.Image) {
-	msg := fmt.Sprintf("Score: %d", g.snake.foodEaten)
+	msg := fmt.Sprintf("Score: %05d", int(g.snake.foodEaten)*foodScore)
 	bound := text.BoundString(fontScore, msg)
 	text.Draw(screen, msg, fontScore, scoreTextShiftX, -bound.Min.Y+scoreTextShiftY, colorScore)
 }
@@ -250,6 +266,7 @@ func (g *Game) checkFood() {
 
 	if collides(g.snake.unitHead, g.food, toleranceFood) {
 		g.snake.grow()
+		g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(int(g.food.centerX), int(g.food.centerY)))
 		g.food = newFoodRandLoc()
 		playSoundEating()
 		return

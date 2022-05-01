@@ -10,13 +10,13 @@ require (
 require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220320163800-277f93cfa958 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
-	github.com/hajimehoshi/oto/v2 v2.2.0-alpha.1 // indirect
-	github.com/jezek/xgb v1.0.0 // indirect
+	github.com/hajimehoshi/oto/v2 v2.2.0-alpha.2 // indirect
+	github.com/jezek/xgb v1.0.1 // indirect
 	github.com/jfreymuth/oggvorbis v1.0.3 // indirect
 	github.com/jfreymuth/vorbis v1.0.2 // indirect
-	golang.org/x/exp/shiny v0.0.0-20220426173459-3bcf042a4bf5 // indirect
+	golang.org/x/exp/shiny v0.0.0-20220428152302-39d4317da171 // indirect
 	golang.org/x/mobile v0.0.0-20220414153400-ce6a79cf6a13 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
+	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
