@@ -266,11 +266,15 @@ func (g *Game) checkFood() {
 
 	if collides(g.snake.unitHead, g.food, toleranceFood) {
 		g.snake.grow()
-		g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(int(g.food.centerX), int(g.food.centerY)))
+		g.triggerScoreAnim()
 		g.food = newFoodRandLoc()
 		playSoundEating()
 		return
 	}
+}
+
+func (g *Game) triggerScoreAnim() {
+	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(int(g.food.centerX), int(g.food.centerY), !g.snake.unitHead.direction.isVertical()))
 }
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
