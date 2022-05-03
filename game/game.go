@@ -274,7 +274,22 @@ func (g *Game) checkFood() {
 }
 
 func (g *Game) triggerScoreAnim() {
-	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(int(g.food.centerX), int(g.food.centerY), !g.snake.unitHead.direction.isVertical()))
+	x, y := g.snake.unitHead.headCenterX, g.snake.unitHead.headCenterY
+
+	// Correct the x and y position so the base score animation position will be the tip of the head,
+	// not the head center.
+	switch g.snake.unitHead.direction {
+	case directionUp:
+		y -= halfSnakeWidth
+	case directionDown:
+		y += halfSnakeWidth
+	case directionRight:
+		x += halfSnakeWidth
+	case directionLeft:
+		x -= halfSnakeWidth
+
+	}
+	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(float32(x), float32(y), !g.snake.unitHead.direction.isVertical()))
 }
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {

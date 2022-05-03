@@ -1,10 +1,7 @@
 package game
 
 import (
-	"image"
-
 	"github.com/anilkonac/snake-ebiten/game/resources/fonts"
-	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -20,9 +17,8 @@ const (
 )
 
 var (
-	fontScore      font.Face
-	fontDebug      font.Face
-	boundScoreAnim image.Rectangle
+	fontScore font.Face
+	fontDebug font.Face
 )
 
 func init() {
@@ -39,8 +35,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	boundScoreAnim = text.BoundString(fontScore, foodScoreMsg)
+	initScoreAnim()
 
 	tt, err = opentype.Parse(fonts.Debug)
 	if err != nil {

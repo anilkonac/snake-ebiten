@@ -32,7 +32,7 @@ const (
 
 type food struct {
 	isActive         bool
-	centerX, centerY float32 // for debugging purposes
+	centerX, centerY float32
 	rects            []rectF32
 }
 

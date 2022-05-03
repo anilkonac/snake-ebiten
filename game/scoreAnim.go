@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
+	"image"
 	"image/color"
 	"math/rand"
 	"strconv"
@@ -29,37 +30,49 @@ import (
 
 const (
 	foodScore      = 100
-	decrementAlpha = 4
-	scoreAnimSpeed = 1
-	scoreAnimShift = snakeWidth
+	decrementAlpha = 6
+	scoreAnimSpeed = 20
 )
 
-var foodScoreMsg = strconv.Itoa(foodScore)
+var (
+	scoreAnimShiftX    float32
+	scoreAnimShiftY    float32
+	scoreAnimBound     image.Rectangle
+	scoreAnimBoundSize image.Point
+	foodScoreMsg       = strconv.Itoa(foodScore)
+)
 
 type scoreAnim struct {
-	x, y      int
+	x, y      float32
 	alpha     uint8
 	direction directionT
 }
 
-func newScoreAnim(x, y int, verticalDir bool) *scoreAnim {
+func initScoreAnim() {
+	scoreAnimBound = text.BoundString(fontScore, foodScoreMsg)
+	scoreAnimBoundSize = scoreAnimBound.Size()
+	scoreAnimShiftX = halfSnakeWidth + float32(scoreAnimBoundSize.X)/2.0
+	scoreAnimShiftY = halfSnakeWidth + float32(scoreAnimBoundSize.Y)/2.0
+}
+
+func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
 	// Determine the direction of the new animation
 	var dir directionT
 	if tossUp := rand.Intn(2); verticalDir {
 		dir = directionT(tossUp)
 		// Shift the animation near the snake
 		if dir == directionUp {
-			y -= scoreAnimShift
+			y -= scoreAnimShiftY
 		} else {
-			y += scoreAnimShift
+			y += scoreAnimShiftY
 		}
 	} else {
 		dir = 2 + directionT(tossUp)
 		// Shift the animation near the snake
 		if dir == directionLeft {
-			x -= scoreAnimShift
+			x -= scoreAnimShiftX
 		} else {
-			x += scoreAnimShift
+			x += scoreAnimShiftX
 		}
 	}
 	return &scoreAnim{x, y, colorScore.A, dir}
@@ -68,13 +81,13 @@ func newScoreAnim(x, y int, verticalDir bool) *scoreAnim {
 func (s *scoreAnim) update() (finished bool) {
 	switch s.direction {
 	case directionUp:
-		s.y -= scoreAnimSpeed
+		s.y -= scoreAnimSpeed * deltaTime
 	case directionDown:
-		s.y += scoreAnimSpeed
+		s.y += scoreAnimSpeed * deltaTime
 	case directionLeft:
-		s.x -= scoreAnimSpeed
+		s.x -= scoreAnimSpeed * deltaTime
 	case directionRight:
-		s.x += scoreAnimSpeed
+		s.x += scoreAnimSpeed * deltaTime
 	}
 
 	if int(s.alpha)-decrementAlpha <= 0 {
@@ -85,5 +98,7 @@ func (s *scoreAnim) update() (finished bool) {
 }
 
 func (s *scoreAnim) draw(dst *ebiten.Image) {
-	text.Draw(dst, foodScoreMsg, fontScore, s.x-(boundScoreAnim.Max.X/2.0), -(boundScoreAnim.Min.Y/2.0)+s.y, color.RGBA{colorScore.R, colorScore.G, colorScore.B, s.alpha})
+	text.Draw(dst, foodScoreMsg, fontScore,
+		int(s.x)-(scoreAnimBound.Max.X/2.0), int(s.y)-(scoreAnimBound.Min.Y/2.0),
+		color.RGBA{colorScore.R, colorScore.G, colorScore.B, s.alpha})
 }
