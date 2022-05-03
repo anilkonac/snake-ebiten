@@ -50,12 +50,13 @@ const halfSnakeWidth = snakeWidth / 2.0
 // Colors to be used in the drawing.
 // Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
 var (
-	colorBackground = color.RGBA{0, 48, 73, 255}     // ~ Prussian Blue
-	colorSnake1     = color.RGBA{252, 191, 73, 255}  // ~ Maximum Yellow Red
-	colorSnake2     = color.RGBA{247, 127, 0, 255}   // ~ Orange
-	colorFood       = color.RGBA{214, 40, 40, 255}   // ~ Maximum Red
-	colorDebug      = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
-	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
+	colorBackground     = color.RGBA{0, 48, 73, 255}     // ~ Prussian Blue
+	colorSnake1         = color.RGBA{252, 191, 73, 255}  // ~ Maximum Yellow Red
+	colorSnake2         = color.RGBA{247, 127, 0, 255}   // ~ Orange
+	colorFood           = color.RGBA{214, 40, 40, 255}   // ~ Maximum Red
+	colorDebug          = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
+	colorScore          = color.RGBA{247, 127, 0, 255}   // ~ Orange
+	colorScoreAnimBackg = color.RGBA{93, 78, 46, 255}    // Mixed color for score animation text background
 )
 
 var (
@@ -135,13 +136,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		draw(screen, unit)
 	}
 
-	// Draw score text
-	g.drawScore(screen)
-
 	// Draw score anim
 	for _, scoreAnim := range g.scoreAnimList {
-		scoreAnim.draw(screen)
+		draw(screen, scoreAnim)
 	}
+
+	// Draw score text
+	g.drawScore(screen)
 
 	if debugUnits {
 		// Mark cursor

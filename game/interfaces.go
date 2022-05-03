@@ -34,15 +34,24 @@ type drawable interface {
 	drawEnabled() bool
 	drawableRects() []rectF32
 	Color() color.Color
-	drawingSize() *[2]float32
+	drawOptions() *ebiten.DrawTrianglesShaderOptions
+	shader() *ebiten.Shader
 	drawDebugInfo(dst *ebiten.Image)
 }
 
-var shaderRound *ebiten.Shader
+var (
+	shaderRound *ebiten.Shader
+	shaderScore *ebiten.Shader
+)
 
 func init() {
 	var err error
 	shaderRound, err = ebiten.NewShader(shaders.Round)
+	if err != nil {
+		panic(err)
+	}
+
+	shaderScore, err = ebiten.NewShader(shaders.Score)
 	if err != nil {
 		panic(err)
 	}
@@ -53,27 +62,8 @@ func draw(dst *ebiten.Image, src drawable) {
 		return
 	}
 
-	var radius float32
-	var isVertical float32
-	switch v := src.(type) {
-	case *unit:
-		radius = halfSnakeWidth
-		if v.direction.isVertical() {
-			isVertical = 1.0
-		}
-	case *food:
-		radius = halfFoodLength
-	}
-
 	vertices, indices := triangles(src)
-	op := &ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"Radius":     radius,
-			"IsVertical": isVertical,
-			"Dimension":  (*src.drawingSize())[:],
-		},
-	}
-	dst.DrawTrianglesShader(vertices, indices, shaderRound, op)
+	dst.DrawTrianglesShader(vertices, indices, src.shader(), src.drawOptions())
 
 	if debugUnits {
 		src.drawDebugInfo(dst)

@@ -71,7 +71,7 @@ func (f food) collisionRects() []rectF32 {
 }
 
 // Implement drawable interface
-// ------------------------------
+// ----------------------------
 func (f food) drawEnabled() bool {
 	return f.isActive
 }
@@ -84,8 +84,18 @@ func (f food) Color() color.Color {
 	return colorFood
 }
 
-func (f food) drawingSize() *[2]float32 {
-	return &[2]float32{foodLength, foodLength}
+func (f food) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+	return &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius":     float32(halfFoodLength),
+			"IsVertical": float32(1.0),
+			"Size":       []float32{foodLength, foodLength},
+		},
+	}
+}
+
+func (f food) shader() *ebiten.Shader {
+	return shaderRound
 }
 
 func (f food) drawDebugInfo(dst *ebiten.Image) {

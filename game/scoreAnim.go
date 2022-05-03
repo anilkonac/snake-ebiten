@@ -30,22 +30,24 @@ import (
 
 const (
 	foodScore      = 100
-	decrementAlpha = 6
+	decrementAlpha = 8
 	scoreAnimSpeed = 20
 )
 
 var (
-	scoreAnimShiftX    float32
-	scoreAnimShiftY    float32
-	scoreAnimBound     image.Rectangle
-	scoreAnimBoundSize image.Point
-	foodScoreMsg       = strconv.Itoa(foodScore)
+	scoreAnimShiftX     float32
+	scoreAnimShiftY     float32
+	scoreAnimBound      image.Rectangle
+	scoreAnimBoundSize  image.Point
+	foodScoreMsg        = strconv.Itoa(foodScore)
+	scoreAnimBoundImage *ebiten.Image
 )
 
 type scoreAnim struct {
 	x, y      float32
 	alpha     uint8
 	direction directionT
+	rects     []rectF32
 }
 
 func initScoreAnim() {
@@ -53,9 +55,15 @@ func initScoreAnim() {
 	scoreAnimBoundSize = scoreAnimBound.Size()
 	scoreAnimShiftX = halfSnakeWidth + float32(scoreAnimBoundSize.X)/2.0
 	scoreAnimShiftY = halfSnakeWidth + float32(scoreAnimBoundSize.Y)/2.0
+	scoreAnimBoundImage = ebiten.NewImage(scoreAnimBoundSize.X, scoreAnimBoundSize.Y)
+	scoreAnimBoundImage.Fill(colorScoreAnimBackg)
+	text.Draw(scoreAnimBoundImage, foodScoreMsg, fontScore,
+		-scoreAnimBound.Min.X, -scoreAnimBound.Min.Y,
+		colorScore)
 }
 
 func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
+
 	// Determine the direction of the new animation
 	var dir directionT
 	if tossUp := rand.Intn(2); verticalDir {
@@ -75,7 +83,32 @@ func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
 			x += scoreAnimShiftX
 		}
 	}
-	return &scoreAnim{x, y, colorScore.A, dir}
+
+	newAnim := &scoreAnim{
+		x:         x,
+		y:         y,
+		alpha:     colorScore.A,
+		direction: dir,
+	}
+
+	newAnim.createRects()
+
+	return newAnim
+}
+
+func (s *scoreAnim) createRects() {
+	// Create a rectangle to be split
+	pureRect := rectF32{
+		x:      s.x - float32(scoreAnimBoundSize.X)/2.0,
+		y:      s.y - float32(scoreAnimBoundSize.Y)/2.0,
+		width:  float32(scoreAnimBoundSize.X),
+		height: float32(scoreAnimBoundSize.Y),
+	}
+	// Init/Remove rects
+	s.rects = make([]rectF32, 0, 4) // Remove rects
+
+	// Split this rectangle if it is on a screen edge.
+	pureRect.split(&s.rects)
 }
 
 func (s *scoreAnim) update() (finished bool) {
@@ -90,6 +123,9 @@ func (s *scoreAnim) update() (finished bool) {
 		s.x += scoreAnimSpeed * deltaTime
 	}
 
+	// Update rectangles of this anim
+	s.createRects()
+
 	if int(s.alpha)-decrementAlpha <= 0 {
 		finished = true
 	}
@@ -97,8 +133,34 @@ func (s *scoreAnim) update() (finished bool) {
 	return
 }
 
-func (s *scoreAnim) draw(dst *ebiten.Image) {
-	text.Draw(dst, foodScoreMsg, fontScore,
-		int(s.x)-(scoreAnimBound.Max.X/2.0), int(s.y)-(scoreAnimBound.Min.Y/2.0),
-		color.RGBA{colorScore.R, colorScore.G, colorScore.B, s.alpha})
+// Implement drawable interface
+// ----------------------------
+func (s *scoreAnim) drawEnabled() bool {
+	return true
+}
+
+func (s *scoreAnim) drawableRects() []rectF32 {
+	return s.rects
+}
+
+func (s *scoreAnim) Color() color.Color {
+	return colorScoreAnimBackg
+}
+
+func (s *scoreAnim) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+	// create and return the options
+	return &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Alpha": float32(s.alpha),
+		},
+		Images: [4]*ebiten.Image{scoreAnimBoundImage, nil, nil, nil},
+	}
+}
+
+func (s *scoreAnim) shader() *ebiten.Shader {
+	return shaderScore
+}
+
+func (s *scoreAnim) drawDebugInfo(dst *ebiten.Image) {
+
 }

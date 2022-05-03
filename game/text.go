@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	dpi             = 84
-	fontSizeScore   = 24
-	fontSizeDebug   = 16
+	dpi             = 72
+	fontSizeScore   = 32
+	fontSizeDebug   = 24
 	scoreTextShiftX = 10
 	scoreTextShiftY = 8
 	fpsTextShiftX   = 3

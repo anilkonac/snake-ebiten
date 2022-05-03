@@ -198,15 +198,37 @@ func (u *unit) Color() color.Color {
 	return u.color
 }
 
-func (u *unit) drawingSize() *[2]float32 {
+func (u *unit) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+	// Specify IsVertical  uniform variable
+	var isVertical float32
+	if u.direction.isVertical() {
+		isVertical = 1.0
+	}
+
+	// Specify Size uniform variable
+	var drawWidth, drawHeight float32
 	flooredLength := float32(math.Floor(u.length))
 	if u.next != nil {
 		flooredLength += snakeWidth
 	}
 	if u.direction.isVertical() {
-		return &[2]float32{snakeWidth, flooredLength}
+		drawWidth, drawHeight = snakeWidth, flooredLength
+	} else {
+		drawWidth, drawHeight = flooredLength, snakeWidth
 	}
-	return &[2]float32{flooredLength, snakeWidth}
+
+	// create and return the options
+	return &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius":     float32(halfSnakeWidth),
+			"IsVertical": isVertical,
+			"Size":       []float32{drawWidth, drawHeight},
+		},
+	}
+}
+
+func (u *unit) shader() *ebiten.Shader {
+	return shaderRound
 }
 
 func (u *unit) drawDebugInfo(dst *ebiten.Image) {
