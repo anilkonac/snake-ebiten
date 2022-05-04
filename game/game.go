@@ -160,8 +160,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) drawScore(screen *ebiten.Image) {
 	msg := fmt.Sprintf("Score: %05d", int(g.snake.foodEaten)*foodScore)
-	bound := text.BoundString(fontScore, msg)
-	text.Draw(screen, msg, fontScore, scoreTextShiftX, -bound.Min.Y+scoreTextShiftY, colorScore)
+	text.Draw(screen, msg, fontScore, scoreTextShiftX, -boundScoreText.Min.Y+scoreTextShiftY, colorScore)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
@@ -296,8 +295,7 @@ func (g *Game) triggerScoreAnim() {
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
 		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
-		bound := text.BoundString(fontDebug, msg)
-		text.Draw(screen, msg, fontDebug, ScreenWidth-bound.Size().X-fpsTextShiftX, -bound.Min.Y+fpsTextShiftY, colorDebug)
+		text.Draw(screen, msg, fontDebug, ScreenWidth-boundFPSText.Size().X-fpsTextShiftX, -boundFPSText.Min.Y+fpsTextShiftY, colorDebug)
 	}
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {

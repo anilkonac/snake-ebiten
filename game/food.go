@@ -30,6 +30,14 @@ const (
 	halfFoodLength = foodLength / 2.0
 )
 
+var drawOptionsFood = &ebiten.DrawTrianglesShaderOptions{
+	Uniforms: map[string]interface{}{
+		"Radius":     float32(halfFoodLength),
+		"IsVertical": float32(1.0),
+		"Size":       []float32{foodLength, foodLength},
+	},
+}
+
 type food struct {
 	isActive         bool
 	centerX, centerY float32
@@ -85,13 +93,7 @@ func (f food) Color() color.Color {
 }
 
 func (f food) drawOptions() *ebiten.DrawTrianglesShaderOptions {
-	return &ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"Radius":     float32(halfFoodLength),
-			"IsVertical": float32(1.0),
-			"Size":       []float32{foodLength, foodLength},
-		},
-	}
+	return drawOptionsFood
 }
 
 func (f food) shader() *ebiten.Shader {

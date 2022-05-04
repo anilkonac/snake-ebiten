@@ -35,6 +35,7 @@ type unit struct {
 	color          *color.RGBA
 	next           *unit
 	prev           *unit
+	drawOpts       *ebiten.DrawTrianglesShaderOptions
 }
 
 func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
@@ -45,12 +46,12 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 		direction:   direction,
 		color:       color,
 	}
-	newUnit.creteRects()
+	newUnit.update()
 
 	return newUnit
 }
 
-func (u *unit) creteRects() {
+func (u *unit) createRects() {
 	// Create rectangles for drawing and collision. They are going to split.
 	var rectDraw, rectColl *rectF32
 
@@ -113,6 +114,40 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 	}
 
 	return
+}
+
+func (u *unit) createDrawOptions() {
+	// Specify IsVertical  uniform variable
+	var isVertical float32
+	if u.direction.isVertical() {
+		isVertical = 1.0
+	}
+
+	// Specify Size uniform variable
+	var drawWidth, drawHeight float32
+	flooredLength := float32(math.Floor(u.length))
+	if u.next != nil {
+		flooredLength += snakeWidth
+	}
+	if u.direction.isVertical() {
+		drawWidth, drawHeight = snakeWidth, flooredLength
+	} else {
+		drawWidth, drawHeight = flooredLength, snakeWidth
+	}
+
+	// create and return the options
+	u.drawOpts = &ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius":     float32(halfSnakeWidth),
+			"IsVertical": isVertical,
+			"Size":       []float32{drawWidth, drawHeight},
+		},
+	}
+}
+
+func (u *unit) update() {
+	u.createRects()       // Update rectangles of this unit
+	u.createDrawOptions() // Update draw options
 }
 
 func (u *unit) moveUp(dist float64) {
@@ -199,32 +234,7 @@ func (u *unit) Color() color.Color {
 }
 
 func (u *unit) drawOptions() *ebiten.DrawTrianglesShaderOptions {
-	// Specify IsVertical  uniform variable
-	var isVertical float32
-	if u.direction.isVertical() {
-		isVertical = 1.0
-	}
-
-	// Specify Size uniform variable
-	var drawWidth, drawHeight float32
-	flooredLength := float32(math.Floor(u.length))
-	if u.next != nil {
-		flooredLength += snakeWidth
-	}
-	if u.direction.isVertical() {
-		drawWidth, drawHeight = snakeWidth, flooredLength
-	} else {
-		drawWidth, drawHeight = flooredLength, snakeWidth
-	}
-
-	// create and return the options
-	return &ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"Radius":     float32(halfSnakeWidth),
-			"IsVertical": isVertical,
-			"Size":       []float32{drawWidth, drawHeight},
-		},
-	}
+	return u.drawOpts
 }
 
 func (u *unit) shader() *ebiten.Shader {

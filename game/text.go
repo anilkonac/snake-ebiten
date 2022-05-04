@@ -1,7 +1,10 @@
 package game
 
 import (
+	"image"
+
 	"github.com/anilkonac/snake-ebiten/game/resources/fonts"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
@@ -12,13 +15,15 @@ const (
 	fontSizeDebug   = 24
 	scoreTextShiftX = 10
 	scoreTextShiftY = 8
-	fpsTextShiftX   = 3
-	fpsTextShiftY   = 2
+	fpsTextShiftX   = 0
+	fpsTextShiftY   = 3
 )
 
 var (
-	fontScore font.Face
-	fontDebug font.Face
+	fontScore      font.Face
+	fontDebug      font.Face
+	boundScoreText image.Rectangle
+	boundFPSText   image.Rectangle
 )
 
 func init() {
@@ -36,6 +41,7 @@ func init() {
 		panic(err)
 	}
 	initScoreAnim()
+	boundScoreText = text.BoundString(fontScore, "Score: 55555")
 
 	tt, err = opentype.Parse(fonts.Debug)
 	if err != nil {
@@ -50,4 +56,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	boundFPSText = text.BoundString(fontDebug, "TPS: 60.0\tFPS: 165.0")
 }
