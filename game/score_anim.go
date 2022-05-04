@@ -35,12 +35,13 @@ const (
 )
 
 var (
-	scoreAnimShiftX     float32
-	scoreAnimShiftY     float32
-	scoreAnimBound      image.Rectangle
-	scoreAnimBoundSize  image.Point
-	foodScoreMsg        = strconv.Itoa(foodScore)
-	scoreAnimBoundImage *ebiten.Image
+	scoreAnimShiftX      float32
+	scoreAnimShiftY      float32
+	scoreAnimBound       image.Rectangle
+	scoreAnimBoundSize   image.Point
+	foodScoreMsg         = strconv.Itoa(foodScore)
+	scoreAnimImage       *ebiten.Image
+	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
 )
 
 type scoreAnim struct {
@@ -53,17 +54,27 @@ type scoreAnim struct {
 func initScoreAnim() {
 	scoreAnimBound = text.BoundString(fontScore, foodScoreMsg)
 	scoreAnimBoundSize = scoreAnimBound.Size()
+
 	scoreAnimShiftX = halfSnakeWidth + float32(scoreAnimBoundSize.X)/2.0
 	scoreAnimShiftY = halfSnakeWidth + float32(scoreAnimBoundSize.Y)/2.0
-	scoreAnimBoundImage = ebiten.NewImage(scoreAnimBoundSize.X, scoreAnimBoundSize.Y)
-	scoreAnimBoundImage.Fill(colorScoreAnimBackg)
-	text.Draw(scoreAnimBoundImage, foodScoreMsg, fontScore,
+
+	// Prepare score animation text image.
+	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSize.X, scoreAnimBoundSize.Y)
+	scoreAnimImage.Fill(color.Black)
+	text.Draw(scoreAnimImage, foodScoreMsg, fontScore,
 		-scoreAnimBound.Min.X, -scoreAnimBound.Min.Y,
-		colorScore)
+		color.RGBA{255, 0, 0, 255})
+
+	// Prepare draw options
+	drawOptionsScoreAnim = ebiten.DrawTrianglesShaderOptions{
+		Uniforms: map[string]interface{}{
+			"RawAlpha": float32(1.0),
+		},
+		Images: [4]*ebiten.Image{scoreAnimImage, nil, nil, nil},
+	}
 }
 
 func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
-
 	// Determine the direction of the new animation
 	var dir directionT
 	if tossUp := rand.Intn(2); verticalDir {
@@ -112,6 +123,7 @@ func (s *scoreAnim) createRects() {
 }
 
 func (s *scoreAnim) update() (finished bool) {
+	// Move animation coordinate
 	switch s.direction {
 	case directionUp:
 		s.y -= scoreAnimSpeed * deltaTime
@@ -126,10 +138,13 @@ func (s *scoreAnim) update() (finished bool) {
 	// Update rectangles of this anim
 	s.createRects()
 
+	// Update alpha
 	if int(s.alpha)-decrementAlpha <= 0 {
 		finished = true
 	}
 	s.alpha -= decrementAlpha
+	drawOptionsScoreAnim.Uniforms["RawAlpha"] = float32(s.alpha)
+
 	return
 }
 
@@ -144,17 +159,11 @@ func (s *scoreAnim) drawableRects() []rectF32 {
 }
 
 func (s *scoreAnim) Color() color.Color {
-	return colorScoreAnimBackg
+	return colorScore
 }
 
 func (s *scoreAnim) drawOptions() *ebiten.DrawTrianglesShaderOptions {
-	// create and return the options
-	return &ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"Alpha": float32(s.alpha),
-		},
-		Images: [4]*ebiten.Image{scoreAnimBoundImage, nil, nil, nil},
-	}
+	return &drawOptionsScoreAnim
 }
 
 func (s *scoreAnim) shader() *ebiten.Shader {

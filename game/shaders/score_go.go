@@ -2,4 +2,4 @@
 
 package shaders
 
-var Score = []byte("//go:build ignore\n\npackage main\n\nvar Alpha float\n\nfunc Fragment(position vec4, texCoord vec2, color vec4) vec4 {\n\timgColor := imageSrc0At(texCoord)\n\tnormColor := color / 0xffff\n\tvar normAlpha float\n\tif imgColor == normColor {\n\t\tnormAlpha = 0.0\n\t} else {\n\t\tnormAlpha = Alpha / 0xff\n\t}\n\timgColor.rgb *= normAlpha\n\timgColor.a = normAlpha\n\treturn imgColor\n}\n")
+var Score = []byte("//go:build ignore\n\npackage main\n\nvar RawAlpha float\n\nfunc Fragment(position vec4, texCoord vec2, color vec4) vec4 {\n\timgColor := imageSrc0At(texCoord)\n\tredIntensity := imgColor.r // Get font drawing information from red color\n\n\tfontColor := color / 0xffff   // Normalize the score color between 0.0 and 1.0\n\tfontColor.a = RawAlpha / 0xff // Normalize alpha between 0.0 and 1.0\n\tfontColor.rgb *= fontColor.a  // Apply alpha to fontColor\n\n\t// Interpolate between the font color and the full transparent color according to the red channel.\n\tnewColor := redIntensity*fontColor + (1-redIntensity)*vec4(0.0)\n\n\treturn newColor\n}\n")
