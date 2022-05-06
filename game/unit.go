@@ -229,7 +229,7 @@ func (u *unit) drawableRects() []rectF32 {
 	return u.rectsDrawable
 }
 
-func (u *unit) Color() color.Color {
+func (u *unit) Color() *color.RGBA {
 	return u.color
 }
 

@@ -33,7 +33,7 @@ type collidable interface {
 type drawable interface {
 	drawEnabled() bool
 	drawableRects() []rectF32
-	Color() color.Color
+	Color() *color.RGBA
 	drawOptions() *ebiten.DrawTrianglesShaderOptions
 	shader() *ebiten.Shader
 	drawDebugInfo(dst *ebiten.Image)

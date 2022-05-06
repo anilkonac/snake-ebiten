@@ -29,9 +29,10 @@ import (
 )
 
 const (
-	foodScore      = 100
-	decrementAlpha = 8
-	scoreAnimSpeed = 20
+	foodScore         = 100
+	decrementAlpha    = 8
+	scoreAnimSpeed    = 20
+	relativeRandomDir = false
 )
 
 var (
@@ -66,33 +67,35 @@ func initScoreAnim() {
 		color.RGBA{255, 0, 0, 255})
 
 	// Prepare draw options
-	drawOptionsScoreAnim = ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"RawAlpha": float32(1.0),
-		},
-		Images: [4]*ebiten.Image{scoreAnimImage, nil, nil, nil},
+	drawOptionsScoreAnim.Uniforms = map[string]interface{}{
+		"Alpha": float32(1.0),
 	}
+	drawOptionsScoreAnim.Images = [4]*ebiten.Image{scoreAnimImage, nil, nil, nil}
 }
 
 func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
 	// Determine the direction of the new animation
 	var dir directionT
-	if tossUp := rand.Intn(2); verticalDir {
-		dir = directionT(tossUp)
-		// Shift the animation near the snake
-		if dir == directionUp {
-			y -= scoreAnimShiftY
+	if relativeRandomDir {
+		if tossUp := rand.Intn(2); verticalDir {
+			dir = directionT(tossUp)
 		} else {
-			y += scoreAnimShiftY
+			dir = 2 + directionT(tossUp)
 		}
 	} else {
-		dir = 2 + directionT(tossUp)
-		// Shift the animation near the snake
-		if dir == directionLeft {
-			x -= scoreAnimShiftX
-		} else {
-			x += scoreAnimShiftX
-		}
+		dir = directionUp
+	}
+
+	// Shift the animation near the snake
+	switch dir {
+	case directionUp:
+		y -= scoreAnimShiftY
+	case directionDown:
+		y += scoreAnimShiftY
+	case directionLeft:
+		x -= scoreAnimShiftX
+	case directionRight:
+		x += scoreAnimShiftX
 	}
 
 	newAnim := &scoreAnim{
@@ -123,7 +126,7 @@ func (s *scoreAnim) createRects() {
 }
 
 func (s *scoreAnim) update() (finished bool) {
-	// Move animation coordinate
+	// Move animation
 	switch s.direction {
 	case directionUp:
 		s.y -= scoreAnimSpeed * deltaTime
@@ -138,12 +141,12 @@ func (s *scoreAnim) update() (finished bool) {
 	// Update rectangles of this anim
 	s.createRects()
 
-	// Update alpha
+	// Decrease alpha
 	if int(s.alpha)-decrementAlpha <= 0 {
 		finished = true
 	}
 	s.alpha -= decrementAlpha
-	drawOptionsScoreAnim.Uniforms["RawAlpha"] = float32(s.alpha)
+	drawOptionsScoreAnim.Uniforms["Alpha"] = float32(s.alpha) / float32(255)
 
 	return
 }
@@ -158,8 +161,8 @@ func (s *scoreAnim) drawableRects() []rectF32 {
 	return s.rects
 }
 
-func (s *scoreAnim) Color() color.Color {
-	return colorScore
+func (s *scoreAnim) Color() *color.RGBA {
+	return &colorScore
 }
 
 func (s *scoreAnim) drawOptions() *ebiten.DrawTrianglesShaderOptions {

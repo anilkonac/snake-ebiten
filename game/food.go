@@ -88,8 +88,8 @@ func (f food) drawableRects() []rectF32 {
 	return f.rects
 }
 
-func (f food) Color() color.Color {
-	return colorFood
+func (f food) Color() *color.RGBA {
+	return &colorFood
 }
 
 func (f food) drawOptions() *ebiten.DrawTrianglesShaderOptions {
