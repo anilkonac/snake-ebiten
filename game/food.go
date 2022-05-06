@@ -30,9 +30,17 @@ const (
 	halfFoodLength = foodLength / 2.0
 )
 
+var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
+	Uniforms: map[string]interface{}{
+		"Radius":     float32(halfFoodLength),
+		"IsVertical": float32(1.0),
+		"Size":       []float32{foodLength, foodLength},
+	},
+}
+
 type food struct {
 	isActive         bool
-	centerX, centerY float32 // for debugging purposes
+	centerX, centerY float32
 	rects            []rectF32
 }
 
@@ -71,7 +79,7 @@ func (f food) collisionRects() []rectF32 {
 }
 
 // Implement drawable interface
-// ------------------------------
+// ----------------------------
 func (f food) drawEnabled() bool {
 	return f.isActive
 }
@@ -80,18 +88,22 @@ func (f food) drawableRects() []rectF32 {
 	return f.rects
 }
 
-func (f food) Color() color.Color {
-	return colorFood
+func (f food) Color() *color.RGBA {
+	return &colorFood
 }
 
-func (f food) drawingSize() *[2]float32 {
-	return &[2]float32{foodLength, foodLength}
+func (f food) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+	return &drawOptionsFood
+}
+
+func (f food) shader() *ebiten.Shader {
+	return shaderRound
 }
 
 func (f food) drawDebugInfo(dst *ebiten.Image) {
 	cX := float64(f.centerX)
 	cY := float64(f.centerY)
-	markPoint(dst, cX, cY, colorSnake1)
+	markPoint(dst, cX, cY, 4, colorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
 		rect.drawOuterRect(dst, colorSnake1)

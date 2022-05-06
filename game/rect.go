@@ -94,9 +94,8 @@ func intersects(rectA, rectB *rectF32, tolerance float32) bool {
 	return true
 }
 
-func (r rectF32) vertices(color color.Color) []ebiten.Vertex {
-	uR, uG, uB, uA := color.RGBA()
-	fR, fG, fB, fA := float32(uR), float32(uG), float32(uB), float32(uA)
+func (r rectF32) vertices(clr *color.RGBA) []ebiten.Vertex {
+	var fR, fG, fB, fA float32 = float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0, float32(clr.A) / 255.0
 	return []ebiten.Vertex{
 		{ // Top Left corner
 			DstX:   r.x,
@@ -147,7 +146,7 @@ func (r rectF32) drawOuterRect(dst *ebiten.Image, clr color.Color) {
 	ebitenutil.DrawRect(dst, x64, y64, width64, height64, color.RGBA{255, 255, 255, 96})
 }
 
-func markPoint(dst *ebiten.Image, pX, pY float64, clr color.Color) {
-	ebitenutil.DrawLine(dst, pX-3, pY, pX+3, pY, clr)
-	ebitenutil.DrawLine(dst, pX, pY-3, pX, pY+3, clr)
+func markPoint(dst *ebiten.Image, pX, pY, length float64, clr color.Color) {
+	ebitenutil.DrawLine(dst, pX-length, pY, pX+length, pY, clr)
+	ebitenutil.DrawLine(dst, pX, pY-length, pX, pY+length, clr)
 }

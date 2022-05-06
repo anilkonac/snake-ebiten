@@ -35,6 +35,7 @@ type unit struct {
 	color          *color.RGBA
 	next           *unit
 	prev           *unit
+	drawOpts       ebiten.DrawTrianglesShaderOptions
 }
 
 func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
@@ -44,13 +45,18 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 		length:      length,
 		direction:   direction,
 		color:       color,
+		drawOpts: ebiten.DrawTrianglesShaderOptions{
+			Uniforms: map[string]interface{}{
+				"Radius": float32(halfSnakeWidth),
+			},
+		},
 	}
-	newUnit.creteRects()
+	newUnit.update()
 
 	return newUnit
 }
 
-func (u *unit) creteRects() {
+func (u *unit) createRects() {
 	// Create rectangles for drawing and collision. They are going to split.
 	var rectDraw, rectColl *rectF32
 
@@ -95,6 +101,7 @@ func (u *unit) createRectColl() (rectColl *rectF32) {
 
 func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 	if u.next == nil {
+		rectDraw = rectColl
 		return
 	}
 
@@ -112,6 +119,35 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 	}
 
 	return
+}
+
+func (u *unit) update() {
+	u.createRects()       // Update rectangles of this unit
+	u.updateDrawOptions() // Update draw options
+}
+
+func (u *unit) updateDrawOptions() {
+	// Specify IsVertical  uniform variable
+	var isVertical float32
+	if u.direction.isVertical() {
+		isVertical = 1.0
+	}
+
+	// Specify Size uniform variable
+	var drawWidth, drawHeight float32
+	flooredLength := float32(math.Floor(u.length))
+	if u.next != nil {
+		flooredLength += snakeWidth
+	}
+	if u.direction.isVertical() {
+		drawWidth, drawHeight = snakeWidth, flooredLength
+	} else {
+		drawWidth, drawHeight = flooredLength, snakeWidth
+	}
+
+	// Update the options
+	u.drawOpts.Uniforms["IsVertical"] = isVertical
+	u.drawOpts.Uniforms["Size"] = []float32{drawWidth, drawHeight}
 }
 
 func (u *unit) moveUp(dist float64) {
@@ -153,7 +189,7 @@ func (u *unit) moveLeft(dist float64) {
 func (u *unit) markHeadCenters(dst *ebiten.Image) {
 	headCX := float64(u.headCenterX)
 	headCY := float64(u.headCenterY)
-	markPoint(dst, headCX, headCY, colorFood)
+	markPoint(dst, headCX, headCY, 4, colorFood)
 
 	var offset float64 = 0
 	if u.next == nil {
@@ -170,7 +206,7 @@ func (u *unit) markHeadCenters(dst *ebiten.Image) {
 		headCX = float64(u.headCenterX+u.length) - offset
 	}
 	// mark head center at the other side
-	markPoint(dst, headCX, headCY, colorFood)
+	markPoint(dst, headCX, headCY, 4, colorFood)
 }
 
 // Implement collidable interface
@@ -193,19 +229,16 @@ func (u *unit) drawableRects() []rectF32 {
 	return u.rectsDrawable
 }
 
-func (u *unit) Color() color.Color {
+func (u *unit) Color() *color.RGBA {
 	return u.color
 }
 
-func (u *unit) drawingSize() *[2]float32 {
-	flooredLength := float32(math.Floor(u.length))
-	if u.next != nil {
-		flooredLength += snakeWidth
-	}
-	if u.direction.isVertical() {
-		return &[2]float32{snakeWidth, flooredLength}
-	}
-	return &[2]float32{flooredLength, snakeWidth}
+func (u *unit) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+	return &u.drawOpts
+}
+
+func (u *unit) shader() *ebiten.Shader {
+	return shaderRound
 }
 
 func (u *unit) drawDebugInfo(dst *ebiten.Image) {

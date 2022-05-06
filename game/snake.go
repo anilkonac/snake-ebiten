@@ -111,7 +111,7 @@ func (s *snake) updateHead(dist float64) {
 	}
 
 	if s.unitHead != s.unitTail { // Avoid unnecessary updates
-		s.unitHead.creteRects() // Update rectangles of this unit
+		s.unitHead.update()
 	}
 
 	s.distAfterTurn += dist
@@ -139,7 +139,7 @@ func (s *snake) updateTail(dist float64) {
 		s.unitTail.next = nil
 	}
 
-	s.unitTail.creteRects() // Update rectangles of this unit
+	s.unitTail.update()
 }
 
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {

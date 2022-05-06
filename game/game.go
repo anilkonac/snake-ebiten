@@ -23,8 +23,8 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
 // Game constants
@@ -48,12 +48,14 @@ const (
 const halfSnakeWidth = snakeWidth / 2.0
 
 // Colors to be used in the drawing.
-// Palette: https://coolors.co/palette/ef476f-ffd166-06d6a0-118ab2-073b4c
+// Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
 var (
-	colorBackground = color.RGBA{7, 59, 76, 255}     // Midnight Green Eagle Green
-	colorSnake1     = color.RGBA{255, 209, 102, 255} // Orange Yellow Crayola
-	colorSnake2     = color.RGBA{6, 214, 160, 255}   // Caribbean Green
-	colorFood       = color.RGBA{239, 71, 111, 255}  // Paradise Pink
+	colorBackground = color.RGBA{0, 48, 73, 255}     // ~ Prussian Blue
+	colorSnake1     = color.RGBA{252, 191, 73, 255}  // ~ Maximum Yellow Red
+	colorSnake2     = color.RGBA{247, 127, 0, 255}   // ~ Orange
+	colorFood       = color.RGBA{214, 40, 40, 255}   // ~ Maximum Red
+	colorDebug      = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
+	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
 )
 
 var (
@@ -68,6 +70,7 @@ type Game struct {
 	gameOver          bool
 	paused            bool
 	timeAfterGameOver float32
+	scoreAnimList     []*scoreAnim
 }
 
 func NewGame() *Game {
@@ -105,35 +108,19 @@ func (g *Game) Update() error {
 	g.handleInput()
 	g.snake.update()
 	g.snake.checkIntersection(&g.gameOver)
+	g.updateScoreAnims()
 	g.checkFood()
 
 	return nil
 }
 
-// Draw is called every frame (typically 1/60[s] for 60Hz display).
-func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(colorBackground)
-
-	// Draw food
-	draw(screen, g.food)
-
-	// Draw the snake
-	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
-		draw(screen, unit)
+func (g *Game) updateScoreAnims() {
+	for index, scoreAnim := range g.scoreAnimList {
+		if scoreAnim.update() {
+			g.scoreAnimList = append(g.scoreAnimList[:index], g.scoreAnimList[index+1:]...) // Delete score anim
+			break
+		}
 	}
-
-	if debugUnits {
-		x, y := ebiten.CursorPosition()
-		markPoint(screen, float64(x), float64(y), color.White)
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%d %d", x, y), 0, 15) // Print mouse coordinates
-	}
-
-	g.printDebugMsgs(screen)
-}
-
-// Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return ScreenWidth, ScreenHeight
 }
 
 func (g *Game) handleInput() {
@@ -234,19 +221,81 @@ func (g *Game) checkFood() {
 
 	if collides(g.snake.unitHead, g.food, toleranceFood) {
 		g.snake.grow()
+		g.triggerScoreAnim()
 		g.food = newFoodRandLoc()
 		playSoundEating()
 		return
 	}
 }
 
+func (g *Game) triggerScoreAnim() {
+	x, y := g.snake.unitHead.headCenterX, g.snake.unitHead.headCenterY
+
+	// Correct the x and y position so the base score animation position will be the tip of the head,
+	// not the head center.
+	switch g.snake.unitHead.direction {
+	case directionUp:
+		y -= halfSnakeWidth
+	case directionDown:
+		y += halfSnakeWidth
+	case directionRight:
+		x += halfSnakeWidth
+	case directionLeft:
+		x -= halfSnakeWidth
+
+	}
+	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(float32(x), float32(y), !g.snake.unitHead.direction.isVertical()))
+}
+
+// Draw is called every frame (typically 1/60[s] for 60Hz display).
+func (g *Game) Draw(screen *ebiten.Image) {
+	screen.Fill(colorBackground)
+
+	// Draw food
+	draw(screen, g.food)
+
+	// Draw the snake
+	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+		draw(screen, unit)
+	}
+
+	// Draw score anim
+	for _, scoreAnim := range g.scoreAnimList {
+		draw(screen, scoreAnim)
+	}
+
+	// Draw score text
+	g.drawScore(screen)
+
+	if debugUnits {
+		// Mark cursor
+		x, y := ebiten.CursorPosition()
+		markPoint(screen, float64(x), float64(y), 5, colorSnake2)
+
+		// Print mouse coordinates
+		msg := fmt.Sprintf("%d %d", x, y)
+		rect := text.BoundString(fontDebug, msg)
+		text.Draw(screen, msg, fontDebug, 0, -rect.Min.Y+ScreenHeight-rect.Size().Y, colorDebug)
+	}
+
+	g.printDebugMsgs(screen)
+}
+
+func (g *Game) drawScore(screen *ebiten.Image) {
+	msg := fmt.Sprintf("Score: %05d", int(g.snake.foodEaten)*foodScore)
+	text.Draw(screen, msg, fontScore, scoreTextShiftX, -boundScoreText.Min.Y+scoreTextShiftY, colorScore)
+}
+
+// Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return ScreenWidth, ScreenHeight
+}
+
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {
 	if printFPS {
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("TPS: %.1f  FPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS()),
-			ScreenWidth-130, 0)
+		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
+		text.Draw(screen, msg, fontDebug, ScreenWidth-boundFPSText.Size().X-fpsTextShiftX, -boundFPSText.Min.Y+fpsTextShiftY, colorDebug)
 	}
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Food Eaten: %d", g.snake.foodEaten), 0, 0)
-	ebitenutil.DebugPrintAt(screen, "Press M to pause/play music", 0, ScreenHeight-15)
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 	// 	totalLength += unit.length
