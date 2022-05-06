@@ -12,7 +12,7 @@ import (
 const (
 	dpi             = 72
 	fontSizeScore   = 32
-	fontSizeDebug   = 24
+	fontSizeDebug   = 20
 	scoreTextShiftX = 10
 	scoreTextShiftY = 8
 	fpsTextShiftX   = 0

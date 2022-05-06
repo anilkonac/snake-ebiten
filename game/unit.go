@@ -121,6 +121,11 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 	return
 }
 
+func (u *unit) update() {
+	u.createRects()       // Update rectangles of this unit
+	u.updateDrawOptions() // Update draw options
+}
+
 func (u *unit) updateDrawOptions() {
 	// Specify IsVertical  uniform variable
 	var isVertical float32
@@ -143,11 +148,6 @@ func (u *unit) updateDrawOptions() {
 	// Update the options
 	u.drawOpts.Uniforms["IsVertical"] = isVertical
 	u.drawOpts.Uniforms["Size"] = []float32{drawWidth, drawHeight}
-}
-
-func (u *unit) update() {
-	u.createRects()       // Update rectangles of this unit
-	u.updateDrawOptions() // Update draw options
 }
 
 func (u *unit) moveUp(dist float64) {

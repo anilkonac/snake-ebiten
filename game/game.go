@@ -123,50 +123,6 @@ func (g *Game) updateScoreAnims() {
 	}
 }
 
-// Draw is called every frame (typically 1/60[s] for 60Hz display).
-func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(colorBackground)
-
-	// Draw food
-	draw(screen, g.food)
-
-	// Draw the snake
-	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
-		draw(screen, unit)
-	}
-
-	// Draw score anim
-	for _, scoreAnim := range g.scoreAnimList {
-		draw(screen, scoreAnim)
-	}
-
-	// Draw score text
-	g.drawScore(screen)
-
-	if debugUnits {
-		// Mark cursor
-		x, y := ebiten.CursorPosition()
-		markPoint(screen, float64(x), float64(y), 5, colorSnake2)
-
-		// Print mouse coordinates
-		msg := fmt.Sprintf("%d %d", x, y)
-		rect := text.BoundString(fontDebug, msg)
-		text.Draw(screen, msg, fontDebug, 0, -rect.Min.Y+ScreenHeight-rect.Size().Y, colorDebug)
-	}
-
-	g.printDebugMsgs(screen)
-}
-
-func (g *Game) drawScore(screen *ebiten.Image) {
-	msg := fmt.Sprintf("Score: %05d", int(g.snake.foodEaten)*foodScore)
-	text.Draw(screen, msg, fontScore, scoreTextShiftX, -boundScoreText.Min.Y+scoreTextShiftY, colorScore)
-}
-
-// Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return ScreenWidth, ScreenHeight
-}
-
 func (g *Game) handleInput() {
 	pressedLeft := inpututil.IsKeyJustPressed(ebiten.KeyLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA)
 	pressedRight := inpututil.IsKeyJustPressed(ebiten.KeyRight) || inpututil.IsKeyJustPressed(ebiten.KeyD)
@@ -289,6 +245,50 @@ func (g *Game) triggerScoreAnim() {
 
 	}
 	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(float32(x), float32(y), !g.snake.unitHead.direction.isVertical()))
+}
+
+// Draw is called every frame (typically 1/60[s] for 60Hz display).
+func (g *Game) Draw(screen *ebiten.Image) {
+	screen.Fill(colorBackground)
+
+	// Draw food
+	draw(screen, g.food)
+
+	// Draw the snake
+	for unit := g.snake.unitHead; unit != nil; unit = unit.next {
+		draw(screen, unit)
+	}
+
+	// Draw score anim
+	for _, scoreAnim := range g.scoreAnimList {
+		draw(screen, scoreAnim)
+	}
+
+	// Draw score text
+	g.drawScore(screen)
+
+	if debugUnits {
+		// Mark cursor
+		x, y := ebiten.CursorPosition()
+		markPoint(screen, float64(x), float64(y), 5, colorSnake2)
+
+		// Print mouse coordinates
+		msg := fmt.Sprintf("%d %d", x, y)
+		rect := text.BoundString(fontDebug, msg)
+		text.Draw(screen, msg, fontDebug, 0, -rect.Min.Y+ScreenHeight-rect.Size().Y, colorDebug)
+	}
+
+	g.printDebugMsgs(screen)
+}
+
+func (g *Game) drawScore(screen *ebiten.Image) {
+	msg := fmt.Sprintf("Score: %05d", int(g.snake.foodEaten)*foodScore)
+	text.Draw(screen, msg, fontScore, scoreTextShiftX, -boundScoreText.Min.Y+scoreTextShiftY, colorScore)
+}
+
+// Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+	return ScreenWidth, ScreenHeight
 }
 
 func (g *Game) printDebugMsgs(screen *ebiten.Image) {

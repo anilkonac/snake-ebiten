@@ -21,7 +21,6 @@ package game
 import (
 	"image"
 	"image/color"
-	"math/rand"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,7 +35,6 @@ const (
 )
 
 var (
-	scoreAnimShiftX      float32
 	scoreAnimShiftY      float32
 	scoreAnimBound       image.Rectangle
 	scoreAnimBoundSize   image.Point
@@ -56,7 +54,6 @@ func initScoreAnim() {
 	scoreAnimBound = text.BoundString(fontScore, foodScoreMsg)
 	scoreAnimBoundSize = scoreAnimBound.Size()
 
-	scoreAnimShiftX = halfSnakeWidth + float32(scoreAnimBoundSize.X)/2.0
 	scoreAnimShiftY = halfSnakeWidth + float32(scoreAnimBoundSize.Y)/2.0
 
 	// Prepare score animation text image.
@@ -74,35 +71,11 @@ func initScoreAnim() {
 }
 
 func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
-	// Determine the direction of the new animation
-	var dir directionT
-	if relativeRandomDir {
-		if tossUp := rand.Intn(2); verticalDir {
-			dir = directionT(tossUp)
-		} else {
-			dir = 2 + directionT(tossUp)
-		}
-	} else {
-		dir = directionUp
-	}
-
-	// Shift the animation near the snake
-	switch dir {
-	case directionUp:
-		y -= scoreAnimShiftY
-	case directionDown:
-		y += scoreAnimShiftY
-	case directionLeft:
-		x -= scoreAnimShiftX
-	case directionRight:
-		x += scoreAnimShiftX
-	}
-
 	newAnim := &scoreAnim{
 		x:         x,
-		y:         y,
+		y:         y - scoreAnimShiftY,
 		alpha:     colorScore.A,
-		direction: dir,
+		direction: directionUp,
 	}
 
 	newAnim.createRects()
@@ -127,16 +100,7 @@ func (s *scoreAnim) createRects() {
 
 func (s *scoreAnim) update() (finished bool) {
 	// Move animation
-	switch s.direction {
-	case directionUp:
-		s.y -= scoreAnimSpeed * deltaTime
-	case directionDown:
-		s.y += scoreAnimSpeed * deltaTime
-	case directionLeft:
-		s.x -= scoreAnimSpeed * deltaTime
-	case directionRight:
-		s.x += scoreAnimSpeed * deltaTime
-	}
+	s.y -= scoreAnimSpeed * deltaTime
 
 	// Update rectangles of this anim
 	s.createRects()

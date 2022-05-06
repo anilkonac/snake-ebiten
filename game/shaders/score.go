@@ -14,7 +14,7 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	// Set alpha of font color to uniform variable
 	fontColor *= Alpha
 
-	// Interpolate between the font color and the full transparent color according to the red channel.
+	// Interpolate between font color and full transparent color according to the red channel.
 	newColor := redIntensity*fontColor + (1.0-redIntensity)*vec4(0.0)
 
 	return newColor
