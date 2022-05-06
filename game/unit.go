@@ -35,7 +35,7 @@ type unit struct {
 	color          *color.RGBA
 	next           *unit
 	prev           *unit
-	drawOpts       *ebiten.DrawTrianglesShaderOptions
+	drawOpts       ebiten.DrawTrianglesShaderOptions
 }
 
 func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
@@ -45,6 +45,11 @@ func newUnit(headCenterX, headCenterY, length float64, direction directionT, col
 		length:      length,
 		direction:   direction,
 		color:       color,
+		drawOpts: ebiten.DrawTrianglesShaderOptions{
+			Uniforms: map[string]interface{}{
+				"Radius": float32(halfSnakeWidth),
+			},
+		},
 	}
 	newUnit.update()
 
@@ -116,7 +121,7 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 	return
 }
 
-func (u *unit) createDrawOptions() {
+func (u *unit) updateDrawOptions() {
 	// Specify IsVertical  uniform variable
 	var isVertical float32
 	if u.direction.isVertical() {
@@ -135,19 +140,14 @@ func (u *unit) createDrawOptions() {
 		drawWidth, drawHeight = flooredLength, snakeWidth
 	}
 
-	// create and return the options
-	u.drawOpts = &ebiten.DrawTrianglesShaderOptions{
-		Uniforms: map[string]interface{}{
-			"Radius":     float32(halfSnakeWidth),
-			"IsVertical": isVertical,
-			"Size":       []float32{drawWidth, drawHeight},
-		},
-	}
+	// Update the options
+	u.drawOpts.Uniforms["IsVertical"] = isVertical
+	u.drawOpts.Uniforms["Size"] = []float32{drawWidth, drawHeight}
 }
 
 func (u *unit) update() {
 	u.createRects()       // Update rectangles of this unit
-	u.createDrawOptions() // Update draw options
+	u.updateDrawOptions() // Update draw options
 }
 
 func (u *unit) moveUp(dist float64) {
@@ -234,7 +234,7 @@ func (u *unit) Color() *color.RGBA {
 }
 
 func (u *unit) drawOptions() *ebiten.DrawTrianglesShaderOptions {
-	return u.drawOpts
+	return &u.drawOpts
 }
 
 func (u *unit) shader() *ebiten.Shader {
