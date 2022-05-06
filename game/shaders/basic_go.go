@@ -2,4 +2,4 @@
 
 package shaders
 
-var Basic = []byte("//go:build ignore\n\npackage main\n\nfunc Fragment(position vec4, texCoord vec2, color vec4) vec4 {\n\tcolor.rgb *= normColor.a\n\treturn color\n}\n")
+var Basic = []byte("//go:build ignore\n\npackage main\n\nfunc Fragment(position vec4, texCoord vec2, color vec4) vec4 {\n\tcolor.rgb *= color.a\n\treturn color\n}\n")

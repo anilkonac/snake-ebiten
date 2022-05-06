@@ -21,6 +21,7 @@ package game
 import (
 	"bytes"
 	"math/rand"
+	"time"
 
 	sound "github.com/anilkonac/snake-ebiten/game/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -49,6 +50,8 @@ var (
 func init() {
 	prepareAudio()
 	playerMusic.Play()
+
+	go repeatMusic()
 }
 
 func prepareAudio() {
@@ -115,9 +118,14 @@ func playSoundHit() {
 	playerHit.Play()
 }
 
+// Designed to run as a goroutine
 func repeatMusic() {
-	if playMusic && !playerMusic.IsPlaying() {
-		playerMusic.Rewind()
-		playerMusic.Play()
+	for {
+		if playMusic && !playerMusic.IsPlaying() {
+			playerMusic.Rewind()
+			playerMusic.Play()
+		}
+
+		time.Sleep(time.Second * 2)
 	}
 }

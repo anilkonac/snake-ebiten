@@ -95,8 +95,6 @@ func (g *Game) Update() error {
 		return nil
 	}
 
-	repeatMusic()
-
 	if g.gameOver {
 		g.timeAfterGameOver += deltaTime
 		if g.timeAfterGameOver >= restartTime {
@@ -178,8 +176,10 @@ func (g *Game) handleSettingsInputs() {
 		g.paused = !g.paused
 		if g.paused {
 			playerMusic.Pause()
+			playMusic = false
 		} else {
 			playerMusic.Play()
+			playMusic = true
 		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {

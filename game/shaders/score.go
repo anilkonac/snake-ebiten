@@ -15,7 +15,5 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	fontColor *= Alpha
 
 	// Interpolate between font color and full transparent color according to the red channel.
-	newColor := redIntensity*fontColor + (1.0-redIntensity)*vec4(0.0)
-
-	return newColor
+	return redIntensity*fontColor + (1.0-redIntensity)*vec4(0.0)
 }
