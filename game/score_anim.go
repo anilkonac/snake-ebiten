@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
-	"image"
 	"image/color"
 	"strconv"
 
@@ -36,7 +35,8 @@ const (
 
 var (
 	scoreAnimShiftY      float32
-	scoreAnimBoundSize   image.Point
+	scoreAnimBoundWidth  float32
+	scoreAnimBoundHeight float32
 	scoreAnimImage       *ebiten.Image
 	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
 )
@@ -49,11 +49,13 @@ type scoreAnim struct {
 }
 
 func initScoreAnim() {
+	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(foodScore)
 	scoreAnimBound := text.BoundString(fontScore, foodScoreMsg)
-	scoreAnimBoundSize = scoreAnimBound.Size()
-
-	scoreAnimShiftY = halfSnakeWidth + float32(scoreAnimBoundSize.Y)/2.0
+	scoreAnimBoundSize := scoreAnimBound.Size()
+	scoreAnimBoundWidth = float32(scoreAnimBoundSize.X)
+	scoreAnimBoundHeight = float32(scoreAnimBoundSize.Y)
+	scoreAnimShiftY = halfSnakeWidth + scoreAnimBoundHeight/2.0
 
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSize.X, scoreAnimBoundSize.Y)
@@ -85,10 +87,10 @@ func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
 func (s *scoreAnim) createRects() {
 	// Create a rectangle to be split
 	pureRect := rectF32{
-		x:      s.x - float32(scoreAnimBoundSize.X)/2.0,
-		y:      s.y - float32(scoreAnimBoundSize.Y)/2.0,
-		width:  float32(scoreAnimBoundSize.X),
-		height: float32(scoreAnimBoundSize.Y),
+		x:      s.x - scoreAnimBoundWidth/2.0,
+		y:      s.y - scoreAnimBoundHeight/2.0,
+		width:  scoreAnimBoundWidth,
+		height: scoreAnimBoundHeight,
 	}
 	// Init/Remove rects
 	s.rects = make([]rectF32, 0, 4) // Remove rects
