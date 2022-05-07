@@ -29,29 +29,28 @@ import (
 
 const (
 	foodScore         = 100
-	decrementAlpha    = 8
+	decrementAlpha    = 8.0 / 255.0
 	scoreAnimSpeed    = 20
 	relativeRandomDir = false
 )
 
 var (
 	scoreAnimShiftY      float32
-	scoreAnimBound       image.Rectangle
 	scoreAnimBoundSize   image.Point
-	foodScoreMsg         = strconv.Itoa(foodScore)
 	scoreAnimImage       *ebiten.Image
 	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
 )
 
 type scoreAnim struct {
 	x, y      float32
-	alpha     uint8
+	alpha     float32
 	direction directionT
 	rects     []rectF32
 }
 
 func initScoreAnim() {
-	scoreAnimBound = text.BoundString(fontScore, foodScoreMsg)
+	foodScoreMsg := strconv.Itoa(foodScore)
+	scoreAnimBound := text.BoundString(fontScore, foodScoreMsg)
 	scoreAnimBoundSize = scoreAnimBound.Size()
 
 	scoreAnimShiftY = halfSnakeWidth + float32(scoreAnimBoundSize.Y)/2.0
@@ -74,7 +73,7 @@ func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
 	newAnim := &scoreAnim{
 		x:         x,
 		y:         y - scoreAnimShiftY,
-		alpha:     colorScore.A,
+		alpha:     float32(colorScore.A) / 255.0,
 		direction: directionUp,
 	}
 
@@ -98,7 +97,8 @@ func (s *scoreAnim) createRects() {
 	pureRect.split(&s.rects)
 }
 
-func (s *scoreAnim) update() (finished bool) {
+// Returns true when the animation is finished
+func (s *scoreAnim) update() bool {
 	// Move animation
 	s.y -= scoreAnimSpeed * deltaTime
 
@@ -106,13 +106,10 @@ func (s *scoreAnim) update() (finished bool) {
 	s.createRects()
 
 	// Decrease alpha
-	if int(s.alpha)-decrementAlpha <= 0 {
-		finished = true
-	}
 	s.alpha -= decrementAlpha
-	drawOptionsScoreAnim.Uniforms["Alpha"] = float32(s.alpha) / float32(255)
+	drawOptionsScoreAnim.Uniforms["Alpha"] = s.alpha
 
-	return
+	return (s.alpha <= 0.0)
 }
 
 // Implement drawable interface

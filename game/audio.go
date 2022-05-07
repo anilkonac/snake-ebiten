@@ -49,8 +49,6 @@ var (
 
 func init() {
 	prepareAudio()
-	playerMusic.Play()
-
 	go repeatMusic()
 }
 
