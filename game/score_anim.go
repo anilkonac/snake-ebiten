@@ -27,10 +27,9 @@ import (
 )
 
 const (
-	foodScore         = 100
-	decrementAlpha    = 8.0 / 255.0
-	scoreAnimSpeed    = 20
-	relativeRandomDir = false
+	foodScore      = 100
+	decrementAlpha = 8.0 / 255.0
+	scoreAnimSpeed = 20
 )
 
 var (
