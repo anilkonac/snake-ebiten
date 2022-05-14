@@ -34,14 +34,13 @@ const (
 
 var (
 	scoreAnimShiftY      float32
-	scoreAnimBoundWidth  float32
-	scoreAnimBoundHeight float32
+	scoreAnimBoundSize   vec32
 	scoreAnimImage       *ebiten.Image
 	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
 )
 
 type scoreAnim struct {
-	x, y      float32
+	pos       vec32
 	alpha     float32
 	direction directionT
 	rects     []rectF32
@@ -51,13 +50,13 @@ func initScoreAnim() {
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(foodScore)
 	scoreAnimBound := text.BoundString(fontScore, foodScoreMsg)
-	scoreAnimBoundSize := scoreAnimBound.Size()
-	scoreAnimBoundWidth = float32(scoreAnimBoundSize.X)
-	scoreAnimBoundHeight = float32(scoreAnimBoundSize.Y)
-	scoreAnimShiftY = halfSnakeWidth + scoreAnimBoundHeight/2.0
+	scoreAnimBoundSizeI := scoreAnimBound.Size()
+	scoreAnimBoundSize.x = float32(scoreAnimBoundSizeI.X)
+	scoreAnimBoundSize.y = float32(scoreAnimBoundSizeI.Y)
+	scoreAnimShiftY = halfSnakeWidth + scoreAnimBoundSize.y/2.0
 
 	// Prepare score animation text image.
-	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSize.X, scoreAnimBoundSize.Y)
+	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
 	scoreAnimImage.Fill(color.Black)
 	text.Draw(scoreAnimImage, foodScoreMsg, fontScore,
 		-scoreAnimBound.Min.X, -scoreAnimBound.Min.Y,
@@ -70,10 +69,12 @@ func initScoreAnim() {
 	drawOptionsScoreAnim.Images = [4]*ebiten.Image{scoreAnimImage, nil, nil, nil}
 }
 
-func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
+func newScoreAnim(pos vec32) *scoreAnim {
 	newAnim := &scoreAnim{
-		x:         x,
-		y:         y - scoreAnimShiftY,
+		pos: vec32{
+			x: pos.x,
+			y: pos.y - scoreAnimShiftY,
+		},
 		alpha:     float32(colorScore.A) / 255.0,
 		direction: directionUp,
 	}
@@ -86,10 +87,11 @@ func newScoreAnim(x, y float32, verticalDir bool) *scoreAnim {
 func (s *scoreAnim) createRects() {
 	// Create a rectangle to be split
 	pureRect := rectF32{
-		x:      s.x - scoreAnimBoundWidth/2.0,
-		y:      s.y - scoreAnimBoundHeight/2.0,
-		width:  scoreAnimBoundWidth,
-		height: scoreAnimBoundHeight,
+		pos: vec32{
+			x: s.pos.x - scoreAnimBoundSize.x/2.0,
+			y: s.pos.y - scoreAnimBoundSize.y/2.0,
+		},
+		size: vec32{scoreAnimBoundSize.x, scoreAnimBoundSize.y},
 	}
 	// Init/Remove rects
 	s.rects = make([]rectF32, 0, 4) // Remove rects
@@ -101,7 +103,7 @@ func (s *scoreAnim) createRects() {
 // Returns true when the animation is finished
 func (s *scoreAnim) update() bool {
 	// Move animation
-	s.y -= scoreAnimSpeed * deltaTime
+	s.pos.y -= scoreAnimSpeed * deltaTime
 
 	// Update rectangles of this anim
 	s.createRects()

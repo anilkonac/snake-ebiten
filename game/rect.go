@@ -27,41 +27,41 @@ import (
 
 // Rectangle compatible with float32 type parameters of the ebiten.DrawTriangleShader function.
 type rectF32 struct {
-	x, y             float32
-	width, height    float32
-	xInUnit, yInUnit float32
+	pos       vec32
+	size      vec32
+	posInUnit vec32
 }
 
-func newRect(x, y, width, height float32) *rectF32 {
-	return &rectF32{x, y, width, height, 0, 0}
+func newRect(pos, size vec32) *rectF32 {
+	return &rectF32{pos, size, vec32{0, 0}}
 }
 
 // Divide rectangle up to 4 based on where it is off-screen.
 func (r rectF32) split(rects *[]rectF32) {
-	if (r.width <= 0) || (r.height <= 0) {
+	if (r.size.x <= 0) || (r.size.y <= 0) {
 		return
 	}
 
-	rightX := r.x + r.width
-	bottomY := r.y + r.height
+	rightX := r.pos.x + r.size.x
+	bottomY := r.pos.y + r.size.y
 
-	if r.x < 0 { // left part is off-screen
-		rectF32{r.x + ScreenWidth, r.y, -r.x, r.height, 0, 0}.split(rects) // teleported left part
-		rectF32{0, r.y, rightX, r.height, -r.x, 0}.split(rects)            // part in the screen
+	if r.pos.x < 0 { // left part is off-screen
+		rectF32{vec32{r.pos.x + ScreenWidth, r.pos.y}, vec32{-r.pos.x, r.size.y}, vec32{0, 0}}.split(rects) // teleported left part
+		rectF32{vec32{0, r.pos.y}, vec32{rightX, r.size.y}, vec32{-r.pos.x, 0}}.split(rects)                // part in the screen
 		return
 	} else if rightX > ScreenWidth { // right part is off-screen
-		rectF32{0, r.y, rightX - ScreenWidth, r.height, ScreenWidth - r.x, 0}.split(rects) // teleported right part
-		rectF32{r.x, r.y, ScreenWidth - r.x, r.height, 0, 0}.split(rects)                  // part in the screen
+		rectF32{vec32{0, r.pos.y}, vec32{rightX - ScreenWidth, r.size.y}, vec32{ScreenWidth - r.pos.x, 0}}.split(rects) // teleported right part
+		rectF32{vec32{r.pos.x, r.pos.y}, vec32{ScreenWidth - r.pos.x, r.size.y}, vec32{0, 0}}.split(rects)              // part in the screen
 		return
 	}
 
-	if r.y < 0 { // upper part is off-screen
-		rectF32{r.x, ScreenHeight + r.y, r.width, -r.y, r.xInUnit, 0}.split(rects) // teleported upper part
-		rectF32{r.x, 0, r.width, bottomY, r.xInUnit, -r.y}.split(rects)            // part in the screen
+	if r.pos.y < 0 { // upper part is off-screen
+		rectF32{vec32{r.pos.x, ScreenHeight + r.pos.y}, vec32{r.size.x, -r.pos.y}, vec32{r.posInUnit.x, 0}}.split(rects) // teleported upper part
+		rectF32{vec32{r.pos.x, 0}, vec32{r.size.x, bottomY}, vec32{r.posInUnit.x, -r.pos.y}}.split(rects)                // part in the screen
 		return
 	} else if bottomY > ScreenHeight { // bottom part is off-screen
-		rectF32{r.x, 0, r.width, bottomY - ScreenHeight, r.xInUnit, ScreenHeight - r.y}.split(rects) // teleported bottom part
-		rectF32{r.x, r.y, r.width, ScreenHeight - r.y, r.xInUnit, 0}.split(rects)                    // part in the screen
+		rectF32{vec32{r.pos.x, 0}, vec32{r.size.x, bottomY - ScreenHeight}, vec32{r.posInUnit.x, ScreenHeight - r.pos.y}}.split(rects) // teleported bottom part
+		rectF32{vec32{r.pos.x, r.pos.y}, vec32{r.size.x, ScreenHeight - r.pos.y}, vec32{r.posInUnit.x, 0}}.split(rects)                // part in the screen
 		return
 	}
 
@@ -70,24 +70,24 @@ func (r rectF32) split(rects *[]rectF32) {
 }
 
 func intersects(rectA, rectB *rectF32, tolerance float32) bool {
-	aRightX := rectA.x + rectA.width
-	bRightX := rectB.x + rectB.width
-	aBottomY := rectA.y + rectA.height
-	bBottomY := rectB.y + rectB.height
+	aRightX := rectA.pos.x + rectA.size.x
+	bRightX := rectB.pos.x + rectB.size.x
+	aBottomY := rectA.pos.y + rectA.size.y
+	bBottomY := rectB.pos.y + rectB.size.y
 
-	if (rectA.x-rectB.x <= tolerance) && (aRightX-rectB.x <= tolerance) { // rectA is on the left side of rectB
+	if (rectA.pos.x-rectB.pos.x <= tolerance) && (aRightX-rectB.pos.x <= tolerance) { // rectA is on the left side of rectB
 		return false
 	}
 
-	if (rectA.x-bRightX >= -tolerance) && (aRightX-bRightX >= -tolerance) { // rectA is on the right side of rectB
+	if (rectA.pos.x-bRightX >= -tolerance) && (aRightX-bRightX >= -tolerance) { // rectA is on the right side of rectB
 		return false
 	}
 
-	if (rectA.y-rectB.y <= tolerance) && (aBottomY-rectB.y <= tolerance) { // rectA is above rectB
+	if (rectA.pos.y-rectB.pos.y <= tolerance) && (aBottomY-rectB.pos.y <= tolerance) { // rectA is above rectB
 		return false
 	}
 
-	if (rectA.y-bBottomY >= -tolerance) && (aBottomY-bBottomY >= -tolerance) { // rectA is under rectB
+	if (rectA.pos.y-bBottomY >= -tolerance) && (aBottomY-bBottomY >= -tolerance) { // rectA is under rectB
 		return false
 	}
 
@@ -98,40 +98,40 @@ func (r rectF32) vertices(clr *color.RGBA) []ebiten.Vertex {
 	var fR, fG, fB, fA float32 = float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0, float32(clr.A) / 255.0
 	return []ebiten.Vertex{
 		{ // Top Left corner
-			DstX:   r.x,
-			DstY:   r.y,
-			SrcX:   r.xInUnit,
-			SrcY:   r.yInUnit,
+			DstX:   r.pos.x,
+			DstY:   r.pos.y,
+			SrcX:   r.posInUnit.x,
+			SrcY:   r.posInUnit.y,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
 			ColorA: fA,
 		},
 		{ // Top Right Corner
-			DstX:   r.x + r.width,
-			DstY:   r.y,
-			SrcX:   r.xInUnit + r.width,
-			SrcY:   r.yInUnit,
+			DstX:   r.pos.x + r.size.x,
+			DstY:   r.pos.y,
+			SrcX:   r.posInUnit.x + r.size.x,
+			SrcY:   r.posInUnit.y,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
 			ColorA: fA,
 		},
 		{ // Bottom Left Corner
-			DstX:   r.x,
-			DstY:   r.y + r.height,
-			SrcX:   r.xInUnit,
-			SrcY:   r.yInUnit + r.height,
+			DstX:   r.pos.x,
+			DstY:   r.pos.y + r.size.y,
+			SrcX:   r.posInUnit.x,
+			SrcY:   r.posInUnit.y + r.size.y,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
 			ColorA: fA,
 		},
 		{ // Bottom Right Corner
-			DstX:   r.x + r.width,
-			DstY:   r.y + r.height,
-			SrcX:   r.xInUnit + r.width,
-			SrcY:   r.yInUnit + r.height,
+			DstX:   r.pos.x + r.size.x,
+			DstY:   r.pos.y + r.size.y,
+			SrcX:   r.posInUnit.x + r.size.x,
+			SrcY:   r.posInUnit.y + r.size.y,
 			ColorR: fR,
 			ColorG: fG,
 			ColorB: fB,
@@ -141,12 +141,12 @@ func (r rectF32) vertices(clr *color.RGBA) []ebiten.Vertex {
 }
 
 func (r rectF32) drawOuterRect(dst *ebiten.Image, clr color.Color) {
-	x64, y64 := float64(r.x), float64(r.y)
-	width64, height64 := float64(r.width), float64(r.height)
-	ebitenutil.DrawRect(dst, x64, y64, width64, height64, color.RGBA{255, 255, 255, 96})
+	pos64 := r.pos.to64()
+	size64 := r.size.to64()
+	ebitenutil.DrawRect(dst, pos64.x, pos64.y, size64.x, size64.y, color.RGBA{255, 255, 255, 96})
 }
 
-func markPoint(dst *ebiten.Image, pX, pY, length float64, clr color.Color) {
-	ebitenutil.DrawLine(dst, pX-length, pY, pX+length, pY, clr)
-	ebitenutil.DrawLine(dst, pX, pY-length, pX, pY+length, clr)
+func markPoint(dst *ebiten.Image, p vec64, length float64, clr color.Color) {
+	ebitenutil.DrawLine(dst, p.x-length, p.y, p.x+length, p.y, clr)
+	ebitenutil.DrawLine(dst, p.x, p.y-length, p.x, p.y+length, clr)
 }

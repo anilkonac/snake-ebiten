@@ -39,24 +39,24 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 }
 
 type food struct {
-	isActive         bool
-	centerX, centerY float32
-	rects            []rectF32
+	isActive bool
+	center   vec32
+	rects    []rectF32
 }
 
-func newFood(centerX, centerY float32) *food {
+func newFood(center vec32) *food {
 	newFood := &food{
-		centerX: centerX,
-		centerY: centerY,
-		rects:   make([]rectF32, 0, 4),
+		center: center,
+		rects:  make([]rectF32, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
 	pureRect := rectF32{
-		x:      centerX - halfFoodLength,
-		y:      centerY - halfFoodLength,
-		width:  foodLength,
-		height: foodLength,
+		pos: vec32{
+			x: center.x - halfFoodLength,
+			y: center.y - halfFoodLength,
+		},
+		size: vec32{foodLength, foodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
 	pureRect.split(&newFood.rects)
@@ -65,7 +65,7 @@ func newFood(centerX, centerY float32) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(float32(rand.Intn(ScreenWidth)), float32(rand.Intn(ScreenHeight)))
+	return newFood(vecI{rand.Intn(ScreenWidth), rand.Intn(ScreenHeight)}.to32())
 }
 
 // Implement collidable interface
@@ -101,9 +101,7 @@ func (f food) shader() *ebiten.Shader {
 }
 
 func (f food) drawDebugInfo(dst *ebiten.Image) {
-	cX := float64(f.centerX)
-	cY := float64(f.centerY)
-	markPoint(dst, cX, cY, 4, colorSnake1)
+	markPoint(dst, f.center.to64(), 4, colorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
 		rect.drawOuterRect(dst, colorSnake1)

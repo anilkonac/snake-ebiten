@@ -75,14 +75,14 @@ type Game struct {
 
 func NewGame() *Game {
 	return &Game{
-		snake: newSnake(snakeHeadCenterX, snakeHeadCenterY, directionRight, snakeLength),
+		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, directionRight, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *Game) restart() {
 	*g = Game{
-		snake: newSnakeRandDir(snakeHeadCenterX, snakeHeadCenterY, snakeLength),
+		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength),
 		food:  newFoodRandLoc(),
 	}
 }
@@ -229,22 +229,22 @@ func (g *Game) checkFood() {
 }
 
 func (g *Game) triggerScoreAnim() {
-	x, y := g.snake.unitHead.headCenterX, g.snake.unitHead.headCenterY
+	corrCenter := g.snake.unitHead.headCenter
 
 	// Correct the x and y position so the base score animation position will be the tip of the head,
 	// not the head center.
 	switch g.snake.unitHead.direction {
 	case directionUp:
-		y -= halfSnakeWidth
+		corrCenter.y -= halfSnakeWidth
 	case directionDown:
-		y += halfSnakeWidth
+		corrCenter.y += halfSnakeWidth
 	case directionRight:
-		x += halfSnakeWidth
+		corrCenter.x += halfSnakeWidth
 	case directionLeft:
-		x -= halfSnakeWidth
-
+		corrCenter.x -= halfSnakeWidth
 	}
-	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(float32(x), float32(y), !g.snake.unitHead.direction.isVertical()))
+
+	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(corrCenter.to32()))
 }
 
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
@@ -270,7 +270,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if debugUnits {
 		// Mark cursor
 		x, y := ebiten.CursorPosition()
-		markPoint(screen, float64(x), float64(y), 5, colorSnake2)
+		markPoint(screen, vec64{float64(x), float64(y)}, 5, colorSnake2)
 
 		// Print mouse coordinates
 		msg := fmt.Sprintf("%d %d", x, y)

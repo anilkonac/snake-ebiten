@@ -49,14 +49,14 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeLengthT) *snake {
+func newSnake(headCenter vec64, direction directionT, snakeLength snakeLengthT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if centerX > ScreenWidth {
+	if headCenter.x > ScreenWidth {
 		panic("Initial x position of the snake is off-screen.")
 	}
-	if centerY > ScreenHeight {
+	if headCenter.y > ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
 	if isVertical := direction.isVertical(); (isVertical && (snakeLength > ScreenHeight)) ||
@@ -64,7 +64,7 @@ func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeL
 		panic("Initial snake intersects itself.")
 	}
 
-	initialUnit := newUnit(centerX, centerY, float64(snakeLength), direction, &colorSnake1)
+	initialUnit := newUnit(headCenter, float64(snakeLength), direction, &colorSnake1)
 
 	snake := &snake{
 		speed:    snakeSpeedInitial,
@@ -75,9 +75,9 @@ func newSnake(centerX, centerY float64, direction directionT, snakeLength snakeL
 	return snake
 }
 
-func newSnakeRandDir(centerX, centerY float64, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(headCenter vec64, snakeLength snakeLengthT) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
-	return newSnake(centerX, centerY, direction, snakeLength)
+	return newSnake(headCenter, direction, snakeLength)
 }
 
 func (s *snake) update() {
@@ -169,7 +169,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	}
 
 	// Create a new head unit.
-	newHead := newUnit(oldHead.headCenterX, oldHead.headCenterY, 0, newTurn.directionTo, newColor)
+	newHead := newUnit(oldHead.headCenter, 0, newTurn.directionTo, newColor)
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
 	newHead.next = oldHead

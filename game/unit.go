@@ -26,8 +26,7 @@ import (
 )
 
 type unit struct {
-	headCenterX    float64
-	headCenterY    float64
+	headCenter     vec64
 	length         float64
 	direction      directionT
 	rectsCollision []rectF32
@@ -38,13 +37,12 @@ type unit struct {
 	drawOpts       ebiten.DrawTrianglesShaderOptions
 }
 
-func newUnit(headCenterX, headCenterY, length float64, direction directionT, color *color.RGBA) *unit {
+func newUnit(headCenter vec64, length float64, direction directionT, color *color.RGBA) *unit {
 	newUnit := &unit{
-		headCenterX: headCenterX,
-		headCenterY: headCenterY,
-		length:      length,
-		direction:   direction,
-		color:       color,
+		headCenter: headCenter,
+		length:     length,
+		direction:  direction,
+		color:      color,
 		drawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"Radius": float32(halfSnakeWidth),
@@ -80,18 +78,17 @@ func (u *unit) createRects() {
 
 func (u *unit) createRectColl() (rectColl *rectF32) {
 	length32 := float32(math.Floor(u.length))
-	cX32 := float32(math.Floor(u.headCenterX))
-	cY32 := float32(math.Floor(u.headCenterY))
+	flCenter := u.headCenter.floor().to32()
 
 	switch u.direction {
 	case directionRight:
-		rectColl = newRect(cX32-length32+halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
+		rectColl = newRect(vec32{flCenter.x - length32 + halfSnakeWidth, flCenter.y - halfSnakeWidth}, vec32{length32, snakeWidth})
 	case directionLeft:
-		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, length32, snakeWidth)
+		rectColl = newRect(vec32{flCenter.x - halfSnakeWidth, flCenter.y - halfSnakeWidth}, vec32{length32, snakeWidth})
 	case directionUp:
-		rectColl = newRect(cX32-halfSnakeWidth, cY32-halfSnakeWidth, snakeWidth, length32)
+		rectColl = newRect(vec32{flCenter.x - halfSnakeWidth, flCenter.y - halfSnakeWidth}, vec32{snakeWidth, length32})
 	case directionDown:
-		rectColl = newRect(cX32-halfSnakeWidth, cY32-length32+halfSnakeWidth, snakeWidth, length32)
+		rectColl = newRect(vec32{flCenter.x - halfSnakeWidth, flCenter.y - length32 + halfSnakeWidth}, vec32{snakeWidth, length32})
 	default:
 		panic("Wrong unit direction!!")
 	}
@@ -107,13 +104,13 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 
 	switch u.direction {
 	case directionRight:
-		rectDraw = newRect(rectColl.x-snakeWidth, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
+		rectDraw = newRect(vec32{rectColl.pos.x - snakeWidth, rectColl.pos.y}, vec32{rectColl.size.x + snakeWidth, rectColl.size.y})
 	case directionLeft:
-		rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width+snakeWidth, rectColl.height)
+		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y}, vec32{rectColl.size.x + snakeWidth, rectColl.size.y})
 	case directionUp:
-		rectDraw = newRect(rectColl.x, rectColl.y, rectColl.width, rectColl.height+snakeWidth)
+		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y}, vec32{rectColl.size.x, rectColl.size.y + snakeWidth})
 	case directionDown:
-		rectDraw = newRect(rectColl.x, rectColl.y-snakeWidth, rectColl.width, rectColl.height+snakeWidth)
+		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y - snakeWidth}, vec32{rectColl.size.x, rectColl.size.y + snakeWidth})
 	default:
 		panic("Wrong unit direction!!")
 	}
@@ -151,62 +148,62 @@ func (u *unit) updateDrawOptions() {
 }
 
 func (u *unit) moveUp(dist float64) {
-	u.headCenterY -= dist
+	u.headCenter.y -= dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterY < 0 {
-		u.headCenterY += ScreenHeight
+	if u.headCenter.y < 0 {
+		u.headCenter.y += ScreenHeight
 	}
 }
 
 func (u *unit) moveDown(dist float64) {
-	u.headCenterY += dist
+	u.headCenter.y += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterY > ScreenHeight {
-		u.headCenterY -= ScreenHeight
+	if u.headCenter.y > ScreenHeight {
+		u.headCenter.y -= ScreenHeight
 	}
 }
 
 func (u *unit) moveRight(dist float64) {
-	u.headCenterX += dist
+	u.headCenter.x += dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterX > ScreenWidth {
-		u.headCenterX -= ScreenWidth
+	if u.headCenter.x > ScreenWidth {
+		u.headCenter.x -= ScreenWidth
 	}
 }
 
 func (u *unit) moveLeft(dist float64) {
-	u.headCenterX -= dist
+	u.headCenter.x -= dist
 
 	// teleport if head center is offscreen.
-	if u.headCenterX < 0 {
-		u.headCenterX += ScreenWidth
+	if u.headCenter.x < 0 {
+		u.headCenter.x += ScreenWidth
 	}
 }
 
 func (u *unit) markHeadCenters(dst *ebiten.Image) {
-	headCX := float64(u.headCenterX)
-	headCY := float64(u.headCenterY)
-	markPoint(dst, headCX, headCY, 4, colorFood)
+	markPoint(dst, u.headCenter, 4, colorFood)
 
 	var offset float64 = 0
 	if u.next == nil {
 		offset = snakeWidth
 	}
+
+	backCenter := u.headCenter
 	switch u.direction {
 	case directionUp:
-		headCY = u.headCenterY + u.length - offset
+		backCenter.y = u.headCenter.y + u.length - offset
 	case directionDown:
-		headCY = float64(u.headCenterY-u.length) + offset
+		backCenter.y = u.headCenter.y - u.length + offset
 	case directionRight:
-		headCX = float64(u.headCenterX-u.length) + offset
+		backCenter.x = u.headCenter.x - u.length + offset
 	case directionLeft:
-		headCX = float64(u.headCenterX+u.length) - offset
+		backCenter.x = u.headCenter.x + u.length - offset
 	}
 	// mark head center at the other side
-	markPoint(dst, headCX, headCY, 4, colorFood)
+	markPoint(dst, backCenter, 4, colorFood)
 }
 
 // Implement collidable interface

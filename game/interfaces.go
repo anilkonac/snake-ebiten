@@ -104,8 +104,10 @@ func collides(a, b collidable, tolerance float32) bool {
 
 	for iRectA := range rectsA {
 		rectA := &rectsA[iRectA]
+
 		for iRectB := range rectsB {
 			rectB := &rectsB[iRectB]
+
 			if !intersects(rectA, rectB, tolerance) {
 				continue
 			}
