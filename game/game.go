@@ -43,7 +43,7 @@ const (
 	snakeSpeedFinal         = 275
 	snakeLength             = 240
 	snakeWidth              = 30
-	eatingAnimStartDistance = 130
+	eatingAnimStartDistance = 140
 )
 
 const halfSnakeWidth = snakeWidth / 2.0

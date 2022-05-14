@@ -25,6 +25,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const mouthRadius float32 = halfSnakeWidth * 1.2
+
 type unit struct {
 	headCenter     vec64
 	length         float64
@@ -45,7 +47,8 @@ func newUnit(headCenter vec64, length float64, direction directionT, color *colo
 		color:      color,
 		drawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
-				"Radius": float32(halfSnakeWidth),
+				"Radius":      float32(halfSnakeWidth),
+				"RadiusMouth": mouthRadius,
 			},
 		},
 	}
