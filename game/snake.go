@@ -80,7 +80,7 @@ func newSnakeRandDir(headCenter vec64, snakeLength snakeLengthT) *snake {
 	return newSnake(headCenter, direction, snakeLength)
 }
 
-func (s *snake) update() {
+func (s *snake) update(distToFood float32) {
 	moveDistance := s.speed * deltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
@@ -90,11 +90,11 @@ func (s *snake) update() {
 		s.turnTo(nextTurn, true)
 	}
 
-	s.updateHead(moveDistance)
-	s.updateTail(moveDistance)
+	s.updateHead(moveDistance, distToFood)
+	s.updateTail(moveDistance, distToFood)
 }
 
-func (s *snake) updateHead(dist float64) {
+func (s *snake) updateHead(dist float64, distToFood float32) {
 	// Increse head length
 	s.unitHead.length += dist
 
@@ -111,13 +111,13 @@ func (s *snake) updateHead(dist float64) {
 	}
 
 	if s.unitHead != s.unitTail { // Avoid unnecessary updates
-		s.unitHead.update()
+		s.unitHead.update(distToFood)
 	}
 
 	s.distAfterTurn += dist
 }
 
-func (s *snake) updateTail(dist float64) {
+func (s *snake) updateTail(dist float64, distToFood float32) {
 	decreaseAmount := dist
 	if s.growthRemaining > 0 {
 		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
@@ -139,7 +139,7 @@ func (s *snake) updateTail(dist float64) {
 		s.unitTail.next = nil
 	}
 
-	s.unitTail.update()
+	s.unitTail.update(distToFood)
 }
 
 func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {

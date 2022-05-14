@@ -49,7 +49,7 @@ func newUnit(headCenter vec64, length float64, direction directionT, color *colo
 			},
 		},
 	}
-	newUnit.update()
+	newUnit.update(eatingAnimStartDistance)
 
 	return newUnit
 }
@@ -118,17 +118,14 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 	return
 }
 
-func (u *unit) update() {
-	u.createRects()       // Update rectangles of this unit
-	u.updateDrawOptions() // Update draw options
+func (u *unit) update(distToFood float32) {
+	u.createRects()                 // Update rectangles of this unit
+	u.updateDrawOptions(distToFood) // Update draw options
 }
 
-func (u *unit) updateDrawOptions() {
-	// Specify IsVertical  uniform variable
-	var isVertical float32
-	if u.direction.isVertical() {
-		isVertical = 1.0
-	}
+func (u *unit) updateDrawOptions(distToFood float32) {
+	// Distance to food
+	uniDistFood := distToFood / eatingAnimStartDistance
 
 	// Specify Size uniform variable
 	var drawWidth, drawHeight float32
@@ -143,8 +140,9 @@ func (u *unit) updateDrawOptions() {
 	}
 
 	// Update the options
-	u.drawOpts.Uniforms["IsVertical"] = isVertical
+	u.drawOpts.Uniforms["Direction"] = float32(u.direction)
 	u.drawOpts.Uniforms["Size"] = []float32{drawWidth, drawHeight}
+	u.drawOpts.Uniforms["DistToFood"] = uniDistFood
 }
 
 func (u *unit) moveUp(dist float64) {
@@ -184,7 +182,7 @@ func (u *unit) moveLeft(dist float64) {
 }
 
 func (u *unit) markHeadCenters(dst *ebiten.Image) {
-	markPoint(dst, u.headCenter, 4, colorFood)
+	markPoint(dst, &u.headCenter, 4, colorFood)
 
 	var offset float64 = 0
 	if u.next == nil {
@@ -203,7 +201,7 @@ func (u *unit) markHeadCenters(dst *ebiten.Image) {
 		backCenter.x = u.headCenter.x + u.length - offset
 	}
 	// mark head center at the other side
-	markPoint(dst, backCenter, 4, colorFood)
+	markPoint(dst, &backCenter, 4, colorFood)
 }
 
 // Implement collidable interface
@@ -235,6 +233,9 @@ func (u *unit) drawOptions() *ebiten.DrawTrianglesShaderOptions {
 }
 
 func (u *unit) shader() *ebiten.Shader {
+	if u.prev == nil {
+		return shaderSnakeHead
+	}
 	return shaderRound
 }
 

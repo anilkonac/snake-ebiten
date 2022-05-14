@@ -37,12 +37,13 @@ const (
 
 // Snake parameters
 const (
-	snakeHeadCenterX  = ScreenWidth / 2.0
-	snakeHeadCenterY  = ScreenHeight / 2.0
-	snakeSpeedInitial = 300
-	snakeSpeedFinal   = 275
-	snakeLength       = 240
-	snakeWidth        = 30
+	snakeHeadCenterX        = ScreenWidth / 2.0
+	snakeHeadCenterY        = ScreenHeight / 2.0
+	snakeSpeedInitial       = 300
+	snakeSpeedFinal         = 275
+	snakeLength             = 240
+	snakeWidth              = 30
+	eatingAnimStartDistance = 130
 )
 
 const halfSnakeWidth = snakeWidth / 2.0
@@ -104,7 +105,14 @@ func (g *Game) Update() error {
 	}
 
 	g.handleInput()
-	g.snake.update()
+
+	// Calculate the distance betw head and food
+	var distToFood float32 = eatingAnimStartDistance
+	if g.food.isActive {
+		distToFood = float32(distance(&g.snake.unitHead.headCenter, g.food.center.to64()))
+	}
+
+	g.snake.update(distToFood)
 	g.snake.checkIntersection(&g.gameOver)
 	g.updateScoreAnims()
 	g.checkFood()
@@ -270,7 +278,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if debugUnits {
 		// Mark cursor
 		x, y := ebiten.CursorPosition()
-		markPoint(screen, vec64{float64(x), float64(y)}, 5, colorSnake2)
+		markPoint(screen, vecI{x, y}.to64(), 5, colorSnake2)
 
 		// Print mouse coordinates
 		msg := fmt.Sprintf("%d %d", x, y)

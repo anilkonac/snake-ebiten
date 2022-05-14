@@ -7,9 +7,10 @@ A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 - Pixel-precise teleportation
 
 ## Play
+### In browser
 Play the current development version at https://anilkonac.github.io/snake-ebiten/.
 
 Play possibly the more stable (and older) version at https://anilkonac.itch.io/ssnake.
 
-### Credits
+## Credits
 [Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/main/game/resources/audio/Credits.md)

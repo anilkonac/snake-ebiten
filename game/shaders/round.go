@@ -3,20 +3,21 @@
 package main
 
 var (
-	Radius     float
-	IsVertical float
-	Size       vec2
+	Radius    float
+	Direction float
+	Size      vec2
 )
 
 func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	clr := color
+	isVertical := (Direction <= 1.0)
 
 	headCenter1 := vec2(Radius, Radius)
 	if Size.x == Size.y {
 		if distance(texCoord, headCenter1) > Radius {
 			clr.a = 0.0
 		}
-	} else if IsVertical > 0.0 {
+	} else if isVertical {
 		headCenter2 := vec2(Radius, Size.y-Radius)
 
 		if (texCoord.y < headCenter1.y) && (distance(texCoord, headCenter1) > Radius) {
