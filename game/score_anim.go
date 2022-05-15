@@ -27,9 +27,10 @@ import (
 )
 
 const (
-	foodScore      = 100
-	decrementAlpha = 8.0 / 255.0
-	scoreAnimSpeed = 30
+	foodScore        = 100
+	decrementAlpha   = 8.0 / 255.0
+	scoreAnimSpeed   = 30
+	scoreAnimPadding = 5.0
 )
 
 var (
@@ -53,7 +54,7 @@ func initScoreAnim() {
 	scoreAnimBoundSizeI := scoreAnimBound.Size()
 	scoreAnimBoundSize.x = float32(scoreAnimBoundSizeI.X)
 	scoreAnimBoundSize.y = float32(scoreAnimBoundSizeI.Y)
-	scoreAnimShiftY = halfSnakeWidth + scoreAnimBoundSize.y/2.0
+	scoreAnimShiftY = halfSnakeWidth + scoreAnimBoundSize.y/2.0 + scoreAnimPadding
 
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)

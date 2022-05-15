@@ -8,9 +8,10 @@ A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 
 ## Play
 ### In browser
-Play the current development version at https://anilkonac.github.io/snake-ebiten/.
-
-Play possibly the more stable (and older) version at https://anilkonac.itch.io/ssnake.
+- [Current development version](https://anilkonac.github.io/snake-ebiten/) (GitHub Pages)
+- [Probably the more stable and older version](https://anilkonac.itch.io/ssnake) (itch.io)
+### On desktop
+- Download and run prebuilt executables from [itch.io page](https://anilkonac.itch.io/ssnake).
 
 ## Credits
-[Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/main/game/resources/audio/Credits.md)
+- [Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/main/game/resources/audio/Credits.md)

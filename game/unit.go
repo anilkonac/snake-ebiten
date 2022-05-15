@@ -25,7 +25,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const mouthRadius float32 = halfSnakeWidth * 1.2
+const mouthRadius float32 = halfSnakeWidth * 0.75
 
 type unit struct {
 	headCenter     vec64
