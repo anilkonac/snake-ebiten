@@ -54,7 +54,7 @@ func initScoreAnim() {
 	scoreAnimBoundSizeI := scoreAnimBound.Size()
 	scoreAnimBoundSize.x = float32(scoreAnimBoundSizeI.X)
 	scoreAnimBoundSize.y = float32(scoreAnimBoundSizeI.Y)
-	scoreAnimShiftY = halfSnakeWidth + scoreAnimBoundSize.y/2.0 + scoreAnimPadding
+	scoreAnimShiftY = radiusSnake + scoreAnimBoundSize.y/2.0 + scoreAnimPadding
 
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)

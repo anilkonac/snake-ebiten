@@ -24,13 +24,23 @@ import (
 	"time"
 )
 
-type snakeLengthT uint16
+// Snake parameters
+const (
+	snakeHeadCenterX        = ScreenWidth / 2.0
+	snakeHeadCenterY        = ScreenHeight / 2.0
+	snakeSpeedInitial       = 275
+	snakeSpeedFinal         = 250
+	snakeLength             = 240
+	snakeWidth              = 30
+	eatingAnimStartDistance = 120
+	radiusSnake             = snakeWidth / 2.0
+	radiusMouth             = radiusSnake * 0.625
+)
 
 // Snake collision tolerances must be an integer or false collisions will occur.
 const (
 	toleranceDefault    = 2 //snakeWidth / 16.0
-	toleranceScreenEdge = halfSnakeWidth
-	toleranceFood       = snakeWidth / 4.0
+	toleranceScreenEdge = radiusSnake
 )
 
 type snake struct {
@@ -49,7 +59,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(headCenter vec64, direction directionT, snakeLength snakeLengthT) *snake {
+func newSnake(headCenter vec64, direction directionT) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -64,7 +74,7 @@ func newSnake(headCenter vec64, direction directionT, snakeLength snakeLengthT) 
 		panic("Initial snake intersects itself.")
 	}
 
-	initialUnit := newUnit(headCenter, float64(snakeLength), direction, &colorSnake1)
+	initialUnit := newUnit(headCenter, snakeLength, direction, &colorSnake1)
 
 	snake := &snake{
 		speed:    snakeSpeedInitial,
@@ -75,9 +85,9 @@ func newSnake(headCenter vec64, direction directionT, snakeLength snakeLengthT) 
 	return snake
 }
 
-func newSnakeRandDir(headCenter vec64, snakeLength snakeLengthT) *snake {
+func newSnakeRandDir(headCenter vec64) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
-	return newSnake(headCenter, direction, snakeLength)
+	return newSnake(headCenter, direction)
 }
 
 func (s *snake) update(distToFood float32) {
@@ -211,7 +221,7 @@ func (s *snake) grow() {
 	s.foodEaten++
 
 	// Update snake speed
-	// f(x)=275+25/e^(0.0075x)
+	// f(x)=250+25/e^(0.0075x)
 	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.0075*float64(s.foodEaten))
 }
 

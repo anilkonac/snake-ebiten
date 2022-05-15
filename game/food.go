@@ -26,13 +26,14 @@ import (
 )
 
 const (
-	foodLength     = 16
-	halfFoodLength = foodLength / 2.0
+	foodLength   = 16
+	radiusFood   = foodLength / 2.0
+	radiusEating = radiusMouth + radiusFood
 )
 
 var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 	Uniforms: map[string]interface{}{
-		"Radius":     float32(halfFoodLength),
+		"Radius":     float32(radiusFood),
 		"IsVertical": float32(1.0),
 		"Size":       []float32{foodLength, foodLength},
 	},
@@ -53,8 +54,8 @@ func newFood(center *vec32) *food {
 	// Create a rectangle to use in drawing and eating logic.
 	pureRect := rectF32{
 		pos: vec32{
-			x: center.x - halfFoodLength,
-			y: center.y - halfFoodLength,
+			x: center.x - radiusFood,
+			y: center.y - radiusFood,
 		},
 		size: vec32{foodLength, foodLength},
 	}

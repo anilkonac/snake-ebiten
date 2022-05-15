@@ -25,8 +25,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const mouthRadius float32 = halfSnakeWidth * 0.75
-
 type unit struct {
 	headCenter     vec64
 	length         float64
@@ -47,8 +45,8 @@ func newUnit(headCenter vec64, length float64, direction directionT, color *colo
 		color:      color,
 		drawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
-				"Radius":      float32(halfSnakeWidth),
-				"RadiusMouth": mouthRadius,
+				"Radius":      float32(radiusSnake),
+				"RadiusMouth": float32(radiusMouth),
 			},
 		},
 	}
@@ -85,13 +83,13 @@ func (u *unit) createRectColl() (rectColl *rectF32) {
 
 	switch u.direction {
 	case directionRight:
-		rectColl = newRect(vec32{flCenter.x - length32 + halfSnakeWidth, flCenter.y - halfSnakeWidth}, vec32{length32, snakeWidth})
+		rectColl = newRect(vec32{flCenter.x - length32 + radiusSnake, flCenter.y - radiusSnake}, vec32{length32, snakeWidth})
 	case directionLeft:
-		rectColl = newRect(vec32{flCenter.x - halfSnakeWidth, flCenter.y - halfSnakeWidth}, vec32{length32, snakeWidth})
+		rectColl = newRect(vec32{flCenter.x - radiusSnake, flCenter.y - radiusSnake}, vec32{length32, snakeWidth})
 	case directionUp:
-		rectColl = newRect(vec32{flCenter.x - halfSnakeWidth, flCenter.y - halfSnakeWidth}, vec32{snakeWidth, length32})
+		rectColl = newRect(vec32{flCenter.x - radiusSnake, flCenter.y - radiusSnake}, vec32{snakeWidth, length32})
 	case directionDown:
-		rectColl = newRect(vec32{flCenter.x - halfSnakeWidth, flCenter.y - length32 + halfSnakeWidth}, vec32{snakeWidth, length32})
+		rectColl = newRect(vec32{flCenter.x - radiusSnake, flCenter.y - length32 + radiusSnake}, vec32{snakeWidth, length32})
 	default:
 		panic("Wrong unit direction!!")
 	}
@@ -128,7 +126,7 @@ func (u *unit) update(distToFood float32) {
 
 func (u *unit) updateDrawOptions(distToFood float32) {
 	// Distance to food
-	uniDistFood := distToFood / eatingAnimStartDistance
+	proxToFood := 1.0 - distToFood/eatingAnimStartDistance
 
 	// Specify Size uniform variable
 	var drawWidth, drawHeight float32
@@ -145,7 +143,7 @@ func (u *unit) updateDrawOptions(distToFood float32) {
 	// Update the options
 	u.drawOpts.Uniforms["Direction"] = float32(u.direction)
 	u.drawOpts.Uniforms["Size"] = []float32{drawWidth, drawHeight}
-	u.drawOpts.Uniforms["DistToFood"] = uniDistFood
+	u.drawOpts.Uniforms["ProxToFood"] = proxToFood
 }
 
 func (u *unit) moveUp(dist float64) {
