@@ -29,8 +29,8 @@ import (
 const (
 	foodScore        = 100
 	decrementAlpha   = 8.0 / 255.0
-	scoreAnimSpeed   = 30
-	scoreAnimPadding = 5.0
+	scoreAnimSpeed   = 25
+	scoreAnimPadding = 8
 )
 
 var (

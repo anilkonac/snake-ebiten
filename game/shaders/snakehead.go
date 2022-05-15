@@ -2,8 +2,6 @@
 
 package main
 
-const pi = 3.14159
-
 var (
 	Radius      float
 	RadiusMouth float
@@ -26,22 +24,7 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 			clr.a = 0.0
 		}
 
-		// If the food is far away, don't bother drawing a mouth
-		if ProxToFood <= 0.0 {
-			clr.rgb *= clr.a
-			return clr
-		}
-
-		// Calculate mouth center
-		var mouthCenter vec2
-		if Direction == 0.0 { // up
-			mouthCenter = vec2(Radius, 0.0)
-		} else { // down
-			mouthCenter = vec2(Radius, Size.y)
-		}
-
-		// Draw mouth
-		if distance(texCoord, mouthCenter) < RadiusMouth*easeOutCubic(ProxToFood) {
+		if isMouthVertical(texCoord) {
 			clr.a = 0.0
 		}
 
@@ -55,22 +38,7 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 			clr.a = 0.0
 		}
 
-		// If the food is far away, don't bother drawing a mouth
-		if ProxToFood <= 0.0 {
-			clr.rgb *= clr.a
-			return clr
-		}
-
-		// Calculate mouth center
-		var mouthCenter vec2
-		if Direction == 2.0 { // left
-			mouthCenter = vec2(0.0, Radius)
-		} else { // right
-			mouthCenter = vec2(Size.x, Radius)
-		}
-
-		// Draw mouth
-		if distance(texCoord, mouthCenter) < RadiusMouth*easeOutCubic(ProxToFood) {
+		if isMouthHorizontal(texCoord) {
 			clr.a = 0.0
 		}
 
@@ -80,7 +48,50 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	return clr
 }
 
+func isMouthVertical(texCoord vec2) bool {
+	// If the food is far away, don't bother checking if tex is mouth
+	if ProxToFood <= 0.0 {
+		return false
+	}
+
+	// Calculate mouth center
+	var mouthCenter vec2
+	if Direction == 0.0 { // up
+		mouthCenter = vec2(Radius, 0.0)
+	} else { // down
+		mouthCenter = vec2(Radius, Size.y)
+	}
+
+	// Draw mouth
+	if distance(texCoord, mouthCenter) < RadiusMouth*easeOutCubic(ProxToFood) {
+		return true
+	}
+	return false
+}
+
+func isMouthHorizontal(texCoord vec2) bool {
+	// If the food is far away, don't bother checking if tex is mouth
+	if ProxToFood <= 0.0 {
+		return false
+	}
+
+	// Calculate mouth center
+	var mouthCenter vec2
+	if Direction == 2.0 { // left
+		mouthCenter = vec2(0.0, Radius)
+	} else { // right
+		mouthCenter = vec2(Size.x, Radius)
+	}
+
+	// Draw mouth
+	if distance(texCoord, mouthCenter) < RadiusMouth*easeOutCubic(ProxToFood) {
+		return true
+	}
+	return false
+}
+
 //https://easings.net/#easeOutCubic
 func easeOutCubic(x float) float {
-	return 1.0 - pow(1.0-x, 3.0)
+	xMin := 1.0 - x
+	return 1.0 - xMin*xMin*xMin
 }

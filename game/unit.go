@@ -120,8 +120,8 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 }
 
 func (u *unit) update(distToFood float32) {
-	u.createRects()                 // Update rectangles of this unit
-	u.updateDrawOptions(distToFood) // Update draw options
+	u.createRects() // Update rectangles of this unit
+	u.updateDrawOptions(distToFood)
 }
 
 func (u *unit) updateDrawOptions(distToFood float32) {
