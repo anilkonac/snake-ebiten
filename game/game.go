@@ -114,25 +114,25 @@ func (g *Game) computeFoodDist() float32 {
 	// In screen distance
 	minDist := distance(headLoc, foodLoc)
 
-	// Left mirror distance
-	foodLeft := *foodLoc
-	foodLeft.x -= ScreenWidth
-	minDist = math.Min(minDist, distance(headLoc, &foodLeft))
+	if halfWidth := ScreenWidth / 2.0; headLoc.x < halfWidth { // Left mirror distance
+		foodLeft := *foodLoc
+		foodLeft.x -= ScreenWidth
+		minDist = math.Min(minDist, distance(headLoc, &foodLeft))
+	} else if headLoc.x >= halfWidth { // Right mirror distance
+		foodRight := *foodLoc
+		foodRight.x += ScreenWidth
+		minDist = math.Min(minDist, distance(headLoc, &foodRight))
+	}
 
-	// Right mirror distance
-	foodRight := *foodLoc
-	foodRight.x += ScreenWidth
-	minDist = math.Min(minDist, distance(headLoc, &foodRight))
-
-	// Upper mirror distance
-	foodUp := *foodLoc
-	foodUp.y -= ScreenHeight
-	minDist = math.Min(minDist, distance(headLoc, &foodUp))
-
-	// Bottom mirror distance
-	foodDown := *foodLoc
-	foodDown.y += ScreenHeight
-	minDist = math.Min(minDist, distance(headLoc, &foodDown))
+	if halfHeight := ScreenHeight / 2.0; headLoc.y < halfHeight { // Upper mirror distance
+		foodUp := *foodLoc
+		foodUp.y -= ScreenHeight
+		minDist = math.Min(minDist, distance(headLoc, &foodUp))
+	} else if headLoc.y >= halfHeight { // Bottom mirror distance
+		foodDown := *foodLoc
+		foodDown.y += ScreenHeight
+		minDist = math.Min(minDist, distance(headLoc, &foodDown))
+	}
 
 	return float32(minDist)
 

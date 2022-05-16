@@ -1,7 +1,7 @@
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220320163800-277f93cfa958/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
-github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220515205805-8da84822faab h1:kHjfI6lLxXDc3lUZWTluOhndVSLKf7yxjngkjblTZzc=
-github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220515205805-8da84822faab/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220516021902-eb3e265c7661 h1:1bpooddSK2996NWM/1TW59cchQOm9MkoV9DkhSJH1BI=
+github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220516021902-eb3e265c7661/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/gofrs/flock v0.8.1 h1:+gYjHKf32LDeiEEFhQaotPbLuUXjY5ZqxKgXy7n59aw=
 github.com/gofrs/flock v0.8.1/go.mod h1:F1TvTiK9OcQqauNUHlbJvyl9Qa1QvF/gOUDKA14jxHU=
 github.com/hajimehoshi/bitmapfont/v2 v2.2.0 h1:E6vzlchynZj6OVohVKFqWkKW348EmDW62K5zPXDi7A8=

@@ -24,6 +24,7 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 			clr.a = 0.0
 		}
 
+		// Draw mouth
 		if isMouthVertical(texCoord) {
 			clr.a = 0.0
 		}
@@ -38,6 +39,7 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 			clr.a = 0.0
 		}
 
+		// Draw mouth
 		if isMouthHorizontal(texCoord) {
 			clr.a = 0.0
 		}
@@ -62,7 +64,7 @@ func isMouthVertical(texCoord vec2) bool {
 		mouthCenter = vec2(Radius, Size.y)
 	}
 
-	// Draw mouth
+	// Check if the position is in the mouth
 	if distance(texCoord, mouthCenter) < RadiusMouth*easeOutCubic(ProxToFood) {
 		return true
 	}
@@ -83,14 +85,14 @@ func isMouthHorizontal(texCoord vec2) bool {
 		mouthCenter = vec2(Size.x, Radius)
 	}
 
-	// Draw mouth
+	// Check if the position is in the mouth
 	if distance(texCoord, mouthCenter) < RadiusMouth*easeOutCubic(ProxToFood) {
 		return true
 	}
 	return false
 }
 
-//https://easings.net/#easeOutCubic
+// https://easings.net/#easeOutCubic
 func easeOutCubic(x float) float {
 	xMin := 1.0 - x
 	return 1.0 - xMin*xMin*xMin
