@@ -70,7 +70,7 @@ func initScoreAnim() {
 	drawOptionsScoreAnim.Images = [4]*ebiten.Image{scoreAnimImage, nil, nil, nil}
 }
 
-func newScoreAnim(pos *vec32) *scoreAnim {
+func newScoreAnim(pos vec32) *scoreAnim {
 	newAnim := &scoreAnim{
 		pos: vec32{
 			x: pos.x,

@@ -30,10 +30,12 @@ import (
 
 // Game constants
 const (
-	ScreenWidth  = 960
-	ScreenHeight = 720
-	deltaTime    = 1.0 / 60.0
-	restartTime  = 1.5 // seconds
+	ScreenWidth      = 960
+	ScreenHeight     = 720
+	deltaTime        = 1.0 / 60.0
+	restartTime      = 1.5 // seconds
+	halfScreenWidth  = ScreenWidth / 2.0
+	halfScreenHeight = ScreenHeight / 2.0
 )
 
 // Colors to be used in the drawing.
@@ -94,7 +96,7 @@ func (g *Game) Update() error {
 
 	g.handleInput()
 
-	distToFood := g.computeFoodDist()
+	distToFood := g.calcFoodDist()
 	g.snake.update(distToFood)
 	g.snake.checkIntersection(&g.gameOver)
 	g.updateScoreAnims()
@@ -103,35 +105,31 @@ func (g *Game) Update() error {
 	return nil
 }
 
-func (g *Game) computeFoodDist() float32 {
+func (g *Game) calcFoodDist() float32 {
 	if !g.food.isActive {
 		return eatingAnimStartDistance
 	}
 
-	headLoc := &g.snake.unitHead.headCenter
+	headLoc := g.snake.unitHead.headCenter
 	foodLoc := g.food.center.to64()
 
 	// In screen distance
 	minDist := distance(headLoc, foodLoc)
 
-	if halfWidth := ScreenWidth / 2.0; headLoc.x < halfWidth { // Left mirror distance
-		foodLeft := *foodLoc
-		foodLeft.x -= ScreenWidth
-		minDist = math.Min(minDist, distance(headLoc, &foodLeft))
-	} else if headLoc.x >= halfWidth { // Right mirror distance
-		foodRight := *foodLoc
-		foodRight.x += ScreenWidth
-		minDist = math.Min(minDist, distance(headLoc, &foodRight))
+	if headLoc.x < halfScreenWidth { // Left mirror distance
+		mirroredFood := vec64{foodLoc.x - ScreenWidth, foodLoc.y}
+		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
+	} else if headLoc.x >= halfScreenWidth { // Right mirror distance
+		mirroredFood := vec64{foodLoc.x + ScreenWidth, foodLoc.y}
+		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
 	}
 
-	if halfHeight := ScreenHeight / 2.0; headLoc.y < halfHeight { // Upper mirror distance
-		foodUp := *foodLoc
-		foodUp.y -= ScreenHeight
-		minDist = math.Min(minDist, distance(headLoc, &foodUp))
-	} else if headLoc.y >= halfHeight { // Bottom mirror distance
-		foodDown := *foodLoc
-		foodDown.y += ScreenHeight
-		minDist = math.Min(minDist, distance(headLoc, &foodDown))
+	if headLoc.y < halfScreenHeight { // Upper mirror distance
+		mirroredFood := vec64{foodLoc.x, foodLoc.y - ScreenHeight}
+		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
+	} else if headLoc.y >= halfScreenHeight { // Bottom mirror distance
+		mirroredFood := vec64{foodLoc.x, foodLoc.y + ScreenHeight}
+		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
 	}
 
 	return float32(minDist)

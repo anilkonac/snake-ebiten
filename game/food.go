@@ -45,9 +45,9 @@ type food struct {
 	rects    []rectF32
 }
 
-func newFood(center *vec32) *food {
+func newFood(center vec32) *food {
 	newFood := &food{
-		center: *center,
+		center: center,
 		rects:  make([]rectF32, 0, 4),
 	}
 

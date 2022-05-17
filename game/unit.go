@@ -183,7 +183,7 @@ func (u *unit) moveLeft(dist float64) {
 }
 
 func (u *unit) markHeadCenters(dst *ebiten.Image) {
-	markPoint(dst, &u.headCenter, 4, colorFood)
+	markPoint(dst, u.headCenter, 4, colorFood)
 
 	var offset float64 = 0
 	if u.next == nil {
@@ -202,7 +202,7 @@ func (u *unit) markHeadCenters(dst *ebiten.Image) {
 		backCenter.x = u.headCenter.x + u.length - offset
 	}
 	// mark head center at the other side
-	markPoint(dst, &backCenter, 4, colorFood)
+	markPoint(dst, backCenter, 4, colorFood)
 }
 
 // Implement collidable interface
