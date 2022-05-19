@@ -26,8 +26,8 @@ import (
 
 // Snake parameters
 const (
-	snakeHeadCenterX        = ScreenWidth / 2.0
-	snakeHeadCenterY        = ScreenHeight / 2.0
+	snakeHeadCenterX        = halfScreenWidth
+	snakeHeadCenterY        = halfScreenHeight
 	snakeSpeedInitial       = 275
 	snakeSpeedFinal         = 250
 	snakeLength             = 240

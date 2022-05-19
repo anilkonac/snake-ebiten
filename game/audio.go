@@ -37,13 +37,21 @@ const (
 	probEatingA  = 0.74
 )
 
+type stateMusic uint8
+
+const (
+	musicOn stateMusic = iota
+	musicPaused
+	musicMuted
+)
+
 var (
 	audioContext  *audio.Context
 	playerHit     *audio.Player
 	playerMusic   *audio.Player
 	playerEatingA *audio.Player
 	playerEatingB *audio.Player
-	playMusic     = true
+	musicState    stateMusic
 	playSounds    = true
 )
 
@@ -119,7 +127,7 @@ func playSoundHit() {
 // Designed to run as a goroutine
 func repeatMusic() {
 	for {
-		if playMusic && !playerMusic.IsPlaying() {
+		if (musicState == musicOn) && !playerMusic.IsPlaying() {
 			playerMusic.Rewind()
 			playerMusic.Play()
 		}

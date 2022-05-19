@@ -198,25 +198,27 @@ func (g *Game) handleSettingsInputs() {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		g.paused = !g.paused
-		if g.paused {
+		if g.paused && (musicState == musicOn) {
 			playerMusic.Pause()
-			playMusic = false
-		} else {
+			musicState = musicPaused
+		} else if musicState == musicPaused {
 			playerMusic.Play()
-			playMusic = true
+			musicState = musicOn
 		}
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
-		printFPS = !printFPS
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
-		playMusic = !playMusic
-		if playMusic {
-			playerMusic.Play()
-		} else {
+		if musicState == musicOn {
+			musicState = musicMuted
 			playerMusic.Pause()
+		} else if (musicState == musicMuted) && !g.paused {
+			musicState = musicOn
+			playerMusic.Play()
 		}
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
+		printFPS = !printFPS
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
