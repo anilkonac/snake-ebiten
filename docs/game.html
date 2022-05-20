@@ -11,6 +11,37 @@
 
     const go = new Go();
     WebAssembly.instantiateStreaming(fetch("snake-ebiten.wasm"), go.importObject).then(result => {
+        document.getElementById('loader').remove();
         go.run(result.instance);
     });
 </script>
+<style>
+    #loader {
+        position: absolute;
+        top: 48%;
+        left: 37.5%;
+        height: 4%;
+        width: 25%;
+        background: #003049;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    #loader:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0;
+        background: #FCBF49;
+        animation: 2.5s prog ease-in infinite;
+    }
+
+    @keyframes prog {
+        to {
+            width: 100%;
+        }
+    }
+</style>
+<div id="loader"></div>
