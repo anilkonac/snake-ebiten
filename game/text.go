@@ -20,8 +20,8 @@ const (
 )
 
 var (
-	fontScore      font.Face
-	fontDebug      font.Face
+	fontFaceScore  font.Face
+	fontFaceDebug  font.Face
 	boundScoreText image.Rectangle
 	boundFPSText   image.Rectangle
 )
@@ -32,7 +32,7 @@ func init() {
 		panic(err)
 	}
 
-	fontScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
+	fontFaceScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeScore,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
@@ -41,14 +41,14 @@ func init() {
 		panic(err)
 	}
 	initScoreAnim()
-	boundScoreText = text.BoundString(fontScore, "Score: 55555")
+	boundScoreText = text.BoundString(fontFaceScore, "Score: 55555")
 
 	tt, err = opentype.Parse(fonts.Debug)
 	if err != nil {
 		panic(err)
 	}
 
-	fontDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{
+	fontFaceDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeDebug,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
@@ -56,5 +56,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	boundFPSText = text.BoundString(fontDebug, "TPS: 60.0\tFPS: 165.0")
+	boundFPSText = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 165.0")
 }

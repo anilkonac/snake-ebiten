@@ -90,6 +90,11 @@ func newSnakeRandDir(headCenter vec64) *snake {
 	return newSnake(headCenter, direction)
 }
 
+func newSnakeRandDirLoc() *snake {
+	headCenter := vec64{float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight))}
+	return newSnakeRandDir(headCenter)
+}
+
 func (s *snake) update(distToFood float32) {
 	moveDistance := s.speed * deltaTime
 

@@ -24,6 +24,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+type scene interface {
+	update()
+	draw(*ebiten.Image)
+}
+
 type collidable interface {
 	collEnabled() bool
 	collisionRects() []rectF32

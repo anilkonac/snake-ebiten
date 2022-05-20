@@ -50,7 +50,7 @@ type scoreAnim struct {
 func initScoreAnim() {
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(foodScore)
-	scoreAnimBound := text.BoundString(fontScore, foodScoreMsg)
+	scoreAnimBound := text.BoundString(fontFaceScore, foodScoreMsg)
 	scoreAnimBoundSizeI := scoreAnimBound.Size()
 	scoreAnimBoundSize.x = float32(scoreAnimBoundSizeI.X)
 	scoreAnimBoundSize.y = float32(scoreAnimBoundSizeI.Y)
@@ -59,7 +59,7 @@ func initScoreAnim() {
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
 	scoreAnimImage.Fill(color.Black)
-	text.Draw(scoreAnimImage, foodScoreMsg, fontScore,
+	text.Draw(scoreAnimImage, foodScoreMsg, fontFaceScore,
 		-scoreAnimBound.Min.X, -scoreAnimBound.Min.Y,
 		color.RGBA{255, 0, 0, 255})
 
