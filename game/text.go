@@ -1,9 +1,11 @@
 package game
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/anilkonac/snake-ebiten/game/resources/fonts"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -57,4 +59,11 @@ func init() {
 		panic(err)
 	}
 	boundFPSText = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 165.0")
+}
+
+func drawFPS(screen *ebiten.Image) {
+	if printFPS {
+		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
+		text.Draw(screen, msg, fontFaceDebug, ScreenWidth-boundFPSText.Size().X-fpsTextShiftX, -boundFPSText.Min.Y+fpsTextShiftY, colorDebug)
+	}
 }

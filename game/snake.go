@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 package game
 
 import (
+	"image/color"
 	"math"
 	"math/rand"
 	"time"
@@ -53,13 +54,14 @@ type snake struct {
 	growthRemaining float64
 	growthTarget    float64
 	foodEaten       uint8
+	color           *color.RGBA
 }
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(headCenter vec64, direction directionT) *snake {
+func newSnake(headCenter vec64, direction directionT, color *color.RGBA) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -73,26 +75,30 @@ func newSnake(headCenter vec64, direction directionT) *snake {
 		(!isVertical && (snakeLength > ScreenWidth)) {
 		panic("Initial snake intersects itself.")
 	}
+	if color == nil {
+		panic("Snake color cannot be nil")
+	}
 
-	initialUnit := newUnit(headCenter, snakeLength, direction, &colorSnake1)
+	initialUnit := newUnit(headCenter, snakeLength, direction, color)
 
 	snake := &snake{
 		speed:    snakeSpeedInitial,
 		unitHead: initialUnit,
 		unitTail: initialUnit,
+		color:    color,
 	}
 
 	return snake
 }
 
-func newSnakeRandDir(headCenter vec64) *snake {
+func newSnakeRandDir(headCenter vec64, color *color.RGBA) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
-	return newSnake(headCenter, direction)
+	return newSnake(headCenter, direction, color)
 }
 
-func newSnakeRandDirLoc() *snake {
+func newSnakeRandDirLoc(color *color.RGBA) *snake {
 	headCenter := vec64{float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight))}
-	return newSnakeRandDir(headCenter)
+	return newSnakeRandDir(headCenter, color)
 }
 
 func (s *snake) update(distToFood float32) {
@@ -178,8 +184,8 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	oldHead := s.unitHead
 
 	// Decide on the color of the new head unit.
-	newColor := &colorSnake1
-	if debugUnits && (oldHead.color == &colorSnake1) {
+	newColor := s.color
+	if debugUnits && (oldHead.color == s.color) {
 		newColor = &colorSnake2
 	}
 

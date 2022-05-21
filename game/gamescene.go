@@ -20,7 +20,6 @@ package game
 
 import (
 	"fmt"
-	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -33,17 +32,6 @@ const (
 	restartTime      = 1.5 // seconds
 	halfScreenWidth  = ScreenWidth / 2.0
 	halfScreenHeight = ScreenHeight / 2.0
-)
-
-// Colors to be used in the drawing.
-// Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
-var (
-	colorBackground = color.RGBA{0, 48, 73, 255}     // ~ Prussian Blue
-	colorSnake1     = color.RGBA{252, 191, 73, 255}  // ~ Maximum Yellow Red
-	colorSnake2     = color.RGBA{247, 127, 0, 255}   // ~ Orange
-	colorFood       = color.RGBA{214, 40, 40, 255}   // ~ Maximum Red
-	colorDebug      = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
-	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
 )
 
 var (
@@ -63,19 +51,18 @@ type gameScene struct {
 
 func newGameScene() *gameScene {
 	return &gameScene{
-		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, directionRight),
+		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, directionRight, &colorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *gameScene) restart() {
 	*g = gameScene{
-		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}),
+		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}, &colorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
 
-// update is called every tick (1/60 [s] by default).
 func (g *gameScene) update() {
 	g.handleSettingsInputs()
 
@@ -307,7 +294,6 @@ func (g *gameScene) drawScore(screen *ebiten.Image) {
 }
 
 func (g *gameScene) printDebugMsgs(screen *ebiten.Image) {
-	drawFPS(screen)
 	// var totalLength float64
 	// for unit := g.snake.unitHead; unit != nil; unit = unit.next {
 	// 	totalLength += unit.length

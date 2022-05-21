@@ -124,7 +124,7 @@ func playSoundHit() {
 	playerHit.Play()
 }
 
-// Designed to run as a goroutine
+// Goroutine
 func repeatMusic() {
 	for {
 		if (musicState == musicOn) && !playerMusic.IsPlaying() {
