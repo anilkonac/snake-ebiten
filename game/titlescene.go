@@ -28,34 +28,48 @@ import (
 )
 
 const (
-	maxSnakes                     = 30
-	turnTimeMin                   = 0.0 // sec
-	turnTimeMax                   = 2.0 // sec
-	turnTimeDiff                  = turnTimeMax - turnTimeMin
-	titleBackgroundWidth  float32 = 600
-	titleBackgroundHeight float32 = 400
+	maxSnakes           = 30
+	turnTimeMin         = 0.0 // sec
+	turnTimeMax         = 1.5 // sec
+	turnTimeDiff        = turnTimeMax - turnTimeMin
+	snakeLengthMin      = 120
+	snakeLengthMax      = 480
+	snakeLengthDiff     = snakeLengthMax - snakeLengthMin
+	titleRectWidth      = 600
+	titleRectHeight     = 400
+	textTitle           = "Ssnake"
+	textPressToPlay     = "Press any key to start"
+	textTitleShiftX     = 0
+	textTitleShiftY     = -50
+	textKeyPromptShiftX = 0
+	textKeyPromptShiftY = +100
+	keyPromptShowTime   = 1.0 //sec
+	keyPromptHideTime   = 0.5 // sec
 )
 
 var (
-	dumbSnakesAlive = true
+	titleSceenAlive = true
 	snakeColors     = map[int]*color.RGBA{
 		0: &colorSnake1,
 		1: &colorSnake2,
 		2: &colorFood,
 		3: &colorDebug,
 	}
-	colorTitleScreen  = color.RGBA{colorSnake1.R, colorSnake1.G, colorSnake1.B, 230}
-	titleBackgroundOp = ebiten.DrawTrianglesShaderOptions{
+	colorTitleScreen = color.RGBA{colorSnake1.R, colorSnake1.G, colorSnake1.B, 230}
+	titleShaderOp    = ebiten.DrawTrianglesShaderOptions{
 		Uniforms: map[string]interface{}{
-			"Radius":    float32(titleBackgroundHeight / 2.0),
-			"Size":      []float32{titleBackgroundWidth, titleBackgroundHeight},
-			"Direction": float32(2),
+			"Radius":        float32(titleRectHeight / 2.0),
+			"Size":          []float32{float32(titleRectWidth), float32(titleRectHeight)},
+			"Direction":     float32(2),
+			"ShowKeyPrompt": float32(0.0),
 		},
 	}
 	titleBackgroundIndices = []uint16{
 		1, 0, 2,
 		2, 3, 1,
 	}
+	titleImage          *ebiten.Image
+	titleImageKeyPrompt *ebiten.Image
 )
 
 type titleScene struct {
@@ -67,17 +81,46 @@ type titleScene struct {
 func newTitleScreen() *titleScene {
 	scene := &titleScene{
 		snakes:          make([]*snake, maxSnakes),
-		titleBackground: *newRect(vec32{(ScreenWidth - titleBackgroundWidth) / 2.0, (ScreenHeight - titleBackgroundHeight) / 2.0}, vec32{titleBackgroundWidth, titleBackgroundHeight}),
+		titleBackground: *newRect(vec32{(ScreenWidth - titleRectWidth) / 2.0, (ScreenHeight - titleRectHeight) / 2.0}, vec32{titleRectWidth, titleRectHeight}),
 	}
 	scene.titleBackgroundVertices = scene.titleBackground.vertices(&colorTitleScreen)
 
 	lenSnakeColors := len(snakeColors)
 	for iSnake := 0; iSnake < maxSnakes; iSnake++ {
-		snake := newSnakeRandDirLoc(snakeColors[rand.Intn(lenSnakeColors)])
+		length := snakeLengthMin + rand.Intn(snakeLengthDiff)
+		snake := newSnakeRandDirLoc(uint16(length), snakeColors[rand.Intn(lenSnakeColors)])
 		go snake.controlDumbly()
 		scene.snakes[iSnake] = snake
 	}
 	return scene
+}
+
+func initTitle() {
+	// Prepare title text image
+	titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
+	// titleImageKeyPrompt = ebiten.NewImage(titleRectWidth, titleRectHeight)
+	titleImage.Fill(colorSnake2)
+
+	println(boundTextTitle.Min.X)
+	boundTextTitleSize := boundTextTitle.Size()
+	boundTextKeyPromptSize := boundTextKeyPrompt.Size()
+	// Draw Title
+	text.Draw(titleImage, textTitle, fontFaceTitle,
+		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X+textTitleShiftX,
+		(titleRectHeight-boundTextTitleSize.Y)/2.0-boundTextTitle.Min.Y+textTitleShiftY,
+		colorBackground)
+
+	titleImageKeyPrompt = ebiten.NewImageFromImage(titleImage)
+
+	// Draw key prompt
+	text.Draw(titleImageKeyPrompt, textPressToPlay, fontFaceScore,
+		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X+textKeyPromptShiftX,
+		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, colorBackground)
+
+	titleShaderOp.Images[0] = titleImage
+	titleShaderOp.Images[1] = titleImageKeyPrompt
+
+	go keyPromptFlipFlop()
 }
 
 func (t *titleScene) update() {
@@ -98,19 +141,33 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 	}
 
 	// Draw Title Background
-	screen.DrawTrianglesShader(t.titleBackgroundVertices, titleBackgroundIndices, shaderRound, &titleBackgroundOp)
+	screen.DrawTrianglesShader(t.titleBackgroundVertices, titleBackgroundIndices, shaderTitle, &titleShaderOp)
 
-	// Draw Title
-	text.Draw(screen, "Ssnake", fontFaceScore, halfScreenWidth, halfScreenHeight, colorBackground)
+}
 
-	// Draw key prompt
-	text.Draw(screen, "Press any key to play", fontFaceScore, halfScreenWidth-100, halfScreenHeight+100, colorBackground)
+func (t *titleScene) exit() {
+	titleSceenAlive = false
+}
+
+// Goroutine
+func keyPromptFlipFlop() {
+	showPrompt := true
+	for titleSceenAlive {
+		if showPrompt {
+			titleShaderOp.Uniforms["ShowKeyPrompt"] = float32(1.0)
+			time.Sleep(time.Millisecond * time.Duration(keyPromptShowTime*1000))
+		} else {
+			titleShaderOp.Uniforms["ShowKeyPrompt"] = float32(0.0)
+			time.Sleep(time.Millisecond * time.Duration(keyPromptHideTime*1000))
+		}
+		showPrompt = !showPrompt
+	}
 }
 
 // Goroutine
 func (s *snake) controlDumbly() {
 	var dirNew directionT
-	for dumbSnakesAlive {
+	for titleSceenAlive {
 		// Determine the new direction.
 		dirCurrent := s.lastDirection()
 

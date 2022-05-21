@@ -51,14 +51,14 @@ type gameScene struct {
 
 func newGameScene() *gameScene {
 	return &gameScene{
-		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, directionRight, &colorSnake1),
+		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength, directionRight, &colorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *gameScene) restart() {
 	*g = gameScene{
-		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}, &colorSnake1),
+		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength, &colorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
@@ -290,7 +290,11 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 
 func (g *gameScene) drawScore(screen *ebiten.Image) {
 	msg := fmt.Sprintf("Score: %05d", int(g.snake.foodEaten)*foodScore)
-	text.Draw(screen, msg, fontFaceScore, scoreTextShiftX, -boundScoreText.Min.Y+scoreTextShiftY, colorScore)
+	text.Draw(screen, msg, fontFaceScore, scoreTextShiftX, -boundTextScore.Min.Y+scoreTextShiftY, colorScore)
+}
+
+func (g *gameScene) exit() {
+
 }
 
 func (g *gameScene) printDebugMsgs(screen *ebiten.Image) {

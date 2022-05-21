@@ -15,6 +15,7 @@ const (
 	dpi             = 72
 	fontSizeScore   = 32
 	fontSizeDebug   = 20
+	fontSizeTitle   = 128
 	scoreTextShiftX = 10
 	scoreTextShiftY = 8
 	fpsTextShiftX   = 0
@@ -22,10 +23,13 @@ const (
 )
 
 var (
-	fontFaceScore  font.Face
-	fontFaceDebug  font.Face
-	boundScoreText image.Rectangle
-	boundFPSText   image.Rectangle
+	fontFaceScore      font.Face
+	fontFaceDebug      font.Face
+	fontFaceTitle      font.Face
+	boundTextScore     image.Rectangle
+	boundTextFPS       image.Rectangle
+	boundTextTitle     image.Rectangle
+	boundTextKeyPrompt image.Rectangle
 )
 
 func init() {
@@ -42,8 +46,12 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	initScoreAnim()
-	boundScoreText = text.BoundString(fontFaceScore, "Score: 55555")
+
+	fontFaceTitle, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    fontSizeTitle,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
 
 	tt, err = opentype.Parse(fonts.Debug)
 	if err != nil {
@@ -58,12 +66,19 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	boundFPSText = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 165.0")
+
+	boundTextScore = text.BoundString(fontFaceScore, "Score: 55555")
+	boundTextTitle = text.BoundString(fontFaceTitle, textTitle)
+	boundTextKeyPrompt = text.BoundString(fontFaceScore, textPressToPlay)
+	boundTextFPS = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 165.0")
+
+	initScoreAnim()
+	initTitle()
 }
 
 func drawFPS(screen *ebiten.Image) {
 	if printFPS {
 		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
-		text.Draw(screen, msg, fontFaceDebug, ScreenWidth-boundFPSText.Size().X-fpsTextShiftX, -boundFPSText.Min.Y+fpsTextShiftY, colorDebug)
+		text.Draw(screen, msg, fontFaceDebug, ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, colorDebug)
 	}
 }

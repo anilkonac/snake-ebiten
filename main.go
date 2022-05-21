@@ -15,3 +15,4 @@ func main() {
 //go:generate file2byteslice -input game/shaders/round.go -output game/shaders/round_go.go -package shaders -var Round
 //go:generate file2byteslice -input game/shaders/score.go -output game/shaders/score_go.go -package shaders -var Score
 //go:generate file2byteslice -input game/shaders/snakehead.go -output game/shaders/snakehead_go.go -package shaders -var SnakeHead
+//go:generate file2byteslice -input game/shaders/title.go -output game/shaders/title_go.go -package shaders -var Title

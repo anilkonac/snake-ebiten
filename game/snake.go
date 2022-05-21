@@ -61,7 +61,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(headCenter vec64, direction directionT, color *color.RGBA) *snake {
+func newSnake(headCenter vec64, initialLength uint16, direction directionT, color *color.RGBA) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -71,15 +71,15 @@ func newSnake(headCenter vec64, direction directionT, color *color.RGBA) *snake 
 	if headCenter.y > ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if isVertical := direction.isVertical(); (isVertical && (snakeLength > ScreenHeight)) ||
-		(!isVertical && (snakeLength > ScreenWidth)) {
+	if isVertical := direction.isVertical(); (isVertical && (initialLength > ScreenHeight)) ||
+		(!isVertical && (initialLength > ScreenWidth)) {
 		panic("Initial snake intersects itself.")
 	}
 	if color == nil {
 		panic("Snake color cannot be nil")
 	}
 
-	initialUnit := newUnit(headCenter, snakeLength, direction, color)
+	initialUnit := newUnit(headCenter, float64(initialLength), direction, color)
 
 	snake := &snake{
 		speed:    snakeSpeedInitial,
@@ -91,14 +91,14 @@ func newSnake(headCenter vec64, direction directionT, color *color.RGBA) *snake 
 	return snake
 }
 
-func newSnakeRandDir(headCenter vec64, color *color.RGBA) *snake {
+func newSnakeRandDir(headCenter vec64, initialLength uint16, color *color.RGBA) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
-	return newSnake(headCenter, direction, color)
+	return newSnake(headCenter, initialLength, direction, color)
 }
 
-func newSnakeRandDirLoc(color *color.RGBA) *snake {
+func newSnakeRandDirLoc(initialLength uint16, color *color.RGBA) *snake {
 	headCenter := vec64{float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight))}
-	return newSnakeRandDir(headCenter, color)
+	return newSnakeRandDir(headCenter, initialLength, color)
 }
 
 func (s *snake) update(distToFood float32) {

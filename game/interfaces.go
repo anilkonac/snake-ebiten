@@ -27,6 +27,7 @@ import (
 type scene interface {
 	update()
 	draw(*ebiten.Image)
+	exit()
 }
 
 type collidable interface {

@@ -47,7 +47,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.curScene.draw(screen)
 
-	drawFPS(screen)
+	// drawFPS(screen)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
