@@ -27,49 +27,60 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
+// Dumb snake parameters
 const (
 	maxSnakes           = 30
 	turnTimeMin         = 0.0 // sec
 	turnTimeMax         = 1.5 // sec
 	turnTimeDiff        = turnTimeMax - turnTimeMin
-	snakeLengthMin      = 120
-	snakeLengthMax      = 480
-	snakeLengthDiff     = snakeLengthMax - snakeLengthMin
-	titleRectWidth      = 600
-	titleRectHeight     = 400
-	textTitle           = "Ssnake"
-	textPressToPlay     = "Press any key to start"
-	textTitleShiftX     = 0
-	textTitleShiftY     = -50
-	textKeyPromptShiftX = 0
-	textKeyPromptShiftY = +100
-	keyPromptShowTime   = 1.0 //sec
-	keyPromptHideTime   = 0.5 // sec
+	dumbSnakeLengthMin  = 120
+	dumbSnakeLengthMax  = 480
+	dumbSnakeLengthDiff = dumbSnakeLengthMax - dumbSnakeLengthMin
+	dumbSnakeSpeedMin   = 150
+	dumbSnakeSpeedMax   = 400
+	dumbSnakeSpeedDiff  = dumbSnakeSpeedMax - dumbSnakeSpeedMin
+)
+
+// Title Rectangle parameters
+const (
+	titleRectWidth         = 600
+	titleRectHeight        = 400
+	titleRectRatio         = 1.0 * titleRectWidth / titleRectHeight
+	titleRectCornerRadiusX = radiusSnake
+	titleRectCornerRadiusY = titleRectCornerRadiusX / titleRectRatio
+	textTitle              = "Ssnake"
+	textPressToPlay        = "Press any key to start"
+	textTitleShiftX        = 0
+	textTitleShiftY        = -50
+	textKeyPromptShiftX    = 0
+	textKeyPromptShiftY    = +100
+	keyPromptShowTime      = 1.0 //sec
+	keyPromptHideTime      = 0.5 // sec
 )
 
 var (
-	titleSceenAlive = true
-	snakeColors     = map[int]*color.RGBA{
+	titleSceenAlive        = true
+	titleImage             *ebiten.Image
+	titleImageKeyPrompt    *ebiten.Image
+	colorTitleScreen       = color.RGBA{colorSnake1.R, colorSnake1.G, colorSnake1.B, 230}
+	titleBackgroundIndices = []uint16{
+		1, 0, 2,
+		2, 3, 1,
+	}
+
+	snakeColors = map[int]*color.RGBA{
 		0: &colorSnake1,
 		1: &colorSnake2,
 		2: &colorFood,
 		3: &colorDebug,
 	}
-	colorTitleScreen = color.RGBA{colorSnake1.R, colorSnake1.G, colorSnake1.B, 230}
-	titleShaderOp    = ebiten.DrawTrianglesShaderOptions{
+
+	titleShaderOp = ebiten.DrawTrianglesShaderOptions{
 		Uniforms: map[string]interface{}{
-			"Radius":        float32(titleRectHeight / 2.0),
-			"Size":          []float32{float32(titleRectWidth), float32(titleRectHeight)},
-			"Direction":     float32(2),
 			"ShowKeyPrompt": float32(0.0),
+			"RadiusTex":     []float32{float32(titleRectCornerRadiusX / titleRectWidth), float32(titleRectCornerRadiusY / titleRectHeight)},
 		},
 	}
-	titleBackgroundIndices = []uint16{
-		1, 0, 2,
-		2, 3, 1,
-	}
-	titleImage          *ebiten.Image
-	titleImageKeyPrompt *ebiten.Image
 )
 
 type titleScene struct {
@@ -87,8 +98,9 @@ func newTitleScreen() *titleScene {
 
 	lenSnakeColors := len(snakeColors)
 	for iSnake := 0; iSnake < maxSnakes; iSnake++ {
-		length := snakeLengthMin + rand.Intn(snakeLengthDiff)
-		snake := newSnakeRandDirLoc(uint16(length), snakeColors[rand.Intn(lenSnakeColors)])
+		length := dumbSnakeLengthMin + rand.Intn(dumbSnakeLengthDiff)
+		speed := dumbSnakeSpeedMin + rand.Float64()*dumbSnakeSpeedDiff
+		snake := newSnakeRandDirLoc(uint16(length), speed, snakeColors[rand.Intn(lenSnakeColors)])
 		go snake.controlDumbly()
 		scene.snakes[iSnake] = snake
 	}
@@ -98,10 +110,8 @@ func newTitleScreen() *titleScene {
 func initTitle() {
 	// Prepare title text image
 	titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
-	// titleImageKeyPrompt = ebiten.NewImage(titleRectWidth, titleRectHeight)
 	titleImage.Fill(colorSnake2)
 
-	println(boundTextTitle.Min.X)
 	boundTextTitleSize := boundTextTitle.Size()
 	boundTextKeyPromptSize := boundTextKeyPrompt.Size()
 	// Draw Title
@@ -139,6 +149,7 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 			draw(screen, unit)
 		}
 	}
+	// drawFPS(screen)
 
 	// Draw Title Background
 	screen.DrawTrianglesShader(t.titleBackgroundVertices, titleBackgroundIndices, shaderTitle, &titleShaderOp)

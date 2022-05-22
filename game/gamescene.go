@@ -51,14 +51,14 @@ type gameScene struct {
 
 func newGameScene() *gameScene {
 	return &gameScene{
-		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength, directionRight, &colorSnake1),
+		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength, snakeSpeedInitial, directionRight, &colorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *gameScene) restart() {
 	*g = gameScene{
-		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength, &colorSnake1),
+		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength, snakeSpeedInitial, &colorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
