@@ -4,13 +4,14 @@ package main
 
 var (
 	ShowKeyPrompt float
+	Alpha         float
 	RadiusTex     vec2
 )
 
 func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
-	alpha := color.a
+	alpha := Alpha
 
-	var imgColor vec4 = vec4(1.0)
+	var imgColor vec4
 	if ShowKeyPrompt == 1.0 {
 		imgColor = imageSrc1UnsafeAt(texCoord)
 	} else {
@@ -18,7 +19,6 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 	}
 
 	// Round the corners
-	// Top left
 	origin, size := imageSrcRegionOnTexture()
 	centerTopLeft := origin + RadiusTex
 	centerTopRight := vec2(origin.x+size.x-RadiusTex.x, origin.y+RadiusTex.y)

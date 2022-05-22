@@ -45,24 +45,26 @@ func (r rectF32) split(rects *[]rectF32) {
 	rightX := r.pos.x + r.size.x
 	bottomY := r.pos.y + r.size.y
 
-	if r.pos.x < 0 { // left part is off-screen
-		rectF32{vec32{r.pos.x + ScreenWidth, r.pos.y}, vec32{-r.pos.x, r.size.y}, vec32{0, 0}}.split(rects) // teleported left part
-		rectF32{vec32{0, r.pos.y}, vec32{rightX, r.size.y}, vec32{-r.pos.x, 0}}.split(rects)                // part in the screen
-		return
-	} else if rightX > ScreenWidth { // right part is off-screen
-		rectF32{vec32{0, r.pos.y}, vec32{rightX - ScreenWidth, r.size.y}, vec32{ScreenWidth - r.pos.x, 0}}.split(rects) // teleported right part
-		rectF32{vec32{r.pos.x, r.pos.y}, vec32{ScreenWidth - r.pos.x, r.size.y}, vec32{0, 0}}.split(rects)              // part in the screen
-		return
-	}
+	if teleportActive {
+		if r.pos.x < 0 { // left part is off-screen
+			rectF32{vec32{r.pos.x + ScreenWidth, r.pos.y}, vec32{-r.pos.x, r.size.y}, vec32{0, 0}}.split(rects) // teleported left part
+			rectF32{vec32{0, r.pos.y}, vec32{rightX, r.size.y}, vec32{-r.pos.x, 0}}.split(rects)                // part in the screen
+			return
+		} else if rightX > ScreenWidth { // right part is off-screen
+			rectF32{vec32{0, r.pos.y}, vec32{rightX - ScreenWidth, r.size.y}, vec32{ScreenWidth - r.pos.x, 0}}.split(rects) // teleported right part
+			rectF32{vec32{r.pos.x, r.pos.y}, vec32{ScreenWidth - r.pos.x, r.size.y}, vec32{0, 0}}.split(rects)              // part in the screen
+			return
+		}
 
-	if r.pos.y < 0 { // upper part is off-screen
-		rectF32{vec32{r.pos.x, ScreenHeight + r.pos.y}, vec32{r.size.x, -r.pos.y}, vec32{r.posInUnit.x, 0}}.split(rects) // teleported upper part
-		rectF32{vec32{r.pos.x, 0}, vec32{r.size.x, bottomY}, vec32{r.posInUnit.x, -r.pos.y}}.split(rects)                // part in the screen
-		return
-	} else if bottomY > ScreenHeight { // bottom part is off-screen
-		rectF32{vec32{r.pos.x, 0}, vec32{r.size.x, bottomY - ScreenHeight}, vec32{r.posInUnit.x, ScreenHeight - r.pos.y}}.split(rects) // teleported bottom part
-		rectF32{vec32{r.pos.x, r.pos.y}, vec32{r.size.x, ScreenHeight - r.pos.y}, vec32{r.posInUnit.x, 0}}.split(rects)                // part in the screen
-		return
+		if r.pos.y < 0 { // upper part is off-screen
+			rectF32{vec32{r.pos.x, ScreenHeight + r.pos.y}, vec32{r.size.x, -r.pos.y}, vec32{r.posInUnit.x, 0}}.split(rects) // teleported upper part
+			rectF32{vec32{r.pos.x, 0}, vec32{r.size.x, bottomY}, vec32{r.posInUnit.x, -r.pos.y}}.split(rects)                // part in the screen
+			return
+		} else if bottomY > ScreenHeight { // bottom part is off-screen
+			rectF32{vec32{r.pos.x, 0}, vec32{r.size.x, bottomY - ScreenHeight}, vec32{r.posInUnit.x, ScreenHeight - r.pos.y}}.split(rects) // teleported bottom part
+			rectF32{vec32{r.pos.x, r.pos.y}, vec32{r.size.x, ScreenHeight - r.pos.y}, vec32{r.posInUnit.x, 0}}.split(rects)                // part in the screen
+			return
+		}
 	}
 
 	// Add the split rectangle to the rects slice.

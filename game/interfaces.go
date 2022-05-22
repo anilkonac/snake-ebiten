@@ -25,9 +25,8 @@ import (
 )
 
 type scene interface {
-	update()
+	update(*inputHandler) bool // Return true if the scene is finished
 	draw(*ebiten.Image)
-	exit()
 }
 
 type collidable interface {

@@ -50,6 +50,8 @@ type gameScene struct {
 }
 
 func newGameScene() *gameScene {
+	teleportActive = true
+
 	return &gameScene{
 		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, snakeLength, snakeSpeedInitial, directionRight, &colorSnake1),
 		food:  newFoodRandLoc(),
@@ -63,11 +65,11 @@ func (g *gameScene) restart() {
 	}
 }
 
-func (g *gameScene) update() {
+func (g *gameScene) update(input *inputHandler) bool {
 	g.handleSettingsInputs()
 
 	if g.paused {
-		return
+		return false
 	}
 
 	if g.gameOver {
@@ -75,7 +77,7 @@ func (g *gameScene) update() {
 		if g.timeAfterGameOver >= restartTime {
 			g.restart()
 		}
-		return
+		return false
 	}
 
 	g.handleInput()
@@ -86,6 +88,7 @@ func (g *gameScene) update() {
 	g.updateScoreAnims()
 	g.checkFood(distToFood)
 
+	return false
 }
 
 func (g *gameScene) calcFoodDist() float32 {
@@ -291,10 +294,6 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 func (g *gameScene) drawScore(screen *ebiten.Image) {
 	msg := fmt.Sprintf("Score: %05d", int(g.snake.foodEaten)*foodScore)
 	text.Draw(screen, msg, fontFaceScore, scoreTextShiftX, -boundTextScore.Min.Y+scoreTextShiftY, colorScore)
-}
-
-func (g *gameScene) exit() {
-
 }
 
 func (g *gameScene) printDebugMsgs(screen *ebiten.Image) {

@@ -43,26 +43,29 @@ const (
 
 // Title Rectangle parameters
 const (
-	titleRectWidth         = 600
-	titleRectHeight        = 400
+	titleRectWidth         = 540
+	titleRectHeight        = 405
 	titleRectRatio         = 1.0 * titleRectWidth / titleRectHeight
 	titleRectCornerRadiusX = radiusSnake
 	titleRectCornerRadiusY = titleRectCornerRadiusX / titleRectRatio
+	titleRectInitialAlpha  = 230 / 255.0
 	textTitle              = "Ssnake"
 	textPressToPlay        = "Press any key to start"
-	textTitleShiftX        = 0
 	textTitleShiftY        = -50
-	textKeyPromptShiftX    = 0
 	textKeyPromptShiftY    = +100
 	keyPromptShowTime      = 1.0 //sec
 	keyPromptHideTime      = 0.5 // sec
+)
+
+const (
+	titleRectDissapearRate float32 = (75 / 255.0) * deltaTime
 )
 
 var (
 	titleSceenAlive        = true
 	titleImage             *ebiten.Image
 	titleImageKeyPrompt    *ebiten.Image
-	colorTitleScreen       = color.RGBA{colorSnake1.R, colorSnake1.G, colorSnake1.B, 230}
+	colorTitleRect         = &colorSnake2
 	titleBackgroundIndices = []uint16{
 		1, 0, 2,
 		2, 3, 1,
@@ -79,6 +82,7 @@ var (
 		Uniforms: map[string]interface{}{
 			"ShowKeyPrompt": float32(0.0),
 			"RadiusTex":     []float32{float32(titleRectCornerRadiusX / titleRectWidth), float32(titleRectCornerRadiusY / titleRectHeight)},
+			"Alpha":         float32(titleRectInitialAlpha),
 		},
 	}
 )
@@ -87,14 +91,16 @@ type titleScene struct {
 	snakes                  []*snake
 	titleBackground         rectF32
 	titleBackgroundVertices []ebiten.Vertex
+	titleRectAlpha          float32
 }
 
 func newTitleScreen() *titleScene {
 	scene := &titleScene{
 		snakes:          make([]*snake, maxSnakes),
 		titleBackground: *newRect(vec32{(ScreenWidth - titleRectWidth) / 2.0, (ScreenHeight - titleRectHeight) / 2.0}, vec32{titleRectWidth, titleRectHeight}),
+		titleRectAlpha:  titleRectInitialAlpha,
 	}
-	scene.titleBackgroundVertices = scene.titleBackground.vertices(&colorTitleScreen)
+	scene.titleBackgroundVertices = scene.titleBackground.vertices(colorTitleRect)
 
 	lenSnakeColors := len(snakeColors)
 	for iSnake := 0; iSnake < maxSnakes; iSnake++ {
@@ -107,16 +113,16 @@ func newTitleScreen() *titleScene {
 	return scene
 }
 
-func initTitle() {
+func initTitleRect() {
 	// Prepare title text image
 	titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
-	titleImage.Fill(colorSnake2)
+	titleImage.Fill(colorTitleRect)
 
 	boundTextTitleSize := boundTextTitle.Size()
 	boundTextKeyPromptSize := boundTextKeyPrompt.Size()
 	// Draw Title
 	text.Draw(titleImage, textTitle, fontFaceTitle,
-		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X+textTitleShiftX,
+		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X,
 		(titleRectHeight-boundTextTitleSize.Y)/2.0-boundTextTitle.Min.Y+textTitleShiftY,
 		colorBackground)
 
@@ -124,7 +130,7 @@ func initTitle() {
 
 	// Draw key prompt
 	text.Draw(titleImageKeyPrompt, textPressToPlay, fontFaceScore,
-		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X+textKeyPromptShiftX,
+		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
 		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, colorBackground)
 
 	titleShaderOp.Images[0] = titleImage
@@ -133,10 +139,28 @@ func initTitle() {
 	go keyPromptFlipFlop()
 }
 
-func (t *titleScene) update() {
+func (t *titleScene) update(input *inputHandler) bool {
 	for _, snake := range t.snakes {
 		snake.update(eatingAnimStartDistance)
 	}
+
+	if len(input.keys) > 0 && titleSceenAlive {
+		titleSceenAlive = false
+		teleportActive = false
+		for _, snake := range t.snakes {
+			snake.speed *= 2
+		}
+	}
+
+	if !titleSceenAlive {
+		t.titleRectAlpha -= titleRectDissapearRate
+		titleShaderOp.Uniforms["Alpha"] = t.titleRectAlpha
+		if t.titleRectAlpha <= 0.0 {
+			return true
+		}
+		titleShaderOp.Uniforms["ShowKeyPrompt"] = float32(0.0)
+	}
+	return false
 }
 
 func (t *titleScene) draw(screen *ebiten.Image) {
@@ -149,15 +173,10 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 			draw(screen, unit)
 		}
 	}
-	// drawFPS(screen)
 
 	// Draw Title Background
 	screen.DrawTrianglesShader(t.titleBackgroundVertices, titleBackgroundIndices, shaderTitle, &titleShaderOp)
 
-}
-
-func (t *titleScene) exit() {
-	titleSceenAlive = false
 }
 
 // Goroutine

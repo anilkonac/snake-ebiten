@@ -24,21 +24,34 @@ var (
 	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
 )
 
+var (
+	teleportActive = true
+)
+
 // Game implements ebiten.gameScene interface.
 type Game struct {
 	curScene scene
+	input    inputHandler
 }
 
 func NewGame() *Game {
 	return &Game{
 		curScene: newTitleScreen(),
+		input: inputHandler{
+			keys: make([]ebiten.Key, 0, 10),
+		},
 	}
 }
 
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
-	handleSettingsInputs()
-	g.curScene.update()
+	// handleSettingsInputs()
+	g.input.getPressedKeys()
+
+	finished := g.curScene.update(&g.input)
+	if finished {
+		g.curScene = newGameScene()
+	}
 
 	return nil
 }
