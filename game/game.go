@@ -4,7 +4,6 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -13,9 +12,7 @@ const (
 	deltaTime    = 1.0 / 60.0
 )
 
-var (
-	teleportActive = true
-)
+var teleportActive = true
 
 // Colors to be used in the drawing.
 // Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
@@ -35,16 +32,19 @@ type Game struct {
 
 func NewGame() *Game {
 	return &Game{
-		curScene: newTitleScreen(),
+		curScene: newTitleScene(),
 	}
 }
 
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
 
-	finished := g.curScene.update()
-	if finished {
-		g.curScene = newGameScene()
+	sceneEnd := g.curScene.update()
+	if sceneEnd {
+		switch g.curScene.(type) {
+		case *titleScene:
+			g.curScene = newGameScene()
+		}
 	}
 
 	return nil
@@ -58,20 +58,4 @@ func (g *Game) Draw(screen *ebiten.Image) {
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return ScreenWidth, ScreenHeight
-}
-
-func handleSettingsInputs() {
-	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
-		if musicState == musicOn {
-			musicState = musicMuted
-			playerMusic.Pause()
-		} else if musicState == musicMuted {
-			musicState = musicOn
-			playerMusic.Play()
-		}
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
-		printFPS = !printFPS
-	}
 }

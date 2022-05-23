@@ -40,6 +40,7 @@ const (
 	dumbSnakeSpeedMin   = 150
 	dumbSnakeSpeedMax   = 400
 	dumbSnakeSpeedDiff  = dumbSnakeSpeedMax - dumbSnakeSpeedMin
+	dumbSnakeRunMultip  = 2.5
 )
 
 // Title Rectangle parameters
@@ -50,7 +51,7 @@ const (
 	titleRectCornerRadiusX         = radiusSnake
 	titleRectCornerRadiusY         = titleRectCornerRadiusX / titleRectRatio
 	titleRectInitialAlpha          = 230 / 255.0
-	titleRectDissapearRate float32 = (75 / 255.0) * deltaTime
+	titleRectDissapearRate float32 = (85 / 255.0) * deltaTime
 	textTitle                      = "Ssnake"
 	textPressToPlay                = "Press any key to start"
 	textTitleShiftY                = -50
@@ -85,7 +86,7 @@ type titleScene struct {
 	titleRectDrawOpts   ebiten.DrawTrianglesShaderOptions
 }
 
-func newTitleScreen() *titleScene {
+func newTitleScene() *titleScene {
 	// Create title rect model
 	titleRect := rectF32{
 		pos:       vec32{(ScreenWidth - titleRectWidth) / 2.0, (ScreenHeight - titleRectHeight) / 2.0},
@@ -95,10 +96,10 @@ func newTitleScreen() *titleScene {
 
 	// Create scene
 	scene := &titleScene{
-		snakes:            make([]*snake, maxSnakes),
-		titleRectVertices: titleRect.vertices(colorTitleRect),
 		titleRectAlpha:    titleRectInitialAlpha,
+		snakes:            make([]*snake, maxSnakes),
 		pressedKeys:       make([]ebiten.Key, 0, 10),
+		titleRectVertices: titleRect.vertices(colorTitleRect),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"ShowKeyPrompt": float32(0.0),
@@ -146,7 +147,7 @@ func (t *titleScene) prepareTitleRects() {
 		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
 		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, colorBackground)
 
-	// Send the images to the shader
+	// Send images to the shader
 	t.titleRectDrawOpts.Images[0] = t.titleImage
 	t.titleRectDrawOpts.Images[1] = t.titleImageKeyPrompt
 
@@ -181,7 +182,7 @@ func (t *titleScene) handleKeyPress() {
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
 		for _, snake := range t.snakes {
-			snake.speed *= 2
+			snake.speed *= dumbSnakeRunMultip
 		}
 	}
 }
