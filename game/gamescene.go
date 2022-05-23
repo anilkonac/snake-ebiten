@@ -65,7 +65,7 @@ func (g *gameScene) restart() {
 	}
 }
 
-func (g *gameScene) update(input *inputHandler) bool {
+func (g *gameScene) update() bool {
 	g.handleSettingsInputs()
 
 	if g.paused {
@@ -276,6 +276,8 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 
 	// Draw score text
 	g.drawScore(screen)
+
+	drawFPS(screen)
 
 	if debugUnits {
 		// Mark cursor

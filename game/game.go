@@ -13,6 +13,10 @@ const (
 	deltaTime    = 1.0 / 60.0
 )
 
+var (
+	teleportActive = true
+)
+
 // Colors to be used in the drawing.
 // Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
 var (
@@ -24,31 +28,21 @@ var (
 	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
 )
 
-var (
-	teleportActive = true
-)
-
 // Game implements ebiten.gameScene interface.
 type Game struct {
 	curScene scene
-	input    inputHandler
 }
 
 func NewGame() *Game {
 	return &Game{
 		curScene: newTitleScreen(),
-		input: inputHandler{
-			keys: make([]ebiten.Key, 0, 10),
-		},
 	}
 }
 
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
-	// handleSettingsInputs()
-	g.input.getPressedKeys()
 
-	finished := g.curScene.update(&g.input)
+	finished := g.curScene.update()
 	if finished {
 		g.curScene = newGameScene()
 	}
@@ -59,8 +53,6 @@ func (g *Game) Update() error {
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.curScene.draw(screen)
-
-	// drawFPS(screen)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.

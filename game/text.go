@@ -73,7 +73,6 @@ func init() {
 	boundTextFPS = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 165.0")
 
 	initScoreAnim()
-	initTitleRect()
 }
 
 func drawFPS(screen *ebiten.Image) {

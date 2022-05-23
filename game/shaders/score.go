@@ -5,7 +5,7 @@ package main
 var Alpha float
 
 func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
-	imgColor := imageSrc0At(texCoord)
+	imgColor := imageSrc0UnsafeAt(texCoord)
 
 	// Get font drawing information from red color
 	redIntensity := imgColor.r

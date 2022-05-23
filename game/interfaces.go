@@ -25,7 +25,7 @@ import (
 )
 
 type scene interface {
-	update(*inputHandler) bool // Return true if the scene is finished
+	update() bool // Return true if the scene is finished
 	draw(*ebiten.Image)
 }
 
