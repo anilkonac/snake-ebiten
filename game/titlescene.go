@@ -24,6 +24,8 @@ import (
 	"time"
 
 	"github.com/anilkonac/snake-ebiten/game/params"
+	"github.com/anilkonac/snake-ebiten/game/shaders"
+	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -85,14 +87,15 @@ type titleScene struct {
 	titleImage          *ebiten.Image
 	titleImageKeyPrompt *ebiten.Image
 	titleRectDrawOpts   ebiten.DrawTrianglesShaderOptions
+	shaderTitle         *ebiten.Shader
 }
 
 func newTitleScene() *titleScene {
 	// Create title rect model
-	titleRect := rectF32{
-		pos:       vec32{(params.ScreenWidth - titleRectWidth) / 2.0, (params.ScreenHeight - titleRectHeight) / 2.0},
-		size:      vec32{titleRectWidth, titleRectHeight},
-		posInUnit: vec32{0, 0},
+	titleRect := t.RectF32{
+		Pos:       t.Vec32{X: (params.ScreenWidth - titleRectWidth) / 2.0, Y: (params.ScreenHeight - titleRectHeight) / 2.0},
+		Size:      t.Vec32{X: titleRectWidth, Y: titleRectHeight},
+		PosInUnit: t.Vec32{X: 0, Y: 0},
 	}
 
 	// Create scene
@@ -100,7 +103,8 @@ func newTitleScene() *titleScene {
 		titleRectAlpha:    titleRectInitialAlpha,
 		snakes:            make([]*snake, maxSnakes),
 		pressedKeys:       make([]ebiten.Key, 0, 10),
-		titleRectVertices: titleRect.vertices(colorTitleRect),
+		shaderTitle:       t.NewShader(shaders.Title),
+		titleRectVertices: titleRect.Vertices(colorTitleRect),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"ShowKeyPrompt": float32(0.0),
@@ -201,7 +205,7 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 	drawFPS(screen)
 
 	// Draw Title Rect
-	screen.DrawTrianglesShader(t.titleRectVertices, titleBackgroundIndices, shaderTitle, &t.titleRectDrawOpts)
+	screen.DrawTrianglesShader(t.titleRectVertices, titleBackgroundIndices, t.shaderTitle, &t.titleRectDrawOpts)
 
 }
 

@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/anilkonac/snake-ebiten/game/params"
+	t "github.com/anilkonac/snake-ebiten/game/tools"
 )
 
 type snake struct {
@@ -44,14 +45,14 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(headCenter vec64, initialLength uint16, speed float64, direction directionT, color *color.RGBA) *snake {
+func newSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction directionT, color *color.RGBA) *snake {
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if headCenter.x > params.ScreenWidth {
+	if headCenter.X > params.ScreenWidth {
 		panic("Initial x position of the snake is off-screen.")
 	}
-	if headCenter.y > params.ScreenHeight {
+	if headCenter.Y > params.ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
 	if isVertical := direction.isVertical(); (isVertical && (initialLength > params.ScreenHeight)) ||
@@ -74,13 +75,16 @@ func newSnake(headCenter vec64, initialLength uint16, speed float64, direction d
 	return snake
 }
 
-func newSnakeRandDir(headCenter vec64, initialLength uint16, speed float64, color *color.RGBA) *snake {
+func newSnakeRandDir(headCenter t.Vec64, initialLength uint16, speed float64, color *color.RGBA) *snake {
 	direction := directionT(rand.Intn(int(directionTotal)))
 	return newSnake(headCenter, initialLength, speed, direction, color)
 }
 
 func newSnakeRandDirLoc(initialLength uint16, speed float64, color *color.RGBA) *snake {
-	headCenter := vec64{float64(rand.Intn(params.ScreenWidth)), float64(rand.Intn(params.ScreenHeight))}
+	headCenter := t.Vec64{
+		X: float64(rand.Intn(params.ScreenWidth)),
+		Y: float64(rand.Intn(params.ScreenHeight)),
+	}
 	return newSnakeRandDir(headCenter, initialLength, speed, color)
 }
 

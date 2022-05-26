@@ -21,6 +21,7 @@ package game
 import (
 	"image/color"
 
+	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -31,12 +32,12 @@ type scene interface {
 
 type collidable interface {
 	collEnabled() bool
-	collisionRects() []rectF32
+	collisionRects() []t.RectF32
 }
 
 type drawable interface {
 	drawEnabled() bool
-	drawableRects() []rectF32
+	drawableRects() []t.RectF32
 	Color() *color.RGBA
 	drawOptions() *ebiten.DrawTrianglesShaderOptions
 	shader() *ebiten.Shader
@@ -65,7 +66,7 @@ func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
 	for iRect := range rects {
 		rect := &rects[iRect]
 
-		verticesRect := rect.vertices(src.Color())
+		verticesRect := rect.Vertices(src.Color())
 		indicesRect := []uint16{
 			offset + 1, offset, offset + 2,
 			offset + 2, offset + 3, offset + 1,
@@ -94,7 +95,7 @@ func collides(a, b collidable, tolerance float32) bool {
 		for iRectB := range rectsB {
 			rectB := &rectsB[iRectB]
 
-			if !intersects(rectA, rectB, tolerance) {
+			if !t.Intersects(rectA, rectB, tolerance) {
 				continue
 			}
 

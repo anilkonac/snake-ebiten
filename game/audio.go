@@ -24,6 +24,7 @@ import (
 	"time"
 
 	sound "github.com/anilkonac/snake-ebiten/game/resources/audio"
+	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
@@ -74,14 +75,10 @@ func prepareAudio() {
 
 func createPlayer(src []byte, volume float64) *audio.Player {
 	stream, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
-	if err != nil {
-		panic(err)
-	}
+	t.Panic(err)
 
 	player, err := audioContext.NewPlayer(stream)
-	if err != nil {
-		panic(err)
-	}
+	t.Panic(err)
 
 	player.SetVolume(volume)
 	return player
@@ -89,14 +86,10 @@ func createPlayer(src []byte, volume float64) *audio.Player {
 
 func createMusicPlayer(src []byte) *audio.Player {
 	stream, err := vorbis.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
-	if err != nil {
-		panic(err)
-	}
+	t.Panic(err)
 
 	player, err := audioContext.NewPlayer(stream)
-	if err != nil {
-		panic(err)
-	}
+	t.Panic(err)
 
 	return player
 }

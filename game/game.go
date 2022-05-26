@@ -2,12 +2,18 @@ package game
 
 import (
 	"github.com/anilkonac/snake-ebiten/game/params"
+	"github.com/anilkonac/snake-ebiten/game/shaders"
+	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Game implements ebiten.gameScene interface.
+// Game implements ebiten.Game interface.
 type Game struct {
 	curScene scene
+}
+
+func init() {
+	params.ShaderRound = t.NewShader(shaders.Round)
 }
 
 func NewGame() *Game {
@@ -18,9 +24,7 @@ func NewGame() *Game {
 
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
-
-	sceneEnd := g.curScene.update()
-	if sceneEnd {
+	if g.curScene.update() {
 		switch g.curScene.(type) {
 		case *titleScene:
 			g.curScene = newGameScene()

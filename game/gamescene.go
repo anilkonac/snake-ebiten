@@ -23,6 +23,7 @@ import (
 	"math"
 
 	"github.com/anilkonac/snake-ebiten/game/params"
+	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -41,7 +42,6 @@ var (
 	debugUnits = false // Draw consecutive units with different colors
 )
 
-// gameScene implements ebiten.gameScene interface.
 type gameScene struct {
 	snake             *snake
 	food              *food
@@ -55,14 +55,14 @@ func newGameScene() *gameScene {
 	params.TeleportActive = true
 
 	return &gameScene{
-		snake: newSnake(vec64{snakeHeadCenterX, snakeHeadCenterY}, params.SnakeLength, params.SnakeSpeedInitial, directionRight, &params.ColorSnake1),
+		snake: newSnake(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, params.SnakeLength, params.SnakeSpeedInitial, directionRight, &params.ColorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *gameScene) restart() {
 	*g = gameScene{
-		snake: newSnakeRandDir(vec64{snakeHeadCenterX, snakeHeadCenterY}, params.SnakeLength, params.SnakeSpeedInitial, &params.ColorSnake1),
+		snake: newSnakeRandDir(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, params.SnakeLength, params.SnakeSpeedInitial, &params.ColorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
@@ -99,25 +99,25 @@ func (g *gameScene) calcFoodDist() float32 {
 	}
 
 	headLoc := g.snake.unitHead.headCenter
-	foodLoc := g.food.center.to64()
+	foodLoc := g.food.center.To64()
 
 	// In screen distance
-	minDist := distance(headLoc, foodLoc)
+	minDist := t.Distance(headLoc, foodLoc)
 
-	if headLoc.x < params.HalfScreenWidth { // Left mirror distance
-		mirroredFood := vec64{foodLoc.x - params.ScreenWidth, foodLoc.y}
-		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
-	} else if headLoc.x >= params.HalfScreenWidth { // Right mirror distance
-		mirroredFood := vec64{foodLoc.x + params.ScreenWidth, foodLoc.y}
-		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
+	if headLoc.X < params.HalfScreenWidth { // Left mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X - params.ScreenWidth, Y: foodLoc.Y}
+		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
+	} else if headLoc.X >= params.HalfScreenWidth { // Right mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X + params.ScreenWidth, Y: foodLoc.Y}
+		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
 	}
 
-	if headLoc.y < params.HalfScreenHeight { // Upper mirror distance
-		mirroredFood := vec64{foodLoc.x, foodLoc.y - params.ScreenHeight}
-		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
-	} else if headLoc.y >= params.HalfScreenHeight { // Bottom mirror distance
-		mirroredFood := vec64{foodLoc.x, foodLoc.y + params.ScreenHeight}
-		minDist = math.Min(minDist, distance(headLoc, mirroredFood))
+	if headLoc.Y < params.HalfScreenHeight { // Upper mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y - params.ScreenHeight}
+		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
+	} else if headLoc.Y >= params.HalfScreenHeight { // Bottom mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y + params.ScreenHeight}
+		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
 	}
 
 	return float32(minDist)
@@ -248,16 +248,16 @@ func (g *gameScene) triggerScoreAnim() {
 	// not the head center.
 	switch g.snake.unitHead.direction {
 	case directionUp:
-		corrCenter.y -= params.RadiusSnake
+		corrCenter.Y -= params.RadiusSnake
 	case directionDown:
-		corrCenter.y += params.RadiusSnake
+		corrCenter.Y += params.RadiusSnake
 	case directionRight:
-		corrCenter.x += params.RadiusSnake
+		corrCenter.X += params.RadiusSnake
 	case directionLeft:
-		corrCenter.x -= params.RadiusSnake
+		corrCenter.X -= params.RadiusSnake
 	}
 
-	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(corrCenter.to32()))
+	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(corrCenter.To32()))
 }
 
 func (g *gameScene) draw(screen *ebiten.Image) {
@@ -284,7 +284,7 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 	if debugUnits {
 		// Mark cursor
 		x, y := ebiten.CursorPosition()
-		markPoint(screen, vecI{x, y}.to64(), 5, params.ColorSnake2)
+		t.MarkPoint(screen, t.VecI{X: x, Y: y}.To64(), 5, params.ColorSnake2)
 
 		// Print mouse coordinates
 		msg := fmt.Sprintf("%d %d", x, y)
@@ -307,5 +307,5 @@ func (g *gameScene) printDebugMsgs(screen *ebiten.Image) {
 	// }
 	// ebitenutil.DebugPrint(screen, fmt.Sprintf("Food Eaten: %d   Snake length: %.2f   Speed: %.3f", g.snake.foodEaten, totalLength,  g.snake.speed))
 	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Turn Queue Length: %d Cap: %d", len(g.snake.turnQueue), cap(g.snake.turnQueue)), 0, 15)
-	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
+	// ebitenutil.DebugPrintAt(screen, fmt.Sprintf("t.Distance after turn: %.2f", g.snake.distAfterTurn), 0, 30)
 }

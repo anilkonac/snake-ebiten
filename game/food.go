@@ -23,6 +23,7 @@ import (
 	"math/rand"
 
 	"github.com/anilkonac/snake-ebiten/game/params"
+	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -36,32 +37,32 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 
 type food struct {
 	isActive bool
-	center   vec32
-	rects    []rectF32
+	center   t.Vec32
+	rects    []t.RectF32
 }
 
-func newFood(center vec32) *food {
+func newFood(center t.Vec32) *food {
 	newFood := &food{
 		center: center,
-		rects:  make([]rectF32, 0, 4),
+		rects:  make([]t.RectF32, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
-	pureRect := rectF32{
-		pos: vec32{
-			x: center.x - params.RadiusFood,
-			y: center.y - params.RadiusFood,
+	pureRect := t.RectF32{
+		Pos: t.Vec32{
+			X: center.X - params.RadiusFood,
+			Y: center.Y - params.RadiusFood,
 		},
-		size: vec32{params.FoodLength, params.FoodLength},
+		Size: t.Vec32{X: params.FoodLength, Y: params.FoodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
-	pureRect.split(&newFood.rects)
+	pureRect.Split(&newFood.rects)
 
 	return newFood
 }
 
 func newFoodRandLoc() *food {
-	return newFood(vecI{rand.Intn(params.ScreenWidth), rand.Intn(params.ScreenHeight)}.to32())
+	return newFood(t.VecI{X: rand.Intn(params.ScreenWidth), Y: rand.Intn(params.ScreenHeight)}.To32())
 }
 
 // Implement collidable interface
@@ -70,7 +71,7 @@ func (f food) collEnabled() bool {
 	return true
 }
 
-func (f food) collisionRects() []rectF32 {
+func (f food) collisionRects() []t.RectF32 {
 	return f.rects
 }
 
@@ -80,7 +81,7 @@ func (f food) drawEnabled() bool {
 	return f.isActive
 }
 
-func (f food) drawableRects() []rectF32 {
+func (f food) drawableRects() []t.RectF32 {
 	return f.rects
 }
 
@@ -97,9 +98,9 @@ func (f food) shader() *ebiten.Shader {
 }
 
 func (f food) drawDebugInfo(dst *ebiten.Image) {
-	markPoint(dst, f.center.to64(), 4, params.ColorSnake1)
+	t.MarkPoint(dst, f.center.To64(), 4, params.ColorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
-		rect.drawOuterRect(dst, params.ColorSnake1)
+		rect.DrawOuterRect(dst, params.ColorSnake1)
 	}
 }
