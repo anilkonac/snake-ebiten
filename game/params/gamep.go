@@ -35,5 +35,7 @@ var (
 
 var (
 	TeleportActive = true
+	PrintFPS       = true
+	DebugUnits     = false // Draw consecutive units with different colors
 	ShaderRound    *ebiten.Shader
 )

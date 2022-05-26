@@ -21,6 +21,7 @@ package game
 import (
 	"image/color"
 
+	"github.com/anilkonac/snake-ebiten/game/params"
 	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -31,29 +32,29 @@ type scene interface {
 }
 
 type collidable interface {
-	collEnabled() bool
-	collisionRects() []t.RectF32
+	CollEnabled() bool
+	CollisionRects() []t.RectF32
 }
 
 type drawable interface {
-	drawEnabled() bool
-	drawableRects() []t.RectF32
+	DrawEnabled() bool
+	DrawableRects() []t.RectF32
 	Color() *color.RGBA
-	drawOptions() *ebiten.DrawTrianglesShaderOptions
-	shader() *ebiten.Shader
-	drawDebugInfo(dst *ebiten.Image)
+	DrawOptions() *ebiten.DrawTrianglesShaderOptions
+	Shader() *ebiten.Shader
+	DrawDebugInfo(dst *ebiten.Image)
 }
 
 func draw(dst *ebiten.Image, src drawable) {
-	if !src.drawEnabled() {
+	if !src.DrawEnabled() {
 		return
 	}
 
 	vertices, indices := triangles(src)
-	dst.DrawTrianglesShader(vertices, indices, src.shader(), src.drawOptions())
+	dst.DrawTrianglesShader(vertices, indices, src.Shader(), src.DrawOptions())
 
-	if debugUnits {
-		src.drawDebugInfo(dst)
+	if params.DebugUnits {
+		src.DrawDebugInfo(dst)
 	}
 }
 
@@ -62,7 +63,7 @@ func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
 	indices = make([]uint16, 0, 24)
 	var offset uint16
 
-	rects := src.drawableRects()
+	rects := src.DrawableRects()
 	for iRect := range rects {
 		rect := &rects[iRect]
 
@@ -82,12 +83,12 @@ func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
 }
 
 func collides(a, b collidable, tolerance float32) bool {
-	if !a.collEnabled() || !b.collEnabled() {
+	if !a.CollEnabled() || !b.CollEnabled() {
 		return false
 	}
 
-	rectsA := a.collisionRects()
-	rectsB := b.collisionRects()
+	rectsA := a.CollisionRects()
+	rectsB := b.CollisionRects()
 
 	for iRectA := range rectsA {
 		rectA := &rectsA[iRectA]

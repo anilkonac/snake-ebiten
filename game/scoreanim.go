@@ -24,6 +24,7 @@ import (
 
 	"github.com/anilkonac/snake-ebiten/game/params"
 	"github.com/anilkonac/snake-ebiten/game/shaders"
+	s "github.com/anilkonac/snake-ebiten/game/snake"
 	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -46,7 +47,7 @@ var (
 type scoreAnim struct {
 	pos       t.Vec32
 	alpha     float32
-	direction directionT
+	direction s.DirectionT
 	rects     []t.RectF32
 }
 
@@ -82,7 +83,7 @@ func newScoreAnim(pos t.Vec32) *scoreAnim {
 			Y: pos.Y - scoreAnimShiftY,
 		},
 		alpha:     float32(params.ColorScore.A) / 255.0,
-		direction: directionUp,
+		direction: s.DirectionUp,
 	}
 
 	newAnim.createRects()
@@ -123,11 +124,11 @@ func (s *scoreAnim) update() bool {
 
 // Implement drawable interface
 // ----------------------------
-func (s *scoreAnim) drawEnabled() bool {
+func (s *scoreAnim) DrawEnabled() bool {
 	return true
 }
 
-func (s *scoreAnim) drawableRects() []t.RectF32 {
+func (s *scoreAnim) DrawableRects() []t.RectF32 {
 	return s.rects
 }
 
@@ -135,14 +136,14 @@ func (s *scoreAnim) Color() *color.RGBA {
 	return &params.ColorScore
 }
 
-func (s *scoreAnim) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+func (s *scoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 	return &drawOptionsScoreAnim
 }
 
-func (s *scoreAnim) shader() *ebiten.Shader {
+func (s *scoreAnim) Shader() *ebiten.Shader {
 	return shaderScore
 }
 
-func (s *scoreAnim) drawDebugInfo(dst *ebiten.Image) {
+func (s *scoreAnim) DrawDebugInfo(dst *ebiten.Image) {
 
 }

@@ -25,6 +25,7 @@ import (
 
 	"github.com/anilkonac/snake-ebiten/game/params"
 	"github.com/anilkonac/snake-ebiten/game/shaders"
+	s "github.com/anilkonac/snake-ebiten/game/snake"
 	t "github.com/anilkonac/snake-ebiten/game/tools"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -81,7 +82,7 @@ var (
 
 type titleScene struct {
 	titleRectAlpha      float32
-	snakes              []*snake
+	snakes              []*s.Snake
 	pressedKeys         []ebiten.Key
 	titleRectVertices   []ebiten.Vertex
 	titleImage          *ebiten.Image
@@ -101,7 +102,7 @@ func newTitleScene() *titleScene {
 	// Create scene
 	scene := &titleScene{
 		titleRectAlpha:    titleRectInitialAlpha,
-		snakes:            make([]*snake, maxSnakes),
+		snakes:            make([]*s.Snake, maxSnakes),
 		pressedKeys:       make([]ebiten.Key, 0, 10),
 		shaderTitle:       t.NewShader(shaders.Title),
 		titleRectVertices: titleRect.Vertices(colorTitleRect),
@@ -120,11 +121,11 @@ func newTitleScene() *titleScene {
 	for iSnake := 0; iSnake < maxSnakes; iSnake++ {
 		length := dumbSnakeLengthMin + rand.Intn(dumbSnakeLengthDiff)
 		speed := dumbSnakeSpeedMin + rand.Float64()*dumbSnakeSpeedDiff
-		snake := newSnakeRandDirLoc(uint16(length), speed, snakeColors[rand.Intn(lenSnakeColors)])
+		snake := s.NewSnakeRandDirLoc(uint16(length), speed, snakeColors[rand.Intn(lenSnakeColors)])
 		scene.snakes[iSnake] = snake
 
 		// Activate snake bot
-		go snake.controlDumbly()
+		go controlDumbly(snake)
 	}
 
 	return scene
@@ -161,7 +162,7 @@ func (t *titleScene) prepareTitleRects() {
 
 func (t *titleScene) update() bool {
 	for _, snake := range t.snakes {
-		snake.update(params.EatingAnimStartDistance) // Make sure the snake's mouth is not open
+		snake.Update(params.EatingAnimStartDistance) // Make sure the snake's mouth is not open
 	}
 
 	t.handleKeyPress()
@@ -187,7 +188,7 @@ func (t *titleScene) handleKeyPress() {
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
 		for _, snake := range t.snakes {
-			snake.speed *= dumbSnakeRunMultip
+			snake.Speed *= dumbSnakeRunMultip
 		}
 	}
 }
@@ -197,7 +198,7 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 
 	// Draw snakes
 	for _, snake := range t.snakes {
-		for unit := snake.unitHead; unit != nil; unit = unit.next {
+		for unit := snake.UnitHead; unit != nil; unit = unit.Next {
 			draw(screen, unit)
 		}
 	}
@@ -229,33 +230,33 @@ func (t *titleScene) keyPromptFlipFlop() {
 
 // Goroutine
 // Dumb snake bot
-func (s *snake) controlDumbly() {
+func controlDumbly(snake *s.Snake) {
 	const turnTimeMinMs = turnTimeMin * 1000
 	const turnTimeDiffMs = turnTimeDiff * 1000
 
-	var dirNew directionT
+	var dirNew s.DirectionT
 	for titleSceenAlive {
 		// Determine the new direction.
-		dirCurrent := s.lastDirection()
+		dirCurrent := snake.LastDirection()
 
 		randResult := rand.Float32()
-		if dirCurrent.isVertical() {
+		if dirCurrent.IsVertical() {
 			if randResult < 0.5 {
-				dirNew = directionLeft
+				dirNew = s.DirectionLeft
 			} else {
-				dirNew = directionRight
+				dirNew = s.DirectionRight
 			}
 		} else {
 			if randResult < 0.5 {
-				dirNew = directionUp
+				dirNew = s.DirectionUp
 			} else {
-				dirNew = directionDown
+				dirNew = s.DirectionDown
 			}
 		}
 
 		// Create a new turn and take it
-		newTurn := newTurn(dirCurrent, dirNew)
-		s.turnTo(newTurn, false)
+		newTurn := s.NewTurn(dirCurrent, dirNew)
+		snake.TurnTo(newTurn, false)
 
 		// Sleep for a random time limited by turnTimeMax and turnTimeMin.
 		sleepTime := time.Duration(turnTimeMinMs + rand.Float32()*turnTimeDiffMs)

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package game
+package snake
 
 import (
 	"image/color"
@@ -28,16 +28,16 @@ import (
 	t "github.com/anilkonac/snake-ebiten/game/tools"
 )
 
-type snake struct {
-	speed           float64
-	unitHead        *unit
-	unitTail        *unit
-	turnPrev        *turn
-	turnQueue       []*turn
+type Snake struct {
+	Speed           float64
+	UnitHead        *Unit
+	unitTail        *Unit
+	turnPrev        *Turn
+	turnQueue       []*Turn
 	distAfterTurn   float64
 	growthRemaining float64
 	growthTarget    float64
-	foodEaten       uint8
+	FoodEaten       uint8
 	color           *color.RGBA
 }
 
@@ -45,8 +45,8 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func newSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction directionT, color *color.RGBA) *snake {
-	if direction >= directionTotal {
+func NewSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction DirectionT, color *color.RGBA) *Snake {
+	if direction >= DirectionTotal {
 		panic("direction parameter is invalid.")
 	}
 	if headCenter.X > params.ScreenWidth {
@@ -55,7 +55,7 @@ func newSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction
 	if headCenter.Y > params.ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if isVertical := direction.isVertical(); (isVertical && (initialLength > params.ScreenHeight)) ||
+	if isVertical := direction.IsVertical(); (isVertical && (initialLength > params.ScreenHeight)) ||
 		(!isVertical && (initialLength > params.ScreenWidth)) {
 		panic("Initial snake intersects itself.")
 	}
@@ -63,11 +63,11 @@ func newSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction
 		panic("Snake color cannot be nil")
 	}
 
-	initialUnit := newUnit(headCenter, float64(initialLength), direction, color)
+	initialUnit := NewUnit(headCenter, float64(initialLength), direction, color)
 
-	snake := &snake{
-		speed:    speed,
-		unitHead: initialUnit,
+	snake := &Snake{
+		Speed:    speed,
+		UnitHead: initialUnit,
 		unitTail: initialUnit,
 		color:    color,
 	}
@@ -75,57 +75,57 @@ func newSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction
 	return snake
 }
 
-func newSnakeRandDir(headCenter t.Vec64, initialLength uint16, speed float64, color *color.RGBA) *snake {
-	direction := directionT(rand.Intn(int(directionTotal)))
-	return newSnake(headCenter, initialLength, speed, direction, color)
+func NewSnakeRandDir(headCenter t.Vec64, initialLength uint16, speed float64, color *color.RGBA) *Snake {
+	direction := DirectionT(rand.Intn(int(DirectionTotal)))
+	return NewSnake(headCenter, initialLength, speed, direction, color)
 }
 
-func newSnakeRandDirLoc(initialLength uint16, speed float64, color *color.RGBA) *snake {
+func NewSnakeRandDirLoc(initialLength uint16, speed float64, color *color.RGBA) *Snake {
 	headCenter := t.Vec64{
 		X: float64(rand.Intn(params.ScreenWidth)),
 		Y: float64(rand.Intn(params.ScreenHeight)),
 	}
-	return newSnakeRandDir(headCenter, initialLength, speed, color)
+	return NewSnakeRandDir(headCenter, initialLength, speed, color)
 }
 
-func (s *snake) update(distToFood float32) {
-	moveDistance := s.speed * params.DeltaTime
+func (s *Snake) Update(distToFood float32) {
+	moveDistance := s.Speed * params.DeltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
 	if (len(s.turnQueue) > 0) && (s.distAfterTurn+params.ToleranceDefault >= params.SnakeWidth) {
-		var nextTurn *turn
+		var nextTurn *Turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
-		s.turnTo(nextTurn, true)
+		s.TurnTo(nextTurn, true)
 	}
 
 	s.updateHead(moveDistance, distToFood)
 	s.updateTail(moveDistance, distToFood)
 }
 
-func (s *snake) updateHead(dist float64, distToFood float32) {
+func (s *Snake) updateHead(dist float64, distToFood float32) {
 	// Increse head length
-	s.unitHead.length += dist
+	s.UnitHead.length += dist
 
 	// Move head
-	switch s.unitHead.direction {
-	case directionRight:
-		s.unitHead.moveRight(dist)
-	case directionLeft:
-		s.unitHead.moveLeft(dist)
-	case directionUp:
-		s.unitHead.moveUp(dist)
-	case directionDown:
-		s.unitHead.moveDown(dist)
+	switch s.UnitHead.Direction {
+	case DirectionRight:
+		s.UnitHead.moveRight(dist)
+	case DirectionLeft:
+		s.UnitHead.moveLeft(dist)
+	case DirectionUp:
+		s.UnitHead.moveUp(dist)
+	case DirectionDown:
+		s.UnitHead.moveDown(dist)
 	}
 
-	if s.unitHead != s.unitTail { // Avoid unnecessary updates
-		s.unitHead.update(distToFood)
+	if s.UnitHead != s.unitTail { // Avoid unnecessary updates
+		s.UnitHead.update(distToFood)
 	}
 
 	s.distAfterTurn += dist
 }
 
-func (s *snake) updateTail(dist float64, distToFood float32) {
+func (s *Snake) updateTail(dist float64, distToFood float32) {
 	decreaseAmount := dist
 	if s.growthRemaining > 0 {
 		// Calculate the tail reduction with the square function so that the growth doesn't look ugly.
@@ -144,13 +144,13 @@ func (s *snake) updateTail(dist float64, distToFood float32) {
 	if (s.unitTail.prev != nil) && (s.unitTail.length <= params.SnakeWidth) {
 		s.unitTail.prev.length += s.unitTail.length
 		s.unitTail = s.unitTail.prev
-		s.unitTail.next = nil
+		s.unitTail.Next = nil
 	}
 
 	s.unitTail.update(distToFood)
 }
 
-func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
+func (s *Snake) TurnTo(newTurn *Turn, isFromQueue bool) {
 	if !isFromQueue {
 		// Check if the new turn is dangerous (twice same turns rapidly).
 		if (s.turnPrev != nil) &&
@@ -168,67 +168,45 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	}
 	s.distAfterTurn = 0
 
-	oldHead := s.unitHead
+	oldHead := s.UnitHead
 
 	// Decide on the color of the new head unit.
 	newColor := s.color
-	if debugUnits && (oldHead.color == s.color) {
+	if params.DebugUnits && (oldHead.color == s.color) {
 		newColor = &params.ColorSnake2
 	}
 
 	// Create a new head unit.
-	newHead := newUnit(oldHead.headCenter, 0, newTurn.directionTo, newColor)
+	newHead := NewUnit(oldHead.HeadCenter, 0, newTurn.directionTo, newColor)
 
 	// Add the new head unit to the beginning of the unit doubly linked list.
-	newHead.next = oldHead
+	newHead.Next = oldHead
 	oldHead.prev = newHead
-	s.unitHead = newHead
+	s.UnitHead = newHead
 
 	// Update prev turn
 	s.turnPrev = newTurn
 }
 
-func (s *snake) checkIntersection(intersected *bool) {
-	*intersected = false
-	curUnit := s.unitHead.next
-	if curUnit == nil {
-		return
-	}
-
-	var tolerance float32 = params.ToleranceDefault
-	if len(curUnit.rectsCollision) > 1 { // If second unit is on an edge
-		tolerance = params.ToleranceScreenEdge // To avoid false collisions on screen edges
-	}
-
-	for curUnit != nil {
-		if collides(s.unitHead, curUnit, tolerance) {
-			*intersected = true
-			playSoundHit()
-			return
-		}
-		curUnit = curUnit.next
-	}
-}
-
-func (s *snake) grow() {
+func (s *Snake) Grow() {
 	// Compute the new growth and add to the remaining growth value.
 	// f(x)=50+5*log2(x/10.0+1)
-	newGrowth := 50.0 + 5.0*math.Log2(float64(s.foodEaten)/10.0+1.0)
+	newGrowth := 50.0 + 5.0*math.Log2(float64(s.FoodEaten)/10.0+1.0)
 	s.growthRemaining += newGrowth
 	s.growthTarget += newGrowth
-	s.foodEaten++
+	s.FoodEaten++
 
 	// Update snake speed
 	// f(x)=250+25/e^(0.0075x)
-	s.speed = params.SnakeSpeedFinal + (params.SnakeSpeedInitial-params.SnakeSpeedFinal)/math.Exp(0.0075*float64(s.foodEaten))
+	s.Speed = params.SnakeSpeedFinal + (params.SnakeSpeedInitial-params.SnakeSpeedFinal)/math.Exp(0.0075*float64(s.FoodEaten))
 }
 
-func (s *snake) lastDirection() directionT {
+func (s *Snake) LastDirection() DirectionT {
 	// if the turn queue is not empty, return the direction of the last turn to be taken.
 	if queueLength := len(s.turnQueue); queueLength > 0 {
 		return s.turnQueue[queueLength-1].directionTo
 	}
 
 	// return current head direction
-	return s.unitHead.direction
+	return s.UnitHead.Direction
 }

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package game
+package snake
 
 import (
 	"image/color"
@@ -34,23 +34,23 @@ func init() {
 	shaderSnakeHead = t.NewShader(shaders.SnakeHead)
 }
 
-type unit struct {
-	headCenter     t.Vec64
+type Unit struct {
+	HeadCenter     t.Vec64
 	length         float64
-	direction      directionT
-	rectsCollision []t.RectF32
+	Direction      DirectionT
+	RectsCollision []t.RectF32
 	rectsDrawable  []t.RectF32
 	color          *color.RGBA
-	next           *unit
-	prev           *unit
+	Next           *Unit
+	prev           *Unit
 	drawOpts       ebiten.DrawTrianglesShaderOptions
 }
 
-func newUnit(headCenter t.Vec64, length float64, direction directionT, color *color.RGBA) *unit {
-	newUnit := &unit{
-		headCenter: headCenter,
+func NewUnit(headCenter t.Vec64, length float64, direction DirectionT, color *color.RGBA) *Unit {
+	newUnit := &Unit{
+		HeadCenter: headCenter,
 		length:     length,
-		direction:  direction,
+		Direction:  direction,
 		color:      color,
 		drawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
@@ -64,7 +64,7 @@ func newUnit(headCenter t.Vec64, length float64, direction directionT, color *co
 	return newUnit
 }
 
-func (u *unit) createRects() {
+func (u *Unit) CreateRects() {
 	// Create rectangles for drawing and collision. They are going to split.
 	var rectDraw, rectColl *t.RectF32
 
@@ -72,26 +72,26 @@ func (u *unit) createRects() {
 	rectDraw = u.createRectDraw(rectColl)
 
 	// Remove old rectangles
-	u.rectsCollision = make([]t.RectF32, 0, 4)
-	if u.next != nil {
+	u.RectsCollision = make([]t.RectF32, 0, 4)
+	if u.Next != nil {
 		u.rectsDrawable = make([]t.RectF32, 0, 4)
 	}
 
 	// Create split rectangles on screen edges.
-	rectColl.Split(&u.rectsCollision)
-	if u.next == nil {
-		u.rectsDrawable = u.rectsCollision
+	rectColl.Split(&u.RectsCollision)
+	if u.Next == nil {
+		u.rectsDrawable = u.RectsCollision
 		return
 	}
 	rectDraw.Split(&u.rectsDrawable)
 }
 
-func (u *unit) createRectColl() (rectColl *t.RectF32) {
+func (u *Unit) createRectColl() (rectColl *t.RectF32) {
 	length32 := float32(math.Floor(u.length))
-	flCenter := u.headCenter.Floor().To32()
+	flCenter := u.HeadCenter.Floor().To32()
 
-	switch u.direction {
-	case directionRight:
+	switch u.Direction {
+	case DirectionRight:
 		rectColl = t.NewRect(
 			t.Vec32{
 				X: flCenter.X - length32 + params.RadiusSnake,
@@ -99,7 +99,7 @@ func (u *unit) createRectColl() (rectColl *t.RectF32) {
 			},
 			t.Vec32{X: length32, Y: params.SnakeWidth},
 		)
-	case directionLeft:
+	case DirectionLeft:
 		rectColl = t.NewRect(
 			t.Vec32{
 				X: flCenter.X - params.RadiusSnake,
@@ -107,7 +107,7 @@ func (u *unit) createRectColl() (rectColl *t.RectF32) {
 			},
 			t.Vec32{X: length32, Y: params.SnakeWidth},
 		)
-	case directionUp:
+	case DirectionUp:
 		rectColl = t.NewRect(
 			t.Vec32{
 				X: flCenter.X - params.RadiusSnake,
@@ -115,7 +115,7 @@ func (u *unit) createRectColl() (rectColl *t.RectF32) {
 			},
 			t.Vec32{X: params.SnakeWidth, Y: length32},
 		)
-	case directionDown:
+	case DirectionDown:
 		rectColl = t.NewRect(
 			t.Vec32{
 				X: flCenter.X - params.RadiusSnake,
@@ -129,20 +129,20 @@ func (u *unit) createRectColl() (rectColl *t.RectF32) {
 	return
 }
 
-func (u *unit) createRectDraw(rectColl *t.RectF32) (rectDraw *t.RectF32) {
-	if u.next == nil {
+func (u *Unit) createRectDraw(rectColl *t.RectF32) (rectDraw *t.RectF32) {
+	if u.Next == nil {
 		rectDraw = rectColl
 		return
 	}
 
-	switch u.direction {
-	case directionRight:
+	switch u.Direction {
+	case DirectionRight:
 		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X - params.SnakeWidth, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X + params.SnakeWidth, Y: rectColl.Size.Y})
-	case directionLeft:
+	case DirectionLeft:
 		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X + params.SnakeWidth, Y: rectColl.Size.Y})
-	case directionUp:
+	case DirectionUp:
 		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y + params.SnakeWidth})
-	case directionDown:
+	case DirectionDown:
 		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y - params.SnakeWidth}, t.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y + params.SnakeWidth})
 	default:
 		panic("Wrong unit direction!!")
@@ -151,128 +151,132 @@ func (u *unit) createRectDraw(rectColl *t.RectF32) (rectDraw *t.RectF32) {
 	return
 }
 
-func (u *unit) update(distToFood float32) {
-	u.createRects() // Update rectangles of this unit
+func (u *Unit) update(distToFood float32) {
+	u.CreateRects() // Update rectangles of this unit
 	u.updateDrawOptions(distToFood)
 }
 
-func (u *unit) updateDrawOptions(distToFood float32) {
+func (u *Unit) updateDrawOptions(distToFood float32) {
 	// Distance to food
 	proxToFood := 1.0 - distToFood/params.EatingAnimStartDistance
 
 	// Specify Size uniform variable
 	var drawWidth, drawHeight float32
 	flooredLength := float32(math.Floor(u.length))
-	if u.next != nil {
+	if u.Next != nil {
 		flooredLength += params.SnakeWidth
 	}
-	if u.direction.isVertical() {
+	if u.Direction.IsVertical() {
 		drawWidth, drawHeight = params.SnakeWidth, flooredLength
 	} else {
 		drawWidth, drawHeight = flooredLength, params.SnakeWidth
 	}
 
 	// Update the options
-	u.drawOpts.Uniforms["Direction"] = float32(u.direction)
+	u.drawOpts.Uniforms["Direction"] = float32(u.Direction)
 	u.drawOpts.Uniforms["Size"] = []float32{drawWidth, drawHeight}
 	u.drawOpts.Uniforms["ProxToFood"] = proxToFood
 }
 
-func (u *unit) moveUp(dist float64) {
-	u.headCenter.Y -= dist
+func (u *Unit) moveUp(dist float64) {
+	u.HeadCenter.Y -= dist
 
 	// teleport if head center is offscreen.
-	if params.TeleportActive && (u.headCenter.Y < 0) {
-		u.headCenter.Y += params.ScreenHeight
+	if params.TeleportActive && (u.HeadCenter.Y < 0) {
+		u.HeadCenter.Y += params.ScreenHeight
 	}
 }
 
-func (u *unit) moveDown(dist float64) {
-	u.headCenter.Y += dist
+func (u *Unit) moveDown(dist float64) {
+	u.HeadCenter.Y += dist
 
 	// teleport if head center is offscreen.
-	if params.TeleportActive && (u.headCenter.Y > params.ScreenHeight) {
-		u.headCenter.Y -= params.ScreenHeight
+	if params.TeleportActive && (u.HeadCenter.Y > params.ScreenHeight) {
+		u.HeadCenter.Y -= params.ScreenHeight
 	}
 }
 
-func (u *unit) moveRight(dist float64) {
-	u.headCenter.X += dist
+func (u *Unit) moveRight(dist float64) {
+	u.HeadCenter.X += dist
 
 	// teleport if head center is offscreen.
-	if params.TeleportActive && (u.headCenter.X > params.ScreenWidth) {
-		u.headCenter.X -= params.ScreenWidth
+	if params.TeleportActive && (u.HeadCenter.X > params.ScreenWidth) {
+		u.HeadCenter.X -= params.ScreenWidth
 	}
 }
 
-func (u *unit) moveLeft(dist float64) {
-	u.headCenter.X -= dist
+func (u *Unit) moveLeft(dist float64) {
+	u.HeadCenter.X -= dist
 
 	// teleport if head center is offscreen.
-	if params.TeleportActive && (u.headCenter.X < 0) {
-		u.headCenter.X += params.ScreenWidth
+	if params.TeleportActive && (u.HeadCenter.X < 0) {
+		u.HeadCenter.X += params.ScreenWidth
 	}
 }
 
-func (u *unit) markHeadCenters(dst *ebiten.Image) {
-	t.MarkPoint(dst, u.headCenter, 4, params.ColorFood)
+func (u *Unit) markHeadCenters(dst *ebiten.Image) {
+	t.MarkPoint(dst, u.HeadCenter, 4, params.ColorFood)
 
 	var offset float64 = 0
-	if u.next == nil {
+	if u.Next == nil {
 		offset = params.SnakeWidth
 	}
 
-	backCenter := u.headCenter
-	switch u.direction {
-	case directionUp:
-		backCenter.Y = u.headCenter.Y + u.length - offset
-	case directionDown:
-		backCenter.Y = u.headCenter.Y - u.length + offset
-	case directionRight:
-		backCenter.X = u.headCenter.X - u.length + offset
-	case directionLeft:
-		backCenter.X = u.headCenter.X + u.length - offset
+	backCenter := u.HeadCenter
+	switch u.Direction {
+	case DirectionUp:
+		backCenter.Y = u.HeadCenter.Y + u.length - offset
+	case DirectionDown:
+		backCenter.Y = u.HeadCenter.Y - u.length + offset
+	case DirectionRight:
+		backCenter.X = u.HeadCenter.X - u.length + offset
+	case DirectionLeft:
+		backCenter.X = u.HeadCenter.X + u.length - offset
 	}
 	// mark head center at the other side
 	t.MarkPoint(dst, backCenter, 4, params.ColorFood)
 }
 
+func (u *Unit) SetColor(clr *color.RGBA) {
+	u.color = clr
+}
+
 // Implement collidable interface
 // ------------------------------
-func (u *unit) collEnabled() bool {
+func (u *Unit) CollEnabled() bool {
 	return true
 }
 
-func (u *unit) collisionRects() []t.RectF32 {
-	return u.rectsCollision
+func (u *Unit) CollisionRects() []t.RectF32 {
+	return u.RectsCollision
 }
 
 // Implement drawable interface
 // ----------------------------
-func (u *unit) drawEnabled() bool {
+func (u *Unit) DrawEnabled() bool {
 	return true
 }
 
-func (u *unit) drawableRects() []t.RectF32 {
+func (u *Unit) DrawableRects() []t.RectF32 {
 	return u.rectsDrawable
 }
 
-func (u *unit) Color() *color.RGBA {
+func (u *Unit) Color() *color.RGBA {
 	return u.color
 }
 
-func (u *unit) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+func (u *Unit) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 	return &u.drawOpts
 }
 
-func (u *unit) shader() *ebiten.Shader {
+func (u *Unit) Shader() *ebiten.Shader {
 	if u.prev == nil {
 		return shaderSnakeHead
 	}
 	return params.ShaderRound
 }
 
-func (u *unit) drawDebugInfo(dst *ebiten.Image) {
+func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {
 	u.markHeadCenters(dst)
 	for iRect := range u.rectsDrawable {
 		rect := u.rectsDrawable[iRect]

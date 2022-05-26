@@ -16,40 +16,40 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package game
+package snake
 
-type directionT uint8
+type DirectionT uint8
 
 const (
-	directionUp directionT = iota
-	directionDown
-	directionLeft
-	directionRight
-	directionTotal
+	DirectionUp DirectionT = iota
+	DirectionDown
+	DirectionLeft
+	DirectionRight
+	DirectionTotal
 )
 
-func (d directionT) isVertical() bool {
-	if d >= directionTotal {
+func (d DirectionT) IsVertical() bool {
+	if d >= DirectionTotal {
 		panic("wrong direction")
 	}
-	return (d == directionUp) || (d == directionDown)
+	return (d == DirectionUp) || (d == DirectionDown)
 }
 
-type turn struct {
-	directionTo   directionT
+type Turn struct {
+	directionTo   DirectionT
 	isTurningLeft bool
 }
 
-func newTurn(directionFrom, directionTo directionT) *turn {
-	newTurn := &turn{
+func NewTurn(directionFrom, directionTo DirectionT) *Turn {
+	newTurn := &Turn{
 		directionTo: directionTo,
 	}
 
 	// Determine the direction of rotation.
-	if (directionFrom == directionUp && directionTo == directionLeft) ||
-		(directionFrom == directionLeft && directionTo == directionDown) ||
-		(directionFrom == directionDown && directionTo == directionRight) ||
-		(directionFrom == directionRight && directionTo == directionUp) {
+	if (directionFrom == DirectionUp && directionTo == DirectionLeft) ||
+		(directionFrom == DirectionLeft && directionTo == DirectionDown) ||
+		(directionFrom == DirectionDown && directionTo == DirectionRight) ||
+		(directionFrom == DirectionRight && directionTo == DirectionUp) {
 		newTurn.isTurningLeft = true
 	}
 

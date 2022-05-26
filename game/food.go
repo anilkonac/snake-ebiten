@@ -67,21 +67,21 @@ func newFoodRandLoc() *food {
 
 // Implement collidable interface
 // ------------------------------
-func (f food) collEnabled() bool {
+func (f food) CollEnabled() bool {
 	return true
 }
 
-func (f food) collisionRects() []t.RectF32 {
+func (f food) CollisionRects() []t.RectF32 {
 	return f.rects
 }
 
 // Implement drawable interface
 // ----------------------------
-func (f food) drawEnabled() bool {
+func (f food) DrawEnabled() bool {
 	return f.isActive
 }
 
-func (f food) drawableRects() []t.RectF32 {
+func (f food) DrawableRects() []t.RectF32 {
 	return f.rects
 }
 
@@ -89,15 +89,15 @@ func (f food) Color() *color.RGBA {
 	return &params.ColorFood
 }
 
-func (f food) drawOptions() *ebiten.DrawTrianglesShaderOptions {
+func (f food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 	return &drawOptionsFood
 }
 
-func (f food) shader() *ebiten.Shader {
+func (f food) Shader() *ebiten.Shader {
 	return params.ShaderRound
 }
 
-func (f food) drawDebugInfo(dst *ebiten.Image) {
+func (f food) DrawDebugInfo(dst *ebiten.Image) {
 	t.MarkPoint(dst, f.center.To64(), 4, params.ColorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
