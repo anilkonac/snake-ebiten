@@ -22,12 +22,12 @@ import (
 	"image/color"
 	"strconv"
 
+	"github.com/anilkonac/snake-ebiten/game/params"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
 const (
-	foodScore        = 100
 	decrementAlpha   = 8.0 / 255.0
 	scoreAnimSpeed   = 25
 	scoreAnimPadding = 8
@@ -49,12 +49,12 @@ type scoreAnim struct {
 
 func initScoreAnim() {
 	// Init animation text bound variables
-	foodScoreMsg := strconv.Itoa(foodScore)
+	foodScoreMsg := strconv.Itoa(params.FoodScore)
 	scoreAnimBound := text.BoundString(fontFaceScore, foodScoreMsg)
 	scoreAnimBoundSizeI := scoreAnimBound.Size()
 	scoreAnimBoundSize.x = float32(scoreAnimBoundSizeI.X)
 	scoreAnimBoundSize.y = float32(scoreAnimBoundSizeI.Y)
-	scoreAnimShiftY = radiusSnake + scoreAnimBoundSize.y/2.0 + scoreAnimPadding
+	scoreAnimShiftY = params.RadiusSnake + scoreAnimBoundSize.y/2.0 + scoreAnimPadding
 
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
@@ -76,7 +76,7 @@ func newScoreAnim(pos vec32) *scoreAnim {
 			x: pos.x,
 			y: pos.y - scoreAnimShiftY,
 		},
-		alpha:     float32(colorScore.A) / 255.0,
+		alpha:     float32(params.ColorScore.A) / 255.0,
 		direction: directionUp,
 	}
 
@@ -104,7 +104,7 @@ func (s *scoreAnim) createRects() {
 // Returns true when the animation is finished
 func (s *scoreAnim) update() bool {
 	// Move animation
-	s.pos.y -= scoreAnimSpeed * deltaTime
+	s.pos.y -= scoreAnimSpeed * params.DeltaTime
 
 	// Update rectangles of this anim
 	s.createRects()
@@ -127,7 +127,7 @@ func (s *scoreAnim) drawableRects() []rectF32 {
 }
 
 func (s *scoreAnim) Color() *color.RGBA {
-	return &colorScore
+	return &params.ColorScore
 }
 
 func (s *scoreAnim) drawOptions() *ebiten.DrawTrianglesShaderOptions {

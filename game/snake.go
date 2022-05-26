@@ -23,25 +23,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
-)
 
-// Snake parameters
-const (
-	snakeHeadCenterX        = halfScreenWidth
-	snakeHeadCenterY        = halfScreenHeight
-	snakeSpeedInitial       = 275
-	snakeSpeedFinal         = 250
-	snakeLength             = 240
-	snakeWidth              = 30
-	eatingAnimStartDistance = 120
-	radiusSnake             = snakeWidth / 2.0
-	radiusMouth             = radiusSnake * 0.625
-)
-
-// Snake collision tolerances must be an integer or false collisions will occur.
-const (
-	toleranceDefault    = 2 //snakeWidth / 16.0
-	toleranceScreenEdge = radiusSnake
+	"github.com/anilkonac/snake-ebiten/game/params"
 )
 
 type snake struct {
@@ -65,14 +48,14 @@ func newSnake(headCenter vec64, initialLength uint16, speed float64, direction d
 	if direction >= directionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if headCenter.x > ScreenWidth {
+	if headCenter.x > params.ScreenWidth {
 		panic("Initial x position of the snake is off-screen.")
 	}
-	if headCenter.y > ScreenHeight {
+	if headCenter.y > params.ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if isVertical := direction.isVertical(); (isVertical && (initialLength > ScreenHeight)) ||
-		(!isVertical && (initialLength > ScreenWidth)) {
+	if isVertical := direction.isVertical(); (isVertical && (initialLength > params.ScreenHeight)) ||
+		(!isVertical && (initialLength > params.ScreenWidth)) {
 		panic("Initial snake intersects itself.")
 	}
 	if color == nil {
@@ -97,15 +80,15 @@ func newSnakeRandDir(headCenter vec64, initialLength uint16, speed float64, colo
 }
 
 func newSnakeRandDirLoc(initialLength uint16, speed float64, color *color.RGBA) *snake {
-	headCenter := vec64{float64(rand.Intn(ScreenWidth)), float64(rand.Intn(ScreenHeight))}
+	headCenter := vec64{float64(rand.Intn(params.ScreenWidth)), float64(rand.Intn(params.ScreenHeight))}
 	return newSnakeRandDir(headCenter, initialLength, speed, color)
 }
 
 func (s *snake) update(distToFood float32) {
-	moveDistance := s.speed * deltaTime
+	moveDistance := s.speed * params.DeltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
-	if (len(s.turnQueue) > 0) && (s.distAfterTurn+toleranceDefault >= snakeWidth) {
+	if (len(s.turnQueue) > 0) && (s.distAfterTurn+params.ToleranceDefault >= params.SnakeWidth) {
 		var nextTurn *turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
 		s.turnTo(nextTurn, true)
@@ -154,7 +137,7 @@ func (s *snake) updateTail(dist float64, distToFood float32) {
 	s.unitTail.length -= decreaseAmount
 
 	// Delete tail if its length is less than width of the snake
-	if (s.unitTail.prev != nil) && (s.unitTail.length <= snakeWidth) {
+	if (s.unitTail.prev != nil) && (s.unitTail.length <= params.SnakeWidth) {
 		s.unitTail.prev.length += s.unitTail.length
 		s.unitTail = s.unitTail.prev
 		s.unitTail.next = nil
@@ -168,7 +151,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 		// Check if the new turn is dangerous (twice same turns rapidly).
 		if (s.turnPrev != nil) &&
 			(s.turnPrev.isTurningLeft == newTurn.isTurningLeft) &&
-			(s.distAfterTurn+toleranceDefault <= snakeWidth) {
+			(s.distAfterTurn+params.ToleranceDefault <= params.SnakeWidth) {
 			// New turn cannot be taken now, push it into the queue
 			s.turnQueue = append(s.turnQueue, newTurn)
 			return
@@ -186,7 +169,7 @@ func (s *snake) turnTo(newTurn *turn, isFromQueue bool) {
 	// Decide on the color of the new head unit.
 	newColor := s.color
 	if debugUnits && (oldHead.color == s.color) {
-		newColor = &colorSnake2
+		newColor = &params.ColorSnake2
 	}
 
 	// Create a new head unit.
@@ -208,9 +191,9 @@ func (s *snake) checkIntersection(intersected *bool) {
 		return
 	}
 
-	var tolerance float32 = toleranceDefault
+	var tolerance float32 = params.ToleranceDefault
 	if len(curUnit.rectsCollision) > 1 { // If second unit is on an edge
-		tolerance = toleranceScreenEdge // To avoid false collisions on screen edges
+		tolerance = params.ToleranceScreenEdge // To avoid false collisions on screen edges
 	}
 
 	for curUnit != nil {
@@ -233,7 +216,7 @@ func (s *snake) grow() {
 
 	// Update snake speed
 	// f(x)=250+25/e^(0.0075x)
-	s.speed = snakeSpeedFinal + (snakeSpeedInitial-snakeSpeedFinal)/math.Exp(0.0075*float64(s.foodEaten))
+	s.speed = params.SnakeSpeedFinal + (params.SnakeSpeedInitial-params.SnakeSpeedFinal)/math.Exp(0.0075*float64(s.foodEaten))
 }
 
 func (s *snake) lastDirection() directionT {

@@ -22,6 +22,7 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/anilkonac/snake-ebiten/game/params"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -45,12 +46,12 @@ func newUnit(headCenter vec64, length float64, direction directionT, color *colo
 		color:      color,
 		drawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
-				"Radius":      float32(radiusSnake),
-				"RadiusMouth": float32(radiusMouth),
+				"Radius":      float32(params.RadiusSnake),
+				"RadiusMouth": float32(params.RadiusMouth),
 			},
 		},
 	}
-	newUnit.update(eatingAnimStartDistance)
+	newUnit.update(params.EatingAnimStartDistance)
 
 	return newUnit
 }
@@ -83,13 +84,13 @@ func (u *unit) createRectColl() (rectColl *rectF32) {
 
 	switch u.direction {
 	case directionRight:
-		rectColl = newRect(vec32{flCenter.x - length32 + radiusSnake, flCenter.y - radiusSnake}, vec32{length32, snakeWidth})
+		rectColl = newRect(vec32{flCenter.x - length32 + params.RadiusSnake, flCenter.y - params.RadiusSnake}, vec32{length32, params.SnakeWidth})
 	case directionLeft:
-		rectColl = newRect(vec32{flCenter.x - radiusSnake, flCenter.y - radiusSnake}, vec32{length32, snakeWidth})
+		rectColl = newRect(vec32{flCenter.x - params.RadiusSnake, flCenter.y - params.RadiusSnake}, vec32{length32, params.SnakeWidth})
 	case directionUp:
-		rectColl = newRect(vec32{flCenter.x - radiusSnake, flCenter.y - radiusSnake}, vec32{snakeWidth, length32})
+		rectColl = newRect(vec32{flCenter.x - params.RadiusSnake, flCenter.y - params.RadiusSnake}, vec32{params.SnakeWidth, length32})
 	case directionDown:
-		rectColl = newRect(vec32{flCenter.x - radiusSnake, flCenter.y - length32 + radiusSnake}, vec32{snakeWidth, length32})
+		rectColl = newRect(vec32{flCenter.x - params.RadiusSnake, flCenter.y - length32 + params.RadiusSnake}, vec32{params.SnakeWidth, length32})
 	default:
 		panic("Wrong unit direction!!")
 	}
@@ -105,13 +106,13 @@ func (u *unit) createRectDraw(rectColl *rectF32) (rectDraw *rectF32) {
 
 	switch u.direction {
 	case directionRight:
-		rectDraw = newRect(vec32{rectColl.pos.x - snakeWidth, rectColl.pos.y}, vec32{rectColl.size.x + snakeWidth, rectColl.size.y})
+		rectDraw = newRect(vec32{rectColl.pos.x - params.SnakeWidth, rectColl.pos.y}, vec32{rectColl.size.x + params.SnakeWidth, rectColl.size.y})
 	case directionLeft:
-		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y}, vec32{rectColl.size.x + snakeWidth, rectColl.size.y})
+		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y}, vec32{rectColl.size.x + params.SnakeWidth, rectColl.size.y})
 	case directionUp:
-		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y}, vec32{rectColl.size.x, rectColl.size.y + snakeWidth})
+		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y}, vec32{rectColl.size.x, rectColl.size.y + params.SnakeWidth})
 	case directionDown:
-		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y - snakeWidth}, vec32{rectColl.size.x, rectColl.size.y + snakeWidth})
+		rectDraw = newRect(vec32{rectColl.pos.x, rectColl.pos.y - params.SnakeWidth}, vec32{rectColl.size.x, rectColl.size.y + params.SnakeWidth})
 	default:
 		panic("Wrong unit direction!!")
 	}
@@ -126,18 +127,18 @@ func (u *unit) update(distToFood float32) {
 
 func (u *unit) updateDrawOptions(distToFood float32) {
 	// Distance to food
-	proxToFood := 1.0 - distToFood/eatingAnimStartDistance
+	proxToFood := 1.0 - distToFood/params.EatingAnimStartDistance
 
 	// Specify Size uniform variable
 	var drawWidth, drawHeight float32
 	flooredLength := float32(math.Floor(u.length))
 	if u.next != nil {
-		flooredLength += snakeWidth
+		flooredLength += params.SnakeWidth
 	}
 	if u.direction.isVertical() {
-		drawWidth, drawHeight = snakeWidth, flooredLength
+		drawWidth, drawHeight = params.SnakeWidth, flooredLength
 	} else {
-		drawWidth, drawHeight = flooredLength, snakeWidth
+		drawWidth, drawHeight = flooredLength, params.SnakeWidth
 	}
 
 	// Update the options
@@ -150,8 +151,8 @@ func (u *unit) moveUp(dist float64) {
 	u.headCenter.y -= dist
 
 	// teleport if head center is offscreen.
-	if teleportActive && (u.headCenter.y < 0) {
-		u.headCenter.y += ScreenHeight
+	if params.TeleportActive && (u.headCenter.y < 0) {
+		u.headCenter.y += params.ScreenHeight
 	}
 }
 
@@ -159,8 +160,8 @@ func (u *unit) moveDown(dist float64) {
 	u.headCenter.y += dist
 
 	// teleport if head center is offscreen.
-	if teleportActive && (u.headCenter.y > ScreenHeight) {
-		u.headCenter.y -= ScreenHeight
+	if params.TeleportActive && (u.headCenter.y > params.ScreenHeight) {
+		u.headCenter.y -= params.ScreenHeight
 	}
 }
 
@@ -168,8 +169,8 @@ func (u *unit) moveRight(dist float64) {
 	u.headCenter.x += dist
 
 	// teleport if head center is offscreen.
-	if teleportActive && (u.headCenter.x > ScreenWidth) {
-		u.headCenter.x -= ScreenWidth
+	if params.TeleportActive && (u.headCenter.x > params.ScreenWidth) {
+		u.headCenter.x -= params.ScreenWidth
 	}
 }
 
@@ -177,17 +178,17 @@ func (u *unit) moveLeft(dist float64) {
 	u.headCenter.x -= dist
 
 	// teleport if head center is offscreen.
-	if teleportActive && (u.headCenter.x < 0) {
-		u.headCenter.x += ScreenWidth
+	if params.TeleportActive && (u.headCenter.x < 0) {
+		u.headCenter.x += params.ScreenWidth
 	}
 }
 
 func (u *unit) markHeadCenters(dst *ebiten.Image) {
-	markPoint(dst, u.headCenter, 4, colorFood)
+	markPoint(dst, u.headCenter, 4, params.ColorFood)
 
 	var offset float64 = 0
 	if u.next == nil {
-		offset = snakeWidth
+		offset = params.SnakeWidth
 	}
 
 	backCenter := u.headCenter
@@ -202,7 +203,7 @@ func (u *unit) markHeadCenters(dst *ebiten.Image) {
 		backCenter.x = u.headCenter.x + u.length - offset
 	}
 	// mark head center at the other side
-	markPoint(dst, backCenter, 4, colorFood)
+	markPoint(dst, backCenter, 4, params.ColorFood)
 }
 
 // Implement collidable interface
@@ -237,13 +238,13 @@ func (u *unit) shader() *ebiten.Shader {
 	if u.prev == nil {
 		return shaderSnakeHead
 	}
-	return shaderRound
+	return params.ShaderRound
 }
 
 func (u *unit) drawDebugInfo(dst *ebiten.Image) {
 	u.markHeadCenters(dst)
 	for iRect := range u.rectsDrawable {
 		rect := u.rectsDrawable[iRect]
-		rect.drawOuterRect(dst, colorFood)
+		rect.drawOuterRect(dst, params.ColorFood)
 	}
 }

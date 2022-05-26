@@ -22,20 +22,15 @@ import (
 	"image/color"
 	"math/rand"
 
+	"github.com/anilkonac/snake-ebiten/game/params"
 	"github.com/hajimehoshi/ebiten/v2"
-)
-
-const (
-	foodLength   = 16
-	radiusFood   = foodLength / 2.0
-	radiusEating = radiusMouth + radiusFood
 )
 
 var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 	Uniforms: map[string]interface{}{
-		"Radius":     float32(radiusFood),
+		"Radius":     float32(params.RadiusFood),
 		"IsVertical": float32(1.0),
-		"Size":       []float32{foodLength, foodLength},
+		"Size":       []float32{params.FoodLength, params.FoodLength},
 	},
 }
 
@@ -54,10 +49,10 @@ func newFood(center vec32) *food {
 	// Create a rectangle to use in drawing and eating logic.
 	pureRect := rectF32{
 		pos: vec32{
-			x: center.x - radiusFood,
-			y: center.y - radiusFood,
+			x: center.x - params.RadiusFood,
+			y: center.y - params.RadiusFood,
 		},
-		size: vec32{foodLength, foodLength},
+		size: vec32{params.FoodLength, params.FoodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
 	pureRect.split(&newFood.rects)
@@ -66,7 +61,7 @@ func newFood(center vec32) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(vecI{rand.Intn(ScreenWidth), rand.Intn(ScreenHeight)}.to32())
+	return newFood(vecI{rand.Intn(params.ScreenWidth), rand.Intn(params.ScreenHeight)}.to32())
 }
 
 // Implement collidable interface
@@ -90,7 +85,7 @@ func (f food) drawableRects() []rectF32 {
 }
 
 func (f food) Color() *color.RGBA {
-	return &colorFood
+	return &params.ColorFood
 }
 
 func (f food) drawOptions() *ebiten.DrawTrianglesShaderOptions {
@@ -98,13 +93,13 @@ func (f food) drawOptions() *ebiten.DrawTrianglesShaderOptions {
 }
 
 func (f food) shader() *ebiten.Shader {
-	return shaderRound
+	return params.ShaderRound
 }
 
 func (f food) drawDebugInfo(dst *ebiten.Image) {
-	markPoint(dst, f.center.to64(), 4, colorSnake1)
+	markPoint(dst, f.center.to64(), 4, params.ColorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
-		rect.drawOuterRect(dst, colorSnake1)
+		rect.drawOuterRect(dst, params.ColorSnake1)
 	}
 }

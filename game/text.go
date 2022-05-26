@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 
+	"github.com/anilkonac/snake-ebiten/game/params"
 	"github.com/anilkonac/snake-ebiten/game/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -52,6 +53,9 @@ func init() {
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	tt, err = opentype.Parse(fonts.Debug)
 	if err != nil {
@@ -78,6 +82,6 @@ func init() {
 func drawFPS(screen *ebiten.Image) {
 	if printFPS {
 		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
-		text.Draw(screen, msg, fontFaceDebug, ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, colorDebug)
+		text.Draw(screen, msg, fontFaceDebug, params.ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, params.ColorDebug)
 	}
 }

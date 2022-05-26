@@ -1,19 +1,19 @@
 package game
 
 import (
+	"github.com/anilkonac/snake-ebiten/game/params"
 	"github.com/anilkonac/snake-ebiten/game/shaders"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
-	shaderRound     *ebiten.Shader
 	shaderScore     *ebiten.Shader
 	shaderSnakeHead *ebiten.Shader
 	shaderTitle     *ebiten.Shader
 )
 
 func init() {
-	shaderRound = newShader(shaders.Round)
+	params.ShaderRound = newShader(shaders.Round)
 	shaderScore = newShader(shaders.Score)
 	shaderSnakeHead = newShader(shaders.SnakeHead)
 	shaderTitle = newShader(shaders.Title)
