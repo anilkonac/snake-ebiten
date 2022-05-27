@@ -7,6 +7,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+type scene interface {
+	update() bool // Return true if the scene is finished
+	draw(*ebiten.Image)
+}
+
 // Game implements ebiten.Game interface.
 type Game struct {
 	curScene scene

@@ -102,7 +102,7 @@ func (g *gameScene) checkIntersection() {
 	}
 
 	for curUnit != nil {
-		if collides(g.snake.UnitHead, curUnit, tolerance) {
+		if object.Collides(g.snake.UnitHead, curUnit, tolerance) {
 			g.gameOver = true
 			playSoundHit()
 			return
@@ -241,7 +241,7 @@ func (g *gameScene) checkFood(distToFood float32) {
 	if !g.food.IsActive {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
-			if collides(unit, g.food, param.ToleranceDefault) {
+			if object.Collides(unit, g.food, param.ToleranceDefault) {
 				g.food = object.NewFoodRandLoc()
 				return
 			}
@@ -282,16 +282,16 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 	screen.Fill(param.ColorBackground)
 
 	// Draw food
-	draw(screen, g.food)
+	object.Draw(screen, g.food)
 
 	// Draw the snake
 	for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
-		draw(screen, unit)
+		object.Draw(screen, unit)
 	}
 
 	// Draw score anim
 	for _, scoreAnim := range g.scoreAnimList {
-		draw(screen, scoreAnim)
+		object.Draw(screen, scoreAnim)
 	}
 
 	// Draw score text

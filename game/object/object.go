@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package game
+package object
 
 import (
 	"image/color"
@@ -25,11 +25,6 @@ import (
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-type scene interface {
-	update() bool // Return true if the scene is finished
-	draw(*ebiten.Image)
-}
 
 type collidable interface {
 	CollEnabled() bool
@@ -45,7 +40,7 @@ type drawable interface {
 	DrawDebugInfo(dst *ebiten.Image)
 }
 
-func draw(dst *ebiten.Image, src drawable) {
+func Draw(dst *ebiten.Image, src drawable) {
 	if !src.DrawEnabled() {
 		return
 	}
@@ -82,7 +77,7 @@ func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
 	return
 }
 
-func collides(a, b collidable, tolerance float32) bool {
+func Collides(a, b collidable, tolerance float32) bool {
 	if !a.CollEnabled() || !b.CollEnabled() {
 		return false
 	}
