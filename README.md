@@ -1,4 +1,6 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/anilkonac/snake-ebiten/badge/main)](https://www.codefactor.io/repository/github/anilkonac/snake-ebiten/overview/main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/anilkonac/snake-ebiten)](https://goreportcard.com/report/github.com/anilkonac/snake-ebiten)
+
 # snake-ebiten
 A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 
