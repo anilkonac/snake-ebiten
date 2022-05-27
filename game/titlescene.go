@@ -170,20 +170,22 @@ func (t *titleScene) prepareTitleRects() {
 }
 
 func (t *titleScene) update() bool {
+	const distToFood = param.EatingAnimStartDistance // Make sure the snake's mouth is not open
+
 	if titleSceenAlive {
 		for _, snake := range t.snakes {
-			snake.Update(param.EatingAnimStartDistance)
+			snake.Update(distToFood)
 		}
 
 		t.handleKeyPress()
 
 	} else {
 		param.TeleportActive = true
-		leadSnake.Update(param.EatingAnimStartDistance)
+		leadSnake.Update(distToFood)
 
 		param.TeleportActive = false
 		for iSnake := 0; iSnake < maxSnakes-1; iSnake++ {
-			t.snakes[iSnake].Update(param.EatingAnimStartDistance) // Make sure the snake's mouth is not open
+			t.snakes[iSnake].Update(distToFood)
 		}
 
 		// Update transition process to the next scene

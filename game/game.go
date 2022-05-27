@@ -20,11 +20,9 @@ type Game struct {
 	curScene scene
 }
 
-func init() {
-	param.ShaderRound = t.NewShader(shader.Round)
-}
-
 func NewGame() *Game {
+	param.ShaderRound = t.NewShader(shader.Round)
+
 	return &Game{
 		curScene: newTitleScene(),
 	}

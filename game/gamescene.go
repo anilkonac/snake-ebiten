@@ -251,6 +251,7 @@ func (g *gameScene) checkFood(distToFood float32) {
 		return
 	}
 
+	// Check for collision with food
 	if distToFood <= param.RadiusEating {
 		g.snake.Grow()
 		g.triggerScoreAnim()

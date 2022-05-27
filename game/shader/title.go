@@ -9,8 +9,8 @@ var (
 )
 
 func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
-	alpha := Alpha
 
+	// Get the color value of the current texel
 	var imgColor vec4
 	if ShowKeyPrompt == 1.0 {
 		imgColor = imageSrc1UnsafeAt(texCoord)
@@ -18,13 +18,14 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		imgColor = imageSrc0UnsafeAt(texCoord)
 	}
 
-	// Round the corners
+	// Round the corners of the rectangle image
 	origin, size := imageSrcRegionOnTexture()
 	centerTopLeft := origin + RadiusTex
 	centerTopRight := vec2(origin.x+size.x-RadiusTex.x, origin.y+RadiusTex.y)
 	centerBottomLeft := vec2(origin.x+RadiusTex.x, origin.y+size.y-RadiusTex.y)
 	centerBottomRight := vec2(origin.x+size.x-RadiusTex.x, origin.y+size.y-RadiusTex.y)
 
+	alpha := Alpha
 	if (texCoord.x < centerTopLeft.x) && (texCoord.y < centerTopLeft.y) && distance(texCoord, centerTopLeft) > RadiusTex.x {
 		alpha = 0.0
 	} else if (texCoord.x > centerTopRight.x) && (texCoord.y < centerTopRight.y) && (distance(texCoord, centerTopRight) > RadiusTex.x) {
@@ -35,6 +36,5 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		alpha = 0.0
 	}
 
-	imgColor *= alpha
-	return imgColor
+	return imgColor * alpha
 }
