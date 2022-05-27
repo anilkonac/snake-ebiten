@@ -56,7 +56,7 @@ const (
 	titleRectCornerRadiusX         = param.RadiusSnake
 	titleRectCornerRadiusY         = titleRectCornerRadiusX / titleRectRatio
 	titleRectInitialAlpha          = 230 / 255.0
-	titleRectDissapearRate float32 = (85 / 255.0) * param.DeltaTime
+	titleRectDissapearRate float32 = (80 / 255.0) * param.DeltaTime
 	textTitle                      = "Ssnake"
 	textPressToPlay                = "Press any key to start"
 	textTitleShiftY                = -50
@@ -118,8 +118,11 @@ func newTitleScene() *titleScene {
 	scene.prepareTitleRects()
 
 	// Create snakes
+	// -------------
+
+	// Create temp snakes for the title screen
 	lenSnakeColors := len(snakeColors)
-	for iSnake := 0; iSnake < maxSnakes; iSnake++ {
+	for iSnake := 0; iSnake < maxSnakes-1; iSnake++ {
 		length := dumbSnakeLengthMin + rand.Intn(dumbSnakeLengthDiff)
 		speed := dumbSnakeSpeedMin + rand.Float64()*dumbSnakeSpeedDiff
 		snake := s.NewSnakeRandDirLoc(uint16(length), speed, snakeColors[rand.Intn(lenSnakeColors)])
@@ -128,6 +131,11 @@ func newTitleScene() *titleScene {
 		// Activate snake bot
 		go controlDumbly(snake)
 	}
+
+	// Create the snake that player will control
+	leadSnake = s.NewSnake(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, s.DirectionRight, &param.ColorSnake1)
+	scene.snakes[maxSnakes-1] = leadSnake
+	go controlDumbly(leadSnake)
 
 	return scene
 }
@@ -162,18 +170,29 @@ func (t *titleScene) prepareTitleRects() {
 }
 
 func (t *titleScene) update() bool {
-	for _, snake := range t.snakes {
-		snake.Update(param.EatingAnimStartDistance) // Make sure the snake's mouth is not open
-	}
+	if titleSceenAlive {
+		for _, snake := range t.snakes {
+			snake.Update(param.EatingAnimStartDistance)
+		}
 
-	t.handleKeyPress()
+		t.handleKeyPress()
 
-	// Update transition process to the next scene
-	if !titleSceenAlive {
-		t.titleRectAlpha -= titleRectDissapearRate
-		t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
-		if t.titleRectAlpha <= 0.0 {
-			return true
+	} else {
+		param.TeleportActive = true
+		leadSnake.Update(param.EatingAnimStartDistance)
+
+		param.TeleportActive = false
+		for iSnake := 0; iSnake < maxSnakes-1; iSnake++ {
+			t.snakes[iSnake].Update(param.EatingAnimStartDistance) // Make sure the snake's mouth is not open
+		}
+
+		// Update transition process to the next scene
+		if !titleSceenAlive {
+			t.titleRectAlpha -= titleRectDissapearRate
+			t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
+			if t.titleRectAlpha <= 0.0 {
+				return true
+			}
 		}
 	}
 
@@ -188,8 +207,9 @@ func (t *titleScene) handleKeyPress() {
 		param.TeleportActive = false
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
-		for _, snake := range t.snakes {
-			snake.Speed *= dumbSnakeRunMultip
+		// Increase speeds of snakes other than the lead snake
+		for iSnake := 0; iSnake < maxSnakes-1; iSnake++ {
+			t.snakes[iSnake].Speed *= dumbSnakeRunMultip
 		}
 	}
 }

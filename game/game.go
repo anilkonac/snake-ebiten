@@ -1,11 +1,14 @@
 package game
 
 import (
+	"github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+var leadSnake *snake.Snake
 
 type scene interface {
 	update() bool // Return true if the scene is finished
@@ -32,7 +35,7 @@ func (g *Game) Update() error {
 	if g.curScene.update() {
 		switch g.curScene.(type) {
 		case *titleScene:
-			g.curScene = newGameScene()
+			g.curScene = newGameScene(leadSnake)
 		}
 	}
 

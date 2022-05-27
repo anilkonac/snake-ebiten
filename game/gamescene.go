@@ -48,11 +48,11 @@ type gameScene struct {
 	scoreAnimList     []*object.ScoreAnim
 }
 
-func newGameScene() *gameScene {
+func newGameScene(snake *s.Snake) *gameScene {
 	param.TeleportActive = true
 
 	return &gameScene{
-		snake: s.NewSnake(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, s.DirectionRight, &param.ColorSnake1),
+		snake: snake,
 		food:  object.NewFoodRandLoc(),
 	}
 }
