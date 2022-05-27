@@ -1,33 +1,24 @@
 package game
 
 import (
-	"image/color"
-
+	"github.com/anilkonac/snake-ebiten/game/param"
+	"github.com/anilkonac/snake-ebiten/game/shader"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const (
-	ScreenWidth  = 960
-	ScreenHeight = 720
-	deltaTime    = 1.0 / 60.0
-)
+type scene interface {
+	update() bool // Return true if the scene is finished
+	draw(*ebiten.Image)
+}
 
-var teleportActive = true
-
-// Colors to be used in the drawing.
-// Palette: https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
-var (
-	colorBackground = color.RGBA{0, 48, 73, 255}     // ~ Prussian Blue
-	colorSnake1     = color.RGBA{252, 191, 73, 255}  // ~ Maximum Yellow Red
-	colorSnake2     = color.RGBA{247, 127, 0, 255}   // ~ Orange
-	colorFood       = color.RGBA{214, 40, 40, 255}   // ~ Maximum Red
-	colorDebug      = color.RGBA{234, 226, 183, 255} // ~ Lemon Meringue
-	colorScore      = color.RGBA{247, 127, 0, 255}   // ~ Orange
-)
-
-// Game implements ebiten.gameScene interface.
+// Game implements ebiten.Game interface.
 type Game struct {
 	curScene scene
+}
+
+func init() {
+	param.ShaderRound = t.NewShader(shader.Round)
 }
 
 func NewGame() *Game {
@@ -38,9 +29,7 @@ func NewGame() *Game {
 
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
-
-	sceneEnd := g.curScene.update()
-	if sceneEnd {
+	if g.curScene.update() {
 		switch g.curScene.(type) {
 		case *titleScene:
 			g.curScene = newGameScene()
@@ -57,5 +46,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return ScreenWidth, ScreenHeight
+	return param.ScreenWidth, param.ScreenHeight
+}
+
+func ScreenSize() (int, int) {
+	return param.ScreenWidth, param.ScreenHeight
 }

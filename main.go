@@ -6,13 +6,13 @@ import (
 )
 
 func main() {
-	ebiten.SetWindowSize(g.ScreenWidth, g.ScreenHeight)
+	ebiten.SetWindowSize(g.ScreenSize())
 	ebiten.SetWindowTitle("Ssnake")
 	ebiten.RunGame(g.NewGame())
 }
 
-//go:generate file2byteslice -input game/shaders/basic.go -output game/shaders/basic_go.go -package shaders -var Basic
-//go:generate file2byteslice -input game/shaders/round.go -output game/shaders/round_go.go -package shaders -var Round
-//go:generate file2byteslice -input game/shaders/score.go -output game/shaders/score_go.go -package shaders -var Score
-//go:generate file2byteslice -input game/shaders/snakehead.go -output game/shaders/snakehead_go.go -package shaders -var SnakeHead
-//go:generate file2byteslice -input game/shaders/title.go -output game/shaders/title_go.go -package shaders -var Title
+//go:generate file2byteslice -input game/shader/basic.go -output game/shader/basic_go.go -package shader -var Basic
+//go:generate file2byteslice -input game/shader/round.go -output game/shader/round_go.go -package shader -var Round
+//go:generate file2byteslice -input game/shader/score.go -output game/shader/score_go.go -package shader -var Score
+//go:generate file2byteslice -input game/shader/snakehead.go -output game/shader/snakehead_go.go -package shader -var SnakeHead
+//go:generate file2byteslice -input game/shader/title.go -output game/shader/title_go.go -package shader -var Title
