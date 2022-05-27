@@ -22,8 +22,9 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/anilkonac/snake-ebiten/game/object"
+	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	s "github.com/anilkonac/snake-ebiten/game/snake"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -40,11 +41,11 @@ const (
 
 type gameScene struct {
 	snake             *s.Snake
-	food              *food
+	food              *object.Food
 	gameOver          bool
 	paused            bool
 	timeAfterGameOver float32
-	scoreAnimList     []*scoreAnim
+	scoreAnimList     []*object.ScoreAnim
 }
 
 func newGameScene() *gameScene {
@@ -52,14 +53,14 @@ func newGameScene() *gameScene {
 
 	return &gameScene{
 		snake: s.NewSnake(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, s.DirectionRight, &param.ColorSnake1),
-		food:  newFoodRandLoc(),
+		food:  object.NewFoodRandLoc(),
 	}
 }
 
 func (g *gameScene) restart() {
 	*g = gameScene{
 		snake: s.NewSnakeRandDir(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1),
-		food:  newFoodRandLoc(),
+		food:  object.NewFoodRandLoc(),
 	}
 }
 
@@ -111,12 +112,12 @@ func (g *gameScene) checkIntersection() {
 }
 
 func (g *gameScene) calcFoodDist() float32 {
-	if !g.food.isActive {
+	if !g.food.IsActive {
 		return param.EatingAnimStartDistance
 	}
 
 	headLoc := g.snake.UnitHead.HeadCenter
-	foodLoc := g.food.center.To64()
+	foodLoc := g.food.Center.To64()
 
 	// In screen distance
 	minDist := t.Distance(headLoc, foodLoc)
@@ -143,7 +144,7 @@ func (g *gameScene) calcFoodDist() float32 {
 
 func (g *gameScene) updateScoreAnims() {
 	for index, scoreAnim := range g.scoreAnimList {
-		if scoreAnim.update() {
+		if scoreAnim.Update() {
 			g.scoreAnimList = append(g.scoreAnimList[:index], g.scoreAnimList[index+1:]...) // Delete score anim
 			break
 		}
@@ -237,23 +238,23 @@ func (g *gameScene) handleSettingsInputs() {
 }
 
 func (g *gameScene) checkFood(distToFood float32) {
-	if !g.food.isActive {
+	if !g.food.IsActive {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
 			if collides(unit, g.food, param.ToleranceDefault) {
-				g.food = newFoodRandLoc()
+				g.food = object.NewFoodRandLoc()
 				return
 			}
 		}
 		// Food has spawned in an open position, activate it.
-		g.food.isActive = true
+		g.food.IsActive = true
 		return
 	}
 
 	if distToFood <= param.RadiusEating {
 		g.snake.Grow()
 		g.triggerScoreAnim()
-		g.food = newFoodRandLoc()
+		g.food = object.NewFoodRandLoc()
 		playSoundEating()
 	}
 }
@@ -274,7 +275,7 @@ func (g *gameScene) triggerScoreAnim() {
 		corrCenter.X -= param.RadiusSnake
 	}
 
-	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(corrCenter.To32()))
+	g.scoreAnimList = append(g.scoreAnimList, object.NewScoreAnim(corrCenter.To32()))
 }
 
 func (g *gameScene) draw(screen *ebiten.Image) {
@@ -314,7 +315,7 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 
 func (g *gameScene) drawScore(screen *ebiten.Image) {
 	msg := fmt.Sprintf("Score: %05d", int(g.snake.FoodEaten)*param.FoodScore)
-	text.Draw(screen, msg, fontFaceScore, scoreTextShiftX, -boundTextScore.Min.Y+scoreTextShiftY, param.ColorScore)
+	text.Draw(screen, msg, param.FontFaceScore, scoreTextShiftX, -boundTextScore.Min.Y+scoreTextShiftY, param.ColorScore)
 }
 
 func (g *gameScene) printDebugMsgs(screen *ebiten.Image) {

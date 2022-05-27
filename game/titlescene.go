@@ -23,9 +23,9 @@ import (
 	"math/rand"
 	"time"
 
+	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
-	s "github.com/anilkonac/snake-ebiten/game/snake"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -149,7 +149,7 @@ func (t *titleScene) prepareTitleRects() {
 	t.titleImageKeyPrompt = ebiten.NewImageFromImage(t.titleImage)
 
 	// Draw key prompt text to the image
-	text.Draw(t.titleImageKeyPrompt, textPressToPlay, fontFaceScore,
+	text.Draw(t.titleImageKeyPrompt, textPressToPlay, param.FontFaceScore,
 		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
 		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, param.ColorBackground)
 

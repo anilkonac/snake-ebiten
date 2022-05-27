@@ -16,15 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package game
+package object
 
 import (
 	"image/color"
 	"strconv"
 
+	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
-	s "github.com/anilkonac/snake-ebiten/game/snake"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -44,19 +44,19 @@ var (
 	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
 )
 
-type scoreAnim struct {
+type ScoreAnim struct {
 	pos       t.Vec32
 	alpha     float32
 	direction s.DirectionT
 	rects     []t.RectF32
 }
 
-func initScoreAnim() {
+func InitScoreAnim() {
 	shaderScore = t.NewShader(shader.Score)
 
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(param.FoodScore)
-	scoreAnimBound := text.BoundString(fontFaceScore, foodScoreMsg)
+	scoreAnimBound := text.BoundString(param.FontFaceScore, foodScoreMsg)
 	scoreAnimBoundSizeI := scoreAnimBound.Size()
 	scoreAnimBoundSize.X = float32(scoreAnimBoundSizeI.X)
 	scoreAnimBoundSize.Y = float32(scoreAnimBoundSizeI.Y)
@@ -65,7 +65,7 @@ func initScoreAnim() {
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
 	scoreAnimImage.Fill(color.Black)
-	text.Draw(scoreAnimImage, foodScoreMsg, fontFaceScore,
+	text.Draw(scoreAnimImage, foodScoreMsg, param.FontFaceScore,
 		-scoreAnimBound.Min.X, -scoreAnimBound.Min.Y,
 		color.RGBA{255, 0, 0, 255})
 
@@ -76,8 +76,8 @@ func initScoreAnim() {
 	drawOptionsScoreAnim.Images = [4]*ebiten.Image{scoreAnimImage, nil, nil, nil}
 }
 
-func newScoreAnim(pos t.Vec32) *scoreAnim {
-	newAnim := &scoreAnim{
+func NewScoreAnim(pos t.Vec32) *ScoreAnim {
+	newAnim := &ScoreAnim{
 		pos: t.Vec32{
 			X: pos.X,
 			Y: pos.Y - scoreAnimShiftY,
@@ -91,7 +91,7 @@ func newScoreAnim(pos t.Vec32) *scoreAnim {
 	return newAnim
 }
 
-func (s *scoreAnim) createRects() {
+func (s *ScoreAnim) createRects() {
 	// Create a rectangle to be split
 	pureRect := t.RectF32{
 		Pos: t.Vec32{
@@ -108,7 +108,7 @@ func (s *scoreAnim) createRects() {
 }
 
 // Returns true when the animation is finished
-func (s *scoreAnim) update() bool {
+func (s *ScoreAnim) Update() bool {
 	// Move animation
 	s.pos.Y -= scoreAnimSpeed * param.DeltaTime
 
@@ -124,26 +124,26 @@ func (s *scoreAnim) update() bool {
 
 // Implement drawable interface
 // ----------------------------
-func (s *scoreAnim) DrawEnabled() bool {
+func (s *ScoreAnim) DrawEnabled() bool {
 	return true
 }
 
-func (s *scoreAnim) DrawableRects() []t.RectF32 {
+func (s *ScoreAnim) DrawableRects() []t.RectF32 {
 	return s.rects
 }
 
-func (s *scoreAnim) Color() *color.RGBA {
+func (s *ScoreAnim) Color() *color.RGBA {
 	return &param.ColorScore
 }
 
-func (s *scoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
+func (s *ScoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 	return &drawOptionsScoreAnim
 }
 
-func (s *scoreAnim) Shader() *ebiten.Shader {
+func (s *ScoreAnim) Shader() *ebiten.Shader {
 	return shaderScore
 }
 
-func (s *scoreAnim) DrawDebugInfo(dst *ebiten.Image) {
+func (s *ScoreAnim) DrawDebugInfo(dst *ebiten.Image) {
 
 }

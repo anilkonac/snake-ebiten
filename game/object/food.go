@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package game
+package object
 
 import (
 	"image/color"
@@ -35,15 +35,15 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 	},
 }
 
-type food struct {
-	isActive bool
-	center   t.Vec32
+type Food struct {
+	IsActive bool
+	Center   t.Vec32
 	rects    []t.RectF32
 }
 
-func newFood(center t.Vec32) *food {
-	newFood := &food{
-		center: center,
+func newFood(center t.Vec32) *Food {
+	newFood := &Food{
+		Center: center,
 		rects:  make([]t.RectF32, 0, 4),
 	}
 
@@ -61,44 +61,44 @@ func newFood(center t.Vec32) *food {
 	return newFood
 }
 
-func newFoodRandLoc() *food {
+func NewFoodRandLoc() *Food {
 	return newFood(t.VecI{X: rand.Intn(param.ScreenWidth), Y: rand.Intn(param.ScreenHeight)}.To32())
 }
 
 // Implement collidable interface
 // ------------------------------
-func (f food) CollEnabled() bool {
+func (f Food) CollEnabled() bool {
 	return true
 }
 
-func (f food) CollisionRects() []t.RectF32 {
+func (f Food) CollisionRects() []t.RectF32 {
 	return f.rects
 }
 
 // Implement drawable interface
 // ----------------------------
-func (f food) DrawEnabled() bool {
-	return f.isActive
+func (f Food) DrawEnabled() bool {
+	return f.IsActive
 }
 
-func (f food) DrawableRects() []t.RectF32 {
+func (f Food) DrawableRects() []t.RectF32 {
 	return f.rects
 }
 
-func (f food) Color() *color.RGBA {
+func (f Food) Color() *color.RGBA {
 	return &param.ColorFood
 }
 
-func (f food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
+func (f Food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 	return &drawOptionsFood
 }
 
-func (f food) Shader() *ebiten.Shader {
+func (f Food) Shader() *ebiten.Shader {
 	return param.ShaderRound
 }
 
-func (f food) DrawDebugInfo(dst *ebiten.Image) {
-	t.MarkPoint(dst, f.center.To64(), 4, param.ColorSnake1)
+func (f Food) DrawDebugInfo(dst *ebiten.Image) {
+	t.MarkPoint(dst, f.Center.To64(), 4, param.ColorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
 		rect.DrawOuterRect(dst, param.ColorSnake1)

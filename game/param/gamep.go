@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font"
 )
 
 const (
@@ -38,4 +39,5 @@ var (
 	PrintFPS       = true
 	DebugUnits     = false // Draw consecutive units with different colors
 	ShaderRound    *ebiten.Shader
+	FontFaceScore  font.Face
 )

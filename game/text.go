@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 
+	"github.com/anilkonac/snake-ebiten/game/object"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/anilkonac/snake-ebiten/resources/fonts"
@@ -25,7 +26,6 @@ const (
 )
 
 var (
-	fontFaceScore      font.Face
 	fontFaceDebug      font.Face
 	fontFaceTitle      font.Face
 	boundTextScore     image.Rectangle
@@ -38,7 +38,7 @@ func init() {
 	tt, err := opentype.Parse(fonts.Rounded)
 	t.Panic(err)
 
-	fontFaceScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
+	param.FontFaceScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeScore,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
@@ -62,12 +62,12 @@ func init() {
 	})
 	t.Panic(err)
 
-	boundTextScore = text.BoundString(fontFaceScore, "Score: 55555")
+	boundTextScore = text.BoundString(param.FontFaceScore, "Score: 55555")
 	boundTextTitle = text.BoundString(fontFaceTitle, textTitle)
-	boundTextKeyPrompt = text.BoundString(fontFaceScore, textPressToPlay)
+	boundTextKeyPrompt = text.BoundString(param.FontFaceScore, textPressToPlay)
 	boundTextFPS = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 165.0")
 
-	initScoreAnim()
+	object.InitScoreAnim()
 }
 
 func drawFPS(screen *ebiten.Image) {
