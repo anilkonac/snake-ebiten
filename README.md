@@ -2,10 +2,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/anilkonac/snake-ebiten)](https://goreportcard.com/report/github.com/anilkonac/snake-ebiten)
 
 # snake-ebiten
-A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
+A modern remake of the snake game. Written in Go using the [Ebitengine](https://ebiten.org/) game library.
 
 ## Features
-- Smooth and gridless movement.
+- Smooth and gridless movement
 - Pixel-precise teleportation
 
 ## Play
@@ -16,4 +16,4 @@ A snake game written in Go using the [Ebiten](https://ebiten.org/) game library.
 - Download and run the executables from [itch.io page](https://anilkonac.itch.io/ssnake).
 
 ## Credits
-- [Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/main/game/resources/audio/Credits.md)
+- [Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/main/resources/audio/Credits.md)
