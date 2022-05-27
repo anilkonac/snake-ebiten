@@ -24,8 +24,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	"github.com/anilkonac/snake-ebiten/game/param"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 )
 
 type Snake struct {
@@ -49,14 +49,14 @@ func NewSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction
 	if direction >= DirectionTotal {
 		panic("direction parameter is invalid.")
 	}
-	if headCenter.X > params.ScreenWidth {
+	if headCenter.X > param.ScreenWidth {
 		panic("Initial x position of the snake is off-screen.")
 	}
-	if headCenter.Y > params.ScreenHeight {
+	if headCenter.Y > param.ScreenHeight {
 		panic("Initial y position of the snake is off-screen.")
 	}
-	if isVertical := direction.IsVertical(); (isVertical && (initialLength > params.ScreenHeight)) ||
-		(!isVertical && (initialLength > params.ScreenWidth)) {
+	if isVertical := direction.IsVertical(); (isVertical && (initialLength > param.ScreenHeight)) ||
+		(!isVertical && (initialLength > param.ScreenWidth)) {
 		panic("Initial snake intersects itself.")
 	}
 	if color == nil {
@@ -82,17 +82,17 @@ func NewSnakeRandDir(headCenter t.Vec64, initialLength uint16, speed float64, co
 
 func NewSnakeRandDirLoc(initialLength uint16, speed float64, color *color.RGBA) *Snake {
 	headCenter := t.Vec64{
-		X: float64(rand.Intn(params.ScreenWidth)),
-		Y: float64(rand.Intn(params.ScreenHeight)),
+		X: float64(rand.Intn(param.ScreenWidth)),
+		Y: float64(rand.Intn(param.ScreenHeight)),
 	}
 	return NewSnakeRandDir(headCenter, initialLength, speed, color)
 }
 
 func (s *Snake) Update(distToFood float32) {
-	moveDistance := s.Speed * params.DeltaTime
+	moveDistance := s.Speed * param.DeltaTime
 
 	// if the snake has moved a safe distance after the last turn, take the next turn in the queue.
-	if (len(s.turnQueue) > 0) && (s.distAfterTurn+params.ToleranceDefault >= params.SnakeWidth) {
+	if (len(s.turnQueue) > 0) && (s.distAfterTurn+param.ToleranceDefault >= param.SnakeWidth) {
 		var nextTurn *Turn
 		nextTurn, s.turnQueue = s.turnQueue[0], s.turnQueue[1:] // Pop front
 		s.TurnTo(nextTurn, true)
@@ -141,7 +141,7 @@ func (s *Snake) updateTail(dist float64, distToFood float32) {
 	s.unitTail.length -= decreaseAmount
 
 	// Delete tail if its length is less than width of the snake
-	if (s.unitTail.prev != nil) && (s.unitTail.length <= params.SnakeWidth) {
+	if (s.unitTail.prev != nil) && (s.unitTail.length <= param.SnakeWidth) {
 		s.unitTail.prev.length += s.unitTail.length
 		s.unitTail = s.unitTail.prev
 		s.unitTail.Next = nil
@@ -155,7 +155,7 @@ func (s *Snake) TurnTo(newTurn *Turn, isFromQueue bool) {
 		// Check if the new turn is dangerous (twice same turns rapidly).
 		if (s.turnPrev != nil) &&
 			(s.turnPrev.isTurningLeft == newTurn.isTurningLeft) &&
-			(s.distAfterTurn+params.ToleranceDefault <= params.SnakeWidth) {
+			(s.distAfterTurn+param.ToleranceDefault <= param.SnakeWidth) {
 			// New turn cannot be taken now, push it into the queue
 			s.turnQueue = append(s.turnQueue, newTurn)
 			return
@@ -172,8 +172,8 @@ func (s *Snake) TurnTo(newTurn *Turn, isFromQueue bool) {
 
 	// Decide on the color of the new head unit.
 	newColor := s.color
-	if params.DebugUnits && (oldHead.color == s.color) {
-		newColor = &params.ColorSnake2
+	if param.DebugUnits && (oldHead.color == s.color) {
+		newColor = &param.ColorSnake2
 	}
 
 	// Create a new head unit.
@@ -198,7 +198,7 @@ func (s *Snake) Grow() {
 
 	// Update snake speed
 	// f(x)=250+25/e^(0.0075x)
-	s.Speed = params.SnakeSpeedFinal + (params.SnakeSpeedInitial-params.SnakeSpeedFinal)/math.Exp(0.0075*float64(s.FoodEaten))
+	s.Speed = param.SnakeSpeedFinal + (param.SnakeSpeedInitial-param.SnakeSpeedFinal)/math.Exp(0.0075*float64(s.FoodEaten))
 }
 
 func (s *Snake) LastDirection() DirectionT {

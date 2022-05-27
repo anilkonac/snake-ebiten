@@ -22,16 +22,16 @@ import (
 	"image/color"
 	"math/rand"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	"github.com/anilkonac/snake-ebiten/game/param"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 	Uniforms: map[string]interface{}{
-		"Radius":     float32(params.RadiusFood),
+		"Radius":     float32(param.RadiusFood),
 		"IsVertical": float32(1.0),
-		"Size":       []float32{params.FoodLength, params.FoodLength},
+		"Size":       []float32{param.FoodLength, param.FoodLength},
 	},
 }
 
@@ -50,10 +50,10 @@ func newFood(center t.Vec32) *food {
 	// Create a rectangle to use in drawing and eating logic.
 	pureRect := t.RectF32{
 		Pos: t.Vec32{
-			X: center.X - params.RadiusFood,
-			Y: center.Y - params.RadiusFood,
+			X: center.X - param.RadiusFood,
+			Y: center.Y - param.RadiusFood,
 		},
-		Size: t.Vec32{X: params.FoodLength, Y: params.FoodLength},
+		Size: t.Vec32{X: param.FoodLength, Y: param.FoodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
 	pureRect.Split(&newFood.rects)
@@ -62,7 +62,7 @@ func newFood(center t.Vec32) *food {
 }
 
 func newFoodRandLoc() *food {
-	return newFood(t.VecI{X: rand.Intn(params.ScreenWidth), Y: rand.Intn(params.ScreenHeight)}.To32())
+	return newFood(t.VecI{X: rand.Intn(param.ScreenWidth), Y: rand.Intn(param.ScreenHeight)}.To32())
 }
 
 // Implement collidable interface
@@ -86,7 +86,7 @@ func (f food) DrawableRects() []t.RectF32 {
 }
 
 func (f food) Color() *color.RGBA {
-	return &params.ColorFood
+	return &param.ColorFood
 }
 
 func (f food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
@@ -94,13 +94,13 @@ func (f food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 }
 
 func (f food) Shader() *ebiten.Shader {
-	return params.ShaderRound
+	return param.ShaderRound
 }
 
 func (f food) DrawDebugInfo(dst *ebiten.Image) {
-	t.MarkPoint(dst, f.center.To64(), 4, params.ColorSnake1)
+	t.MarkPoint(dst, f.center.To64(), 4, param.ColorSnake1)
 	for iRect := range f.rects {
 		rect := f.rects[iRect]
-		rect.DrawOuterRect(dst, params.ColorSnake1)
+		rect.DrawOuterRect(dst, param.ColorSnake1)
 	}
 }

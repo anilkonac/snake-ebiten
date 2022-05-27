@@ -16,12 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package tools
+package tool
 
 import (
 	"image/color"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
+	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -46,24 +46,24 @@ func (r RectF32) Split(rects *[]RectF32) {
 	rightX := r.Pos.X + r.Size.X
 	bottomY := r.Pos.Y + r.Size.Y
 
-	if params.TeleportActive {
+	if param.TeleportActive {
 		if r.Pos.X < 0 { // left part is off-screen
-			RectF32{Vec32{r.Pos.X + params.ScreenWidth, r.Pos.Y}, Vec32{-r.Pos.X, r.Size.Y}, Vec32{0, 0}}.Split(rects) // teleported left part
-			RectF32{Vec32{0, r.Pos.Y}, Vec32{rightX, r.Size.Y}, Vec32{-r.Pos.X, 0}}.Split(rects)                       // part in the screen
+			RectF32{Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y}, Vec32{-r.Pos.X, r.Size.Y}, Vec32{0, 0}}.Split(rects) // teleported left part
+			RectF32{Vec32{0, r.Pos.Y}, Vec32{rightX, r.Size.Y}, Vec32{-r.Pos.X, 0}}.Split(rects)                      // part in the screen
 			return
-		} else if rightX > params.ScreenWidth { // right part is off-screen
-			RectF32{Vec32{0, r.Pos.Y}, Vec32{rightX - params.ScreenWidth, r.Size.Y}, Vec32{params.ScreenWidth - r.Pos.X, 0}}.Split(rects) // teleported right part
-			RectF32{Vec32{r.Pos.X, r.Pos.Y}, Vec32{params.ScreenWidth - r.Pos.X, r.Size.Y}, Vec32{0, 0}}.Split(rects)                     // part in the screen
+		} else if rightX > param.ScreenWidth { // right part is off-screen
+			RectF32{Vec32{0, r.Pos.Y}, Vec32{rightX - param.ScreenWidth, r.Size.Y}, Vec32{param.ScreenWidth - r.Pos.X, 0}}.Split(rects) // teleported right part
+			RectF32{Vec32{r.Pos.X, r.Pos.Y}, Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y}, Vec32{0, 0}}.Split(rects)                    // part in the screen
 			return
 		}
 
 		if r.Pos.Y < 0 { // upper part is off-screen
-			RectF32{Vec32{r.Pos.X, params.ScreenHeight + r.Pos.Y}, Vec32{r.Size.X, -r.Pos.Y}, Vec32{r.PosInUnit.X, 0}}.Split(rects) // teleported upper part
-			RectF32{Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY}, Vec32{r.PosInUnit.X, -r.Pos.Y}}.Split(rects)                       // part in the screen
+			RectF32{Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y}, Vec32{r.Size.X, -r.Pos.Y}, Vec32{r.PosInUnit.X, 0}}.Split(rects) // teleported upper part
+			RectF32{Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY}, Vec32{r.PosInUnit.X, -r.Pos.Y}}.Split(rects)                      // part in the screen
 			return
-		} else if bottomY > params.ScreenHeight { // bottom part is off-screen
-			RectF32{Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY - params.ScreenHeight}, Vec32{r.PosInUnit.X, params.ScreenHeight - r.Pos.Y}}.Split(rects) // teleported bottom part
-			RectF32{Vec32{r.Pos.X, r.Pos.Y}, Vec32{r.Size.X, params.ScreenHeight - r.Pos.Y}, Vec32{r.PosInUnit.X, 0}}.Split(rects)                       // part in the screen
+		} else if bottomY > param.ScreenHeight { // bottom part is off-screen
+			RectF32{Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY - param.ScreenHeight}, Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y}}.Split(rects) // teleported bottom part
+			RectF32{Vec32{r.Pos.X, r.Pos.Y}, Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y}, Vec32{r.PosInUnit.X, 0}}.Split(rects)                      // part in the screen
 			return
 		}
 	}

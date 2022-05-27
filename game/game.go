@@ -1,9 +1,9 @@
 package game
 
 import (
-	"github.com/anilkonac/snake-ebiten/game/params"
-	"github.com/anilkonac/snake-ebiten/game/shaders"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	"github.com/anilkonac/snake-ebiten/game/param"
+	"github.com/anilkonac/snake-ebiten/game/shader"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -13,7 +13,7 @@ type Game struct {
 }
 
 func init() {
-	params.ShaderRound = t.NewShader(shaders.Round)
+	param.ShaderRound = t.NewShader(shader.Round)
 }
 
 func NewGame() *Game {
@@ -41,9 +41,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return params.ScreenWidth, params.ScreenHeight
+	return param.ScreenWidth, param.ScreenHeight
 }
 
 func ScreenSize() (int, int) {
-	return params.ScreenWidth, params.ScreenHeight
+	return param.ScreenWidth, param.ScreenHeight
 }

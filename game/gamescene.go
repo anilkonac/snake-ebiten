@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
+	"github.com/anilkonac/snake-ebiten/game/param"
 	s "github.com/anilkonac/snake-ebiten/game/snake"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -34,8 +34,8 @@ import (
 const (
 	restartTime = 1.5 // seconds
 
-	snakeHeadCenterX = params.HalfScreenWidth
-	snakeHeadCenterY = params.HalfScreenHeight
+	snakeHeadCenterX = param.HalfScreenWidth
+	snakeHeadCenterY = param.HalfScreenHeight
 )
 
 type gameScene struct {
@@ -48,17 +48,17 @@ type gameScene struct {
 }
 
 func newGameScene() *gameScene {
-	params.TeleportActive = true
+	param.TeleportActive = true
 
 	return &gameScene{
-		snake: s.NewSnake(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, params.SnakeLength, params.SnakeSpeedInitial, s.DirectionRight, &params.ColorSnake1),
+		snake: s.NewSnake(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, s.DirectionRight, &param.ColorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
 
 func (g *gameScene) restart() {
 	*g = gameScene{
-		snake: s.NewSnakeRandDir(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, params.SnakeLength, params.SnakeSpeedInitial, &params.ColorSnake1),
+		snake: s.NewSnakeRandDir(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1),
 		food:  newFoodRandLoc(),
 	}
 }
@@ -71,7 +71,7 @@ func (g *gameScene) update() bool {
 	}
 
 	if g.gameOver {
-		g.timeAfterGameOver += params.DeltaTime
+		g.timeAfterGameOver += param.DeltaTime
 		if g.timeAfterGameOver >= restartTime {
 			g.restart()
 		}
@@ -95,9 +95,9 @@ func (g *gameScene) checkIntersection() {
 		return
 	}
 
-	var tolerance float32 = params.ToleranceDefault
+	var tolerance float32 = param.ToleranceDefault
 	if len(curUnit.RectsCollision) > 1 { // If second unit is on an edge
-		tolerance = params.ToleranceScreenEdge // To avoid false collisions on screen edges
+		tolerance = param.ToleranceScreenEdge // To avoid false collisions on screen edges
 	}
 
 	for curUnit != nil {
@@ -112,7 +112,7 @@ func (g *gameScene) checkIntersection() {
 
 func (g *gameScene) calcFoodDist() float32 {
 	if !g.food.isActive {
-		return params.EatingAnimStartDistance
+		return param.EatingAnimStartDistance
 	}
 
 	headLoc := g.snake.UnitHead.HeadCenter
@@ -121,19 +121,19 @@ func (g *gameScene) calcFoodDist() float32 {
 	// In screen distance
 	minDist := t.Distance(headLoc, foodLoc)
 
-	if headLoc.X < params.HalfScreenWidth { // Left mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X - params.ScreenWidth, Y: foodLoc.Y}
+	if headLoc.X < param.HalfScreenWidth { // Left mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X - param.ScreenWidth, Y: foodLoc.Y}
 		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
-	} else if headLoc.X >= params.HalfScreenWidth { // Right mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X + params.ScreenWidth, Y: foodLoc.Y}
+	} else if headLoc.X >= param.HalfScreenWidth { // Right mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X + param.ScreenWidth, Y: foodLoc.Y}
 		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
 	}
 
-	if headLoc.Y < params.HalfScreenHeight { // Upper mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y - params.ScreenHeight}
+	if headLoc.Y < param.HalfScreenHeight { // Upper mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y - param.ScreenHeight}
 		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
-	} else if headLoc.Y >= params.HalfScreenHeight { // Bottom mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y + params.ScreenHeight}
+	} else if headLoc.Y >= param.HalfScreenHeight { // Bottom mirror distance
+		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y + param.ScreenHeight}
 		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
 	}
 
@@ -189,12 +189,12 @@ func (g *gameScene) handleInput() {
 
 func (g *gameScene) handleSettingsInputs() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyG) {
-		params.DebugUnits = !params.DebugUnits
+		param.DebugUnits = !param.DebugUnits
 		var numUnit uint8
 		for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
-			color := &params.ColorSnake1
-			if params.DebugUnits && (numUnit%2 == 1) {
-				color = &params.ColorSnake2
+			color := &param.ColorSnake1
+			if param.DebugUnits && (numUnit%2 == 1) {
+				color = &param.ColorSnake2
 			}
 			unit.SetColor(color)
 			numUnit++
@@ -223,7 +223,7 @@ func (g *gameScene) handleSettingsInputs() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyF) {
-		params.PrintFPS = !params.PrintFPS
+		param.PrintFPS = !param.PrintFPS
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
@@ -240,7 +240,7 @@ func (g *gameScene) checkFood(distToFood float32) {
 	if !g.food.isActive {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
-			if collides(unit, g.food, params.ToleranceDefault) {
+			if collides(unit, g.food, param.ToleranceDefault) {
 				g.food = newFoodRandLoc()
 				return
 			}
@@ -250,7 +250,7 @@ func (g *gameScene) checkFood(distToFood float32) {
 		return
 	}
 
-	if distToFood <= params.RadiusEating {
+	if distToFood <= param.RadiusEating {
 		g.snake.Grow()
 		g.triggerScoreAnim()
 		g.food = newFoodRandLoc()
@@ -265,20 +265,20 @@ func (g *gameScene) triggerScoreAnim() {
 	// not the head center.
 	switch g.snake.UnitHead.Direction {
 	case s.DirectionUp:
-		corrCenter.Y -= params.RadiusSnake
+		corrCenter.Y -= param.RadiusSnake
 	case s.DirectionDown:
-		corrCenter.Y += params.RadiusSnake
+		corrCenter.Y += param.RadiusSnake
 	case s.DirectionRight:
-		corrCenter.X += params.RadiusSnake
+		corrCenter.X += param.RadiusSnake
 	case s.DirectionLeft:
-		corrCenter.X -= params.RadiusSnake
+		corrCenter.X -= param.RadiusSnake
 	}
 
 	g.scoreAnimList = append(g.scoreAnimList, newScoreAnim(corrCenter.To32()))
 }
 
 func (g *gameScene) draw(screen *ebiten.Image) {
-	screen.Fill(params.ColorBackground)
+	screen.Fill(param.ColorBackground)
 
 	// Draw food
 	draw(screen, g.food)
@@ -298,23 +298,23 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 
 	drawFPS(screen)
 
-	if params.DebugUnits {
+	if param.DebugUnits {
 		// Mark cursor
 		x, y := ebiten.CursorPosition()
-		t.MarkPoint(screen, t.VecI{X: x, Y: y}.To64(), 5, params.ColorSnake2)
+		t.MarkPoint(screen, t.VecI{X: x, Y: y}.To64(), 5, param.ColorSnake2)
 
 		// Print mouse coordinates
 		msg := fmt.Sprintf("%d %d", x, y)
 		rect := text.BoundString(fontFaceDebug, msg)
-		text.Draw(screen, msg, fontFaceDebug, 0, -rect.Min.Y+params.ScreenHeight-rect.Size().Y, params.ColorDebug)
+		text.Draw(screen, msg, fontFaceDebug, 0, -rect.Min.Y+param.ScreenHeight-rect.Size().Y, param.ColorDebug)
 	}
 
 	g.printDebugMsgs(screen)
 }
 
 func (g *gameScene) drawScore(screen *ebiten.Image) {
-	msg := fmt.Sprintf("Score: %05d", int(g.snake.FoodEaten)*params.FoodScore)
-	text.Draw(screen, msg, fontFaceScore, scoreTextShiftX, -boundTextScore.Min.Y+scoreTextShiftY, params.ColorScore)
+	msg := fmt.Sprintf("Score: %05d", int(g.snake.FoodEaten)*param.FoodScore)
+	text.Draw(screen, msg, fontFaceScore, scoreTextShiftX, -boundTextScore.Min.Y+scoreTextShiftY, param.ColorScore)
 }
 
 func (g *gameScene) printDebugMsgs(screen *ebiten.Image) {

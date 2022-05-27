@@ -1,4 +1,4 @@
-package params
+package param
 
 // Snake parameters
 const (
@@ -13,6 +13,6 @@ const (
 
 // Snake collision tolerances must be an integer or false collisions will occur.
 const (
-	ToleranceDefault    = 2 //params.SnakeWidth / 16.0
+	ToleranceDefault    = 2 //param.SnakeWidth / 16.0
 	ToleranceScreenEdge = RadiusSnake
 )

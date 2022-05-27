@@ -21,8 +21,8 @@ package game
 import (
 	"image/color"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	"github.com/anilkonac/snake-ebiten/game/param"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -53,7 +53,7 @@ func draw(dst *ebiten.Image, src drawable) {
 	vertices, indices := triangles(src)
 	dst.DrawTrianglesShader(vertices, indices, src.Shader(), src.DrawOptions())
 
-	if params.DebugUnits {
+	if param.DebugUnits {
 		src.DrawDebugInfo(dst)
 	}
 }

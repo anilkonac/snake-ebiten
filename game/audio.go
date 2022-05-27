@@ -23,8 +23,8 @@ import (
 	"math/rand"
 	"time"
 
-	sound "github.com/anilkonac/snake-ebiten/game/resources/audio"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
+	sound "github.com/anilkonac/snake-ebiten/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
-	"github.com/anilkonac/snake-ebiten/game/resources/fonts"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	"github.com/anilkonac/snake-ebiten/game/param"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
+	"github.com/anilkonac/snake-ebiten/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
@@ -71,8 +71,8 @@ func init() {
 }
 
 func drawFPS(screen *ebiten.Image) {
-	if params.PrintFPS {
+	if param.PrintFPS {
 		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
-		text.Draw(screen, msg, fontFaceDebug, params.ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, params.ColorDebug)
+		text.Draw(screen, msg, fontFaceDebug, param.ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, param.ColorDebug)
 	}
 }

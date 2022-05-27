@@ -1,4 +1,4 @@
-package params
+package param
 
 import (
 	"image/color"

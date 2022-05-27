@@ -22,10 +22,10 @@ import (
 	"image/color"
 	"strconv"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
-	"github.com/anilkonac/snake-ebiten/game/shaders"
+	"github.com/anilkonac/snake-ebiten/game/param"
+	"github.com/anilkonac/snake-ebiten/game/shader"
 	s "github.com/anilkonac/snake-ebiten/game/snake"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
@@ -52,15 +52,15 @@ type scoreAnim struct {
 }
 
 func initScoreAnim() {
-	shaderScore = t.NewShader(shaders.Score)
+	shaderScore = t.NewShader(shader.Score)
 
 	// Init animation text bound variables
-	foodScoreMsg := strconv.Itoa(params.FoodScore)
+	foodScoreMsg := strconv.Itoa(param.FoodScore)
 	scoreAnimBound := text.BoundString(fontFaceScore, foodScoreMsg)
 	scoreAnimBoundSizeI := scoreAnimBound.Size()
 	scoreAnimBoundSize.X = float32(scoreAnimBoundSizeI.X)
 	scoreAnimBoundSize.Y = float32(scoreAnimBoundSizeI.Y)
-	scoreAnimShiftY = params.RadiusSnake + scoreAnimBoundSize.Y/2.0 + scoreAnimPadding
+	scoreAnimShiftY = param.RadiusSnake + scoreAnimBoundSize.Y/2.0 + scoreAnimPadding
 
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
@@ -82,7 +82,7 @@ func newScoreAnim(pos t.Vec32) *scoreAnim {
 			X: pos.X,
 			Y: pos.Y - scoreAnimShiftY,
 		},
-		alpha:     float32(params.ColorScore.A) / 255.0,
+		alpha:     float32(param.ColorScore.A) / 255.0,
 		direction: s.DirectionUp,
 	}
 
@@ -110,7 +110,7 @@ func (s *scoreAnim) createRects() {
 // Returns true when the animation is finished
 func (s *scoreAnim) update() bool {
 	// Move animation
-	s.pos.Y -= scoreAnimSpeed * params.DeltaTime
+	s.pos.Y -= scoreAnimSpeed * param.DeltaTime
 
 	// Update rectangles of this anim
 	s.createRects()
@@ -133,7 +133,7 @@ func (s *scoreAnim) DrawableRects() []t.RectF32 {
 }
 
 func (s *scoreAnim) Color() *color.RGBA {
-	return &params.ColorScore
+	return &param.ColorScore
 }
 
 func (s *scoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {

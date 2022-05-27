@@ -1,4 +1,4 @@
-package tools
+package tool
 
 import "github.com/hajimehoshi/ebiten/v2"
 

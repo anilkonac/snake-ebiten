@@ -23,10 +23,10 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/anilkonac/snake-ebiten/game/params"
-	"github.com/anilkonac/snake-ebiten/game/shaders"
+	"github.com/anilkonac/snake-ebiten/game/param"
+	"github.com/anilkonac/snake-ebiten/game/shader"
 	s "github.com/anilkonac/snake-ebiten/game/snake"
-	t "github.com/anilkonac/snake-ebiten/game/tools"
+	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -52,10 +52,10 @@ const (
 	titleRectWidth                 = 540
 	titleRectHeight                = 405
 	titleRectRatio                 = 1.0 * titleRectWidth / titleRectHeight
-	titleRectCornerRadiusX         = params.RadiusSnake
+	titleRectCornerRadiusX         = param.RadiusSnake
 	titleRectCornerRadiusY         = titleRectCornerRadiusX / titleRectRatio
 	titleRectInitialAlpha          = 230 / 255.0
-	titleRectDissapearRate float32 = (85 / 255.0) * params.DeltaTime
+	titleRectDissapearRate float32 = (85 / 255.0) * param.DeltaTime
 	textTitle                      = "Ssnake"
 	textPressToPlay                = "Press any key to start"
 	textTitleShiftY                = -50
@@ -66,17 +66,17 @@ const (
 
 var (
 	titleSceenAlive        = true
-	colorTitleRect         = &params.ColorSnake2
+	colorTitleRect         = &param.ColorSnake2
 	titleBackgroundIndices = []uint16{
 		1, 0, 2,
 		2, 3, 1,
 	}
 
 	snakeColors = map[int]*color.RGBA{
-		0: &params.ColorSnake1,
-		1: &params.ColorSnake2,
-		2: &params.ColorFood,
-		3: &params.ColorDebug,
+		0: &param.ColorSnake1,
+		1: &param.ColorSnake2,
+		2: &param.ColorFood,
+		3: &param.ColorDebug,
 	}
 )
 
@@ -94,7 +94,7 @@ type titleScene struct {
 func newTitleScene() *titleScene {
 	// Create title rect model
 	titleRect := t.RectF32{
-		Pos:       t.Vec32{X: (params.ScreenWidth - titleRectWidth) / 2.0, Y: (params.ScreenHeight - titleRectHeight) / 2.0},
+		Pos:       t.Vec32{X: (param.ScreenWidth - titleRectWidth) / 2.0, Y: (param.ScreenHeight - titleRectHeight) / 2.0},
 		Size:      t.Vec32{X: titleRectWidth, Y: titleRectHeight},
 		PosInUnit: t.Vec32{X: 0, Y: 0},
 	}
@@ -104,7 +104,7 @@ func newTitleScene() *titleScene {
 		titleRectAlpha:    titleRectInitialAlpha,
 		snakes:            make([]*s.Snake, maxSnakes),
 		pressedKeys:       make([]ebiten.Key, 0, 10),
-		shaderTitle:       t.NewShader(shaders.Title),
+		shaderTitle:       t.NewShader(shader.Title),
 		titleRectVertices: titleRect.Vertices(colorTitleRect),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
@@ -143,7 +143,7 @@ func (t *titleScene) prepareTitleRects() {
 	text.Draw(t.titleImage, textTitle, fontFaceTitle,
 		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X,
 		(titleRectHeight-boundTextTitleSize.Y)/2.0-boundTextTitle.Min.Y+textTitleShiftY,
-		params.ColorBackground)
+		param.ColorBackground)
 
 	// Prepare key prompt text image
 	t.titleImageKeyPrompt = ebiten.NewImageFromImage(t.titleImage)
@@ -151,7 +151,7 @@ func (t *titleScene) prepareTitleRects() {
 	// Draw key prompt text to the image
 	text.Draw(t.titleImageKeyPrompt, textPressToPlay, fontFaceScore,
 		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
-		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, params.ColorBackground)
+		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, param.ColorBackground)
 
 	// Send images to the shader
 	t.titleRectDrawOpts.Images[0] = t.titleImage
@@ -162,7 +162,7 @@ func (t *titleScene) prepareTitleRects() {
 
 func (t *titleScene) update() bool {
 	for _, snake := range t.snakes {
-		snake.Update(params.EatingAnimStartDistance) // Make sure the snake's mouth is not open
+		snake.Update(param.EatingAnimStartDistance) // Make sure the snake's mouth is not open
 	}
 
 	t.handleKeyPress()
@@ -184,7 +184,7 @@ func (t *titleScene) handleKeyPress() {
 	if len(t.pressedKeys) > 0 && titleSceenAlive {
 		// Start transition process
 		titleSceenAlive = false
-		params.TeleportActive = false
+		param.TeleportActive = false
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
 		for _, snake := range t.snakes {
@@ -194,7 +194,7 @@ func (t *titleScene) handleKeyPress() {
 }
 
 func (t *titleScene) draw(screen *ebiten.Image) {
-	screen.Fill(params.ColorBackground)
+	screen.Fill(param.ColorBackground)
 
 	// Draw snakes
 	for _, snake := range t.snakes {
