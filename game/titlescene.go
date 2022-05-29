@@ -38,7 +38,6 @@ const (
 	maxSnakes           = 30
 	turnTimeMin         = 0.0 // sec
 	turnTimeMax         = 1.5 // sec
-	turnTimeDiff        = turnTimeMax - turnTimeMin
 	dumbSnakeLengthMin  = 120
 	dumbSnakeLengthMax  = 480
 	dumbSnakeLengthDiff = dumbSnakeLengthMax - dumbSnakeLengthMin
@@ -88,11 +87,11 @@ type titleScene struct {
 	titleRectVertices   []ebiten.Vertex
 	titleImage          *ebiten.Image
 	titleImageKeyPrompt *ebiten.Image
-	titleRectDrawOpts   ebiten.DrawTrianglesShaderOptions
 	shaderTitle         *ebiten.Shader
+	titleRectDrawOpts   ebiten.DrawTrianglesShaderOptions
 }
 
-func newTitleScene() *titleScene {
+func newTitleScene(playerSnake *s.Snake) *titleScene {
 	// Create title rect model
 	titleRect := t.RectF32{
 		Pos:       t.Vec32{X: (param.ScreenWidth - titleRectWidth) / 2.0, Y: (param.ScreenHeight - titleRectHeight) / 2.0},
@@ -133,20 +132,19 @@ func newTitleScene() *titleScene {
 	}
 
 	// Create the snake that player will control
-	leadSnake = s.NewSnake(t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, s.DirectionRight, &param.ColorSnake1)
-	scene.snakes[maxSnakes-1] = leadSnake
-	go controlDumbly(leadSnake)
+	scene.snakes[maxSnakes-1] = playerSnake
+	go controlDumbly(playerSnake)
 
 	return scene
 }
 
 func (t *titleScene) prepareTitleRects() {
+	boundTextTitleSize := boundTextTitle.Size()
+	boundTextKeyPromptSize := boundTextKeyPrompt.Size()
+
 	// Prepare title text image
 	t.titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
 	t.titleImage.Fill(colorTitleRect)
-
-	boundTextTitleSize := boundTextTitle.Size()
-	boundTextKeyPromptSize := boundTextKeyPrompt.Size()
 
 	// Draw Title text to the image
 	text.Draw(t.titleImage, textTitle, fontFaceTitle,
@@ -180,13 +178,15 @@ func (t *titleScene) update() bool {
 		t.handleKeyPress()
 
 	} else {
-		param.TeleportActive = true
-		leadSnake.Update(distToFood)
-
+		// Update dumb snakes
 		param.TeleportActive = false
 		for iSnake := 0; iSnake < maxSnakes-1; iSnake++ {
 			t.snakes[iSnake].Update(distToFood)
 		}
+
+		// Update player snake
+		param.TeleportActive = true
+		t.snakes[maxSnakes-1].Update(distToFood)
 
 		// Update transition process to the next scene
 		if !titleSceenAlive {
@@ -255,15 +255,14 @@ func (t *titleScene) keyPromptFlipFlop() {
 // Dumb snake bot
 func controlDumbly(snake *s.Snake) {
 	const turnTimeMinMs = turnTimeMin * 1000
-	const turnTimeDiffMs = turnTimeDiff * 1000
+	const turnTimeDiffMs = (turnTimeMax - turnTimeMin) * 1000
 
 	var dirNew s.DirectionT
 	for titleSceenAlive {
 		// Determine the new direction.
 		dirCurrent := snake.LastDirection()
 
-		randResult := rand.Float32()
-		if dirCurrent.IsVertical() {
+		if randResult := rand.Float32(); dirCurrent.IsVertical() {
 			if randResult < 0.5 {
 				dirNew = s.DirectionLeft
 			} else {
@@ -281,7 +280,7 @@ func controlDumbly(snake *s.Snake) {
 		newTurn := s.NewTurn(dirCurrent, dirNew)
 		snake.TurnTo(newTurn, false)
 
-		// Sleep for a random time limited by turnTimeMax and turnTimeMin.
+		// Sleep a random amount of time between turnTimeMax and turnTimeMin.
 		sleepTime := time.Duration(turnTimeMinMs + rand.Float32()*turnTimeDiffMs)
 		time.Sleep(time.Millisecond * sleepTime)
 	}

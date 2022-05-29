@@ -33,8 +33,7 @@ import (
 
 // Game scene constants
 const (
-	restartTime = 1.5 // seconds
-
+	restartTime      = 1.5 // seconds
 	snakeHeadCenterX = param.HalfScreenWidth
 	snakeHeadCenterY = param.HalfScreenHeight
 )
@@ -122,24 +121,23 @@ func (g *gameScene) calcFoodDist() float32 {
 	// In screen distance
 	minDist := t.Distance(headLoc, foodLoc)
 
-	if headLoc.X < param.HalfScreenWidth { // Left mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X - param.ScreenWidth, Y: foodLoc.Y}
-		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
-	} else if headLoc.X >= param.HalfScreenWidth { // Right mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X + param.ScreenWidth, Y: foodLoc.Y}
-		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
+	if headLoc.X < param.HalfScreenWidth { // Left projection distance
+		virtualFood := t.Vec64{X: foodLoc.X - param.ScreenWidth, Y: foodLoc.Y}
+		minDist = math.Min(minDist, t.Distance(headLoc, virtualFood))
+	} else if headLoc.X >= param.HalfScreenWidth { // Right projection distance
+		virtualFood := t.Vec64{X: foodLoc.X + param.ScreenWidth, Y: foodLoc.Y}
+		minDist = math.Min(minDist, t.Distance(headLoc, virtualFood))
 	}
 
-	if headLoc.Y < param.HalfScreenHeight { // Upper mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y - param.ScreenHeight}
-		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
-	} else if headLoc.Y >= param.HalfScreenHeight { // Bottom mirror distance
-		mirroredFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y + param.ScreenHeight}
-		minDist = math.Min(minDist, t.Distance(headLoc, mirroredFood))
+	if headLoc.Y < param.HalfScreenHeight { // Upper projection distance
+		virtualFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y - param.ScreenHeight}
+		minDist = math.Min(minDist, t.Distance(headLoc, virtualFood))
+	} else if headLoc.Y >= param.HalfScreenHeight { // Bottom projection distance
+		virtualFood := t.Vec64{X: foodLoc.X, Y: foodLoc.Y + param.ScreenHeight}
+		minDist = math.Min(minDist, t.Distance(headLoc, virtualFood))
 	}
 
 	return float32(minDist)
-
 }
 
 func (g *gameScene) updateScoreAnims() {

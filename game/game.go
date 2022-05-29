@@ -8,8 +8,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var leadSnake *snake.Snake
-
 type scene interface {
 	update() bool // Return true if the scene is finished
 	draw(*ebiten.Image)
@@ -17,14 +15,20 @@ type scene interface {
 
 // Game implements ebiten.Game interface.
 type Game struct {
-	curScene scene
+	curScene    scene
+	playerSnake *snake.Snake
 }
 
 func NewGame() *Game {
 	param.ShaderRound = t.NewShader(shader.Round)
+	playerSnake := snake.NewSnakeRandDir(
+		t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY},
+		param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1,
+	)
 
 	return &Game{
-		curScene: newTitleScene(),
+		curScene:    newTitleScene(playerSnake),
+		playerSnake: playerSnake,
 	}
 }
 
@@ -33,7 +37,7 @@ func (g *Game) Update() error {
 	if g.curScene.update() {
 		switch g.curScene.(type) {
 		case *titleScene:
-			g.curScene = newGameScene(leadSnake)
+			g.curScene = newGameScene(g.playerSnake)
 		}
 	}
 
