@@ -112,7 +112,7 @@ func (g *gameScene) checkIntersection() {
 
 func (g *gameScene) calcFoodDist() float32 {
 	if !g.food.IsActive {
-		return param.EatingAnimStartDistance
+		return param.MouthAnimStartDistance
 	}
 
 	headLoc := g.snake.UnitHead.HeadCenter

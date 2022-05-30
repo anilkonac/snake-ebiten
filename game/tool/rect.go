@@ -43,29 +43,64 @@ func (r RectF32) Split(rects *[]RectF32) {
 		return
 	}
 
+	if !param.TeleportActive {
+		*rects = []RectF32{r}
+		return
+	}
+
 	rightX := r.Pos.X + r.Size.X
 	bottomY := r.Pos.Y + r.Size.Y
 
-	if param.TeleportActive {
-		if r.Pos.X < 0 { // left part is off-screen
-			RectF32{Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y}, Vec32{-r.Pos.X, r.Size.Y}, Vec32{0, 0}}.Split(rects) // teleported left part
-			RectF32{Vec32{0, r.Pos.Y}, Vec32{rightX, r.Size.Y}, Vec32{-r.Pos.X, 0}}.Split(rects)                      // part in the screen
-			return
-		} else if rightX > param.ScreenWidth { // right part is off-screen
-			RectF32{Vec32{0, r.Pos.Y}, Vec32{rightX - param.ScreenWidth, r.Size.Y}, Vec32{param.ScreenWidth - r.Pos.X, 0}}.Split(rects) // teleported right part
-			RectF32{Vec32{r.Pos.X, r.Pos.Y}, Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y}, Vec32{0, 0}}.Split(rects)                    // part in the screen
-			return
-		}
+	if r.Pos.X < 0 { // left part is off-screen
+		// teleported left part
+		RectF32{
+			Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y}, Vec32{-r.Pos.X, r.Size.Y}, Vec32{0, 0},
+		}.Split(rects)
 
-		if r.Pos.Y < 0 { // upper part is off-screen
-			RectF32{Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y}, Vec32{r.Size.X, -r.Pos.Y}, Vec32{r.PosInUnit.X, 0}}.Split(rects) // teleported upper part
-			RectF32{Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY}, Vec32{r.PosInUnit.X, -r.Pos.Y}}.Split(rects)                      // part in the screen
-			return
-		} else if bottomY > param.ScreenHeight { // bottom part is off-screen
-			RectF32{Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY - param.ScreenHeight}, Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y}}.Split(rects) // teleported bottom part
-			RectF32{Vec32{r.Pos.X, r.Pos.Y}, Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y}, Vec32{r.PosInUnit.X, 0}}.Split(rects)                      // part in the screen
-			return
-		}
+		// part in the screen
+		RectF32{
+			Vec32{0, r.Pos.Y}, Vec32{rightX, r.Size.Y}, Vec32{-r.Pos.X, 0},
+		}.Split(rects)
+
+		return
+	} else if rightX > param.ScreenWidth { // right part is off-screen
+		// teleported right part
+		RectF32{
+			Vec32{0, r.Pos.Y}, Vec32{rightX - param.ScreenWidth, r.Size.Y}, Vec32{param.ScreenWidth - r.Pos.X, 0},
+		}.Split(rects)
+
+		// part in the screen
+		RectF32{
+			Vec32{r.Pos.X, r.Pos.Y}, Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y}, Vec32{0, 0},
+		}.Split(rects)
+
+		return
+	}
+
+	if r.Pos.Y < 0 { // upper part is off-screen
+		// teleported upper part
+		RectF32{
+			Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y}, Vec32{r.Size.X, -r.Pos.Y}, Vec32{r.PosInUnit.X, 0},
+		}.Split(rects)
+
+		// part in the screen
+		RectF32{
+			Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY}, Vec32{r.PosInUnit.X, -r.Pos.Y},
+		}.Split(rects)
+
+		return
+	} else if bottomY > param.ScreenHeight { // bottom part is off-screen
+		// teleported bottom part
+		RectF32{
+			Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY - param.ScreenHeight}, Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y},
+		}.Split(rects)
+
+		// part in the screen
+		RectF32{
+			Vec32{r.Pos.X, r.Pos.Y}, Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y}, Vec32{r.PosInUnit.X, 0},
+		}.Split(rects)
+
+		return
 	}
 
 	// Add the split rectangle to the rects slice.

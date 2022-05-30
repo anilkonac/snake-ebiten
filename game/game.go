@@ -21,10 +21,7 @@ type Game struct {
 
 func NewGame() *Game {
 	param.ShaderRound = t.NewShader(shader.Round)
-	playerSnake := snake.NewSnakeRandDir(
-		t.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY},
-		param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1,
-	)
+	playerSnake := snake.NewSnakeRandDirLoc(param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1)
 
 	return &Game{
 		curScene:    newTitleScene(playerSnake),

@@ -59,7 +59,7 @@ func NewUnit(headCenter t.Vec64, length float64, direction DirectionT, color *co
 			},
 		},
 	}
-	newUnit.update(param.EatingAnimStartDistance)
+	newUnit.update(param.MouthAnimStartDistance)
 
 	return newUnit
 }
@@ -158,7 +158,7 @@ func (u *Unit) update(distToFood float32) {
 
 func (u *Unit) updateDrawOptions(distToFood float32) {
 	// Distance to food
-	proxToFood := 1.0 - distToFood/param.EatingAnimStartDistance
+	proxToFood := 1.0 - distToFood/param.MouthAnimStartDistance
 
 	// Specify Size uniform variable
 	var drawWidth, drawHeight float32

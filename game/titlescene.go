@@ -168,7 +168,7 @@ func (t *titleScene) prepareTitleRects() {
 }
 
 func (t *titleScene) update() bool {
-	const distToFood = param.EatingAnimStartDistance // Make sure the snake's mouth is not open
+	const distToFood = param.MouthAnimStartDistance // Make sure the snake's mouth is not open
 
 	if titleSceenAlive {
 		for _, snake := range t.snakes {
@@ -209,7 +209,7 @@ func (t *titleScene) handleKeyPress() {
 		param.TeleportActive = false
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
-		// Increase speeds of snakes other than the lead snake
+		// Increase speeds of snakes other than the player's snake
 		for iSnake := 0; iSnake < maxSnakes-1; iSnake++ {
 			t.snakes[iSnake].Speed *= dumbSnakeRunMultip
 		}
