@@ -1,5 +1,4 @@
 /*
-snake-ebiten
 Copyright (C) 2022 Anıl Konaç
 
 This file is part of snake-ebiten.
