@@ -39,13 +39,13 @@ func NewRect(pos, size Vec32) *RectF32 {
 }
 
 // Divide rectangle up to 4 based on where it is off-screen.
-func (r RectF32) Split(rects *[]RectF32) {
+func (r RectF32) Split(dst *[]RectF32) {
 	if (r.Size.X <= 0) || (r.Size.Y <= 0) {
 		return
 	}
 
 	if !param.TeleportActive {
-		*rects = []RectF32{r}
+		*dst = []RectF32{r}
 		return
 	}
 
@@ -57,13 +57,13 @@ func (r RectF32) Split(rects *[]RectF32) {
 			Pos:       Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y},
 			Size:      Vec32{-r.Pos.X, r.Size.Y},
 			PosInUnit: Vec32{0, 0},
-		}.Split(rects)
+		}.Split(dst)
 
 		RectF32{ // part in the screen
 			Pos:       Vec32{0, r.Pos.Y},
 			Size:      Vec32{rightX, r.Size.Y},
 			PosInUnit: Vec32{-r.Pos.X, 0},
-		}.Split(rects)
+		}.Split(dst)
 
 		return
 	} else if rightX > param.ScreenWidth { // right part is off-screen
@@ -71,13 +71,13 @@ func (r RectF32) Split(rects *[]RectF32) {
 			Pos:       Vec32{0, r.Pos.Y},
 			Size:      Vec32{rightX - param.ScreenWidth, r.Size.Y},
 			PosInUnit: Vec32{param.ScreenWidth - r.Pos.X, 0},
-		}.Split(rects)
+		}.Split(dst)
 
 		RectF32{ // part in the screen
 			Pos:       Vec32{r.Pos.X, r.Pos.Y},
 			Size:      Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y},
 			PosInUnit: Vec32{0, 0},
-		}.Split(rects)
+		}.Split(dst)
 
 		return
 	}
@@ -87,13 +87,13 @@ func (r RectF32) Split(rects *[]RectF32) {
 			Pos:       Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y},
 			Size:      Vec32{r.Size.X, -r.Pos.Y},
 			PosInUnit: Vec32{r.PosInUnit.X, 0},
-		}.Split(rects)
+		}.Split(dst)
 
 		RectF32{ // part in the screen
 			Pos:       Vec32{r.Pos.X, 0},
 			Size:      Vec32{r.Size.X, bottomY},
 			PosInUnit: Vec32{r.PosInUnit.X, -r.Pos.Y},
-		}.Split(rects)
+		}.Split(dst)
 
 		return
 	} else if bottomY > param.ScreenHeight { // bottom part is off-screen
@@ -101,19 +101,19 @@ func (r RectF32) Split(rects *[]RectF32) {
 			Pos:       Vec32{r.Pos.X, 0},
 			Size:      Vec32{r.Size.X, bottomY - param.ScreenHeight},
 			PosInUnit: Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y},
-		}.Split(rects)
+		}.Split(dst)
 
 		RectF32{ // part in the screen
 			Pos:       Vec32{r.Pos.X, r.Pos.Y},
 			Size:      Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y},
 			PosInUnit: Vec32{r.PosInUnit.X, 0},
-		}.Split(rects)
+		}.Split(dst)
 
 		return
 	}
 
 	// Add the split rectangle to the rects slice.
-	*rects = append(*rects, r)
+	*dst = append(*dst, r)
 }
 
 func Intersects(rectA, rectB *RectF32, tolerance float32) bool {
