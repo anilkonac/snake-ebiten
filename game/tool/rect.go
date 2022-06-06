@@ -2,18 +2,20 @@
 snake-ebiten
 Copyright (C) 2022 Anıl Konaç
 
-This program is free software: you can redistribute it and/or modify
+This file is part of snake-ebiten.
+
+snake-ebiten is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+snake-ebiten is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with snake-ebiten. If not, see <https://www.gnu.org/licenses/>.
 */
 
 package tool
@@ -52,52 +54,60 @@ func (r RectF32) Split(rects *[]RectF32) {
 	bottomY := r.Pos.Y + r.Size.Y
 
 	if r.Pos.X < 0 { // left part is off-screen
-		// teleported left part
-		RectF32{
-			Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y}, Vec32{-r.Pos.X, r.Size.Y}, Vec32{0, 0},
+		RectF32{ // teleported left part
+			Pos:       Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y},
+			Size:      Vec32{-r.Pos.X, r.Size.Y},
+			PosInUnit: Vec32{0, 0},
 		}.Split(rects)
 
-		// part in the screen
-		RectF32{
-			Vec32{0, r.Pos.Y}, Vec32{rightX, r.Size.Y}, Vec32{-r.Pos.X, 0},
+		RectF32{ // part in the screen
+			Pos:       Vec32{0, r.Pos.Y},
+			Size:      Vec32{rightX, r.Size.Y},
+			PosInUnit: Vec32{-r.Pos.X, 0},
 		}.Split(rects)
 
 		return
 	} else if rightX > param.ScreenWidth { // right part is off-screen
-		// teleported right part
-		RectF32{
-			Vec32{0, r.Pos.Y}, Vec32{rightX - param.ScreenWidth, r.Size.Y}, Vec32{param.ScreenWidth - r.Pos.X, 0},
+		RectF32{ // teleported right part
+			Pos:       Vec32{0, r.Pos.Y},
+			Size:      Vec32{rightX - param.ScreenWidth, r.Size.Y},
+			PosInUnit: Vec32{param.ScreenWidth - r.Pos.X, 0},
 		}.Split(rects)
 
-		// part in the screen
-		RectF32{
-			Vec32{r.Pos.X, r.Pos.Y}, Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y}, Vec32{0, 0},
+		RectF32{ // part in the screen
+			Pos:       Vec32{r.Pos.X, r.Pos.Y},
+			Size:      Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y},
+			PosInUnit: Vec32{0, 0},
 		}.Split(rects)
 
 		return
 	}
 
 	if r.Pos.Y < 0 { // upper part is off-screen
-		// teleported upper part
-		RectF32{
-			Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y}, Vec32{r.Size.X, -r.Pos.Y}, Vec32{r.PosInUnit.X, 0},
+		RectF32{ // teleported upper part
+			Pos:       Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y},
+			Size:      Vec32{r.Size.X, -r.Pos.Y},
+			PosInUnit: Vec32{r.PosInUnit.X, 0},
 		}.Split(rects)
 
-		// part in the screen
-		RectF32{
-			Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY}, Vec32{r.PosInUnit.X, -r.Pos.Y},
+		RectF32{ // part in the screen
+			Pos:       Vec32{r.Pos.X, 0},
+			Size:      Vec32{r.Size.X, bottomY},
+			PosInUnit: Vec32{r.PosInUnit.X, -r.Pos.Y},
 		}.Split(rects)
 
 		return
 	} else if bottomY > param.ScreenHeight { // bottom part is off-screen
-		// teleported bottom part
-		RectF32{
-			Vec32{r.Pos.X, 0}, Vec32{r.Size.X, bottomY - param.ScreenHeight}, Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y},
+		RectF32{ // teleported bottom part
+			Pos:       Vec32{r.Pos.X, 0},
+			Size:      Vec32{r.Size.X, bottomY - param.ScreenHeight},
+			PosInUnit: Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y},
 		}.Split(rects)
 
-		// part in the screen
-		RectF32{
-			Vec32{r.Pos.X, r.Pos.Y}, Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y}, Vec32{r.PosInUnit.X, 0},
+		RectF32{ // part in the screen
+			Pos:       Vec32{r.Pos.X, r.Pos.Y},
+			Size:      Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y},
+			PosInUnit: Vec32{r.PosInUnit.X, 0},
 		}.Split(rects)
 
 		return
@@ -133,7 +143,7 @@ func Intersects(rectA, rectB *RectF32, tolerance float32) bool {
 }
 
 func (r RectF32) Vertices(clr *color.RGBA) []ebiten.Vertex {
-	var fR, fG, fB, fA float32 = float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0, float32(clr.A) / 255.0
+	fR, fG, fB, fA := float32(clr.R)/255.0, float32(clr.G)/255.0, float32(clr.B)/255.0, float32(clr.A)/255.0
 	return []ebiten.Vertex{
 		{ // Top Left corner
 			DstX:   r.Pos.X,

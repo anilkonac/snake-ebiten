@@ -2,18 +2,20 @@
 snake-ebiten
 Copyright (C) 2022 Anıl Konaç
 
-This program is free software: you can redistribute it and/or modify
+This file is part of snake-ebiten.
+
+snake-ebiten is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+snake-ebiten is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with snake-ebiten. If not, see <https://www.gnu.org/licenses/>.
 */
 
 package game
@@ -131,7 +133,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		go controlDumbly(snake)
 	}
 
-	// Create the snake that player will control
+	// Run the bot on the snake that the player will control
 	scene.snakes[maxSnakes-1] = playerSnake
 	go controlDumbly(playerSnake)
 
@@ -206,7 +208,6 @@ func (t *titleScene) handleKeyPress() {
 	if len(t.pressedKeys) > 0 && titleSceenAlive {
 		// Start transition process
 		titleSceenAlive = false
-		param.TeleportActive = false
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
 		// Increase speeds of snakes other than the player's snake
@@ -280,7 +281,7 @@ func controlDumbly(snake *s.Snake) {
 		newTurn := s.NewTurn(dirCurrent, dirNew)
 		snake.TurnTo(newTurn, false)
 
-		// Sleep a random amount of time between turnTimeMax and turnTimeMin.
+		// Sleep a random amount of time between turnTimeMin and turnTimeMax.
 		sleepTime := time.Duration(turnTimeMinMs + rand.Float32()*turnTimeDiffMs)
 		time.Sleep(time.Millisecond * sleepTime)
 	}
