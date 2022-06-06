@@ -23,6 +23,7 @@ import (
 	"image/color"
 	"strconv"
 
+	"github.com/anilkonac/snake-ebiten/game/object/core"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
@@ -46,10 +47,10 @@ var (
 )
 
 type ScoreAnim struct {
+	core.TeleUnitScreen
 	pos       t.Vec32
 	alpha     float32
 	direction s.DirectionT
-	rects     []t.RectF32
 }
 
 func InitScoreAnim() {
@@ -101,11 +102,8 @@ func (s *ScoreAnim) createRects() {
 		},
 		Size: t.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
 	}
-	// Init/Remove rects
-	s.rects = make([]t.RectF32, 0, 4) // Remove rects
-
 	// Split this rectangle if it is on a screen edge.
-	pureRect.Split(&s.rects)
+	s.Init(&pureRect, &param.ColorScore)
 }
 
 // Returns true when the animation is finished
@@ -130,7 +128,7 @@ func (s *ScoreAnim) DrawEnabled() bool {
 }
 
 func (s *ScoreAnim) DrawableRects() []t.RectF32 {
-	return s.rects
+	return s.Rects[:]
 }
 
 func (s *ScoreAnim) Color() *color.RGBA {
@@ -147,4 +145,8 @@ func (s *ScoreAnim) Shader() *ebiten.Shader {
 
 func (s *ScoreAnim) DrawDebugInfo(dst *ebiten.Image) {
 
+}
+
+func (s *ScoreAnim) Triangles() ([]ebiten.Vertex, []uint16) {
+	return s.Vertices[:], s.Indices[:]
 }

@@ -23,6 +23,7 @@ import (
 	"image/color"
 	"math/rand"
 
+	"github.com/anilkonac/snake-ebiten/game/object/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -37,15 +38,14 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 }
 
 type Food struct {
+	core.TeleUnit
 	IsActive bool
 	Center   t.Vec32
-	rects    []t.RectF32
 }
 
 func newFood(center t.Vec32) *Food {
 	newFood := &Food{
 		Center: center,
-		rects:  make([]t.RectF32, 0, 4),
 	}
 
 	// Create a rectangle to use in drawing and eating logic.
@@ -57,7 +57,7 @@ func newFood(center t.Vec32) *Food {
 		Size: t.Vec32{X: param.FoodLength, Y: param.FoodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
-	pureRect.Split(&newFood.rects)
+	newFood.Init(&pureRect)
 
 	return newFood
 }
@@ -73,7 +73,7 @@ func (f Food) CollEnabled() bool {
 }
 
 func (f Food) CollisionRects() []t.RectF32 {
-	return f.rects
+	return f.Rects[:]
 }
 
 // Implement drawable interface
@@ -83,7 +83,7 @@ func (f Food) DrawEnabled() bool {
 }
 
 func (f Food) DrawableRects() []t.RectF32 {
-	return f.rects
+	return f.Rects[:]
 }
 
 func (f Food) Color() *color.RGBA {
@@ -100,8 +100,11 @@ func (f Food) Shader() *ebiten.Shader {
 
 func (f Food) DrawDebugInfo(dst *ebiten.Image) {
 	t.MarkPoint(dst, f.Center.To64(), 4, param.ColorSnake1)
-	for iRect := range f.rects {
-		rect := f.rects[iRect]
-		rect.DrawOuterRect(dst, param.ColorSnake1)
+	for iRect := uint8(0); iRect < f.NumRects; iRect++ {
+		f.Rects[iRect].DrawOuterRect(dst, param.ColorSnake1)
 	}
+}
+
+func (f Food) Triangles() ([]ebiten.Vertex, []uint16) {
+	return f.Triangles()
 }

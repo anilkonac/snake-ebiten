@@ -23,6 +23,7 @@ import (
 	"image/color"
 	"math"
 
+	"github.com/anilkonac/snake-ebiten/game/object/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
@@ -36,15 +37,15 @@ func init() {
 }
 
 type Unit struct {
-	HeadCenter     t.Vec64
-	length         float64
-	Direction      DirectionT
-	RectsCollision []t.RectF32
-	rectsDrawable  []t.RectF32
-	color          *color.RGBA
-	Next           *Unit
-	prev           *Unit
-	drawOpts       ebiten.DrawTrianglesShaderOptions
+	HeadCenter   t.Vec64
+	length       float64
+	Direction    DirectionT
+	UnitColl     core.TeleUnit
+	UnitDrawable core.TeleUnitScreen
+	color        *color.RGBA
+	Next         *Unit
+	prev         *Unit
+	drawOpts     ebiten.DrawTrianglesShaderOptions
 }
 
 func NewUnit(headCenter t.Vec64, length float64, direction DirectionT, color *color.RGBA) *Unit {
@@ -72,19 +73,8 @@ func (u *Unit) CreateRects() {
 	rectColl = u.createRectColl()
 	rectDraw = u.createRectDraw(rectColl)
 
-	// Remove old rectangles
-	u.RectsCollision = make([]t.RectF32, 0, 4)
-	if u.Next != nil {
-		u.rectsDrawable = make([]t.RectF32, 0, 4)
-	}
-
-	// Create split rectangles on screen edges.
-	rectColl.Split(&u.RectsCollision)
-	if u.Next == nil {
-		u.rectsDrawable = u.RectsCollision
-		return
-	}
-	rectDraw.Split(&u.rectsDrawable)
+	u.UnitColl.Init(rectColl)
+	u.UnitDrawable.Init(rectDraw, u.color)
 }
 
 func (u *Unit) createRectColl() (rectColl *t.RectF32) {
@@ -249,7 +239,7 @@ func (u *Unit) CollEnabled() bool {
 }
 
 func (u *Unit) CollisionRects() []t.RectF32 {
-	return u.RectsCollision
+	return u.UnitColl.Rects[:]
 }
 
 // Implement drawable interface
@@ -259,7 +249,7 @@ func (u *Unit) DrawEnabled() bool {
 }
 
 func (u *Unit) DrawableRects() []t.RectF32 {
-	return u.rectsDrawable
+	return u.UnitDrawable.Rects[:]
 }
 
 func (u *Unit) Color() *color.RGBA {
@@ -279,8 +269,11 @@ func (u *Unit) Shader() *ebiten.Shader {
 
 func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {
 	u.markHeadCenters(dst)
-	for iRect := range u.rectsDrawable {
-		rect := u.rectsDrawable[iRect]
-		rect.DrawOuterRect(dst, param.ColorFood)
+	for iRect := uint8(0); iRect < u.UnitDrawable.NumRects; iRect++ {
+		u.UnitDrawable.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
 	}
+}
+
+func (u *Unit) Triangles() (vertices []ebiten.Vertex, indices []uint16) {
+	return u.UnitDrawable.Vertices[:], u.UnitDrawable.Indices[:]
 }

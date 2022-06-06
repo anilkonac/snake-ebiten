@@ -44,6 +44,7 @@ type drawable interface {
 	DrawOptions() *ebiten.DrawTrianglesShaderOptions
 	Shader() *ebiten.Shader
 	DrawDebugInfo(dst *ebiten.Image)
+	Triangles() (vertices []ebiten.Vertex, indices []uint16)
 }
 
 func Draw(dst *ebiten.Image, src drawable) {
@@ -51,36 +52,12 @@ func Draw(dst *ebiten.Image, src drawable) {
 		return
 	}
 
-	vertices, indices := triangles(src)
+	vertices, indices := src.Triangles()
 	dst.DrawTrianglesShader(vertices, indices, src.Shader(), src.DrawOptions())
 
 	if param.DebugUnits {
 		src.DrawDebugInfo(dst)
 	}
-}
-
-func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
-	vertices = make([]ebiten.Vertex, 0, 16)
-	indices = make([]uint16, 0, 24)
-	var offset uint16
-
-	rects := src.DrawableRects()
-	for iRect := range rects {
-		rect := &rects[iRect]
-
-		verticesRect := rect.Vertices(src.Color())
-		indicesRect := []uint16{
-			offset + 1, offset, offset + 2,
-			offset + 2, offset + 3, offset + 1,
-		}
-
-		vertices = append(vertices, verticesRect...)
-		indices = append(indices, indicesRect...)
-
-		offset += 4
-	}
-
-	return
 }
 
 func Collides(a, b collidable, tolerance float32) bool {

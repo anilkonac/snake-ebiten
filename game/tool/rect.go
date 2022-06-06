@@ -22,7 +22,6 @@ package tool
 import (
 	"image/color"
 
-	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -38,83 +37,83 @@ func NewRect(pos, size Vec32) *RectF32 {
 	return &RectF32{pos, size, Vec32{0, 0}}
 }
 
-// Divide rectangle up to 4 based on where it is off-screen.
-func (r RectF32) Split(dst *[]RectF32) {
-	if (r.Size.X <= 0) || (r.Size.Y <= 0) {
-		return
-	}
+// // Divide rectangle up to 4 based on where it is off-screen.
+// func (r RectF32) Split(dst *[]RectF32) {
+// 	if (r.Size.X <= 0) || (r.Size.Y <= 0) {
+// 		return
+// 	}
 
-	if !param.TeleportActive {
-		*dst = []RectF32{r}
-		return
-	}
+// 	if !param.TeleportActive {
+// 		*dst = []RectF32{r}
+// 		return
+// 	}
 
-	rightX := r.Pos.X + r.Size.X
-	bottomY := r.Pos.Y + r.Size.Y
+// 	rightX := r.Pos.X + r.Size.X
+// 	bottomY := r.Pos.Y + r.Size.Y
 
-	if r.Pos.X < 0 { // left part is off-screen
-		RectF32{ // teleported left part
-			Pos:       Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y},
-			Size:      Vec32{-r.Pos.X, r.Size.Y},
-			PosInUnit: Vec32{0, 0},
-		}.Split(dst)
+// 	if r.Pos.X < 0 { // left part is off-screen
+// 		RectF32{ // teleported left part
+// 			Pos:       Vec32{r.Pos.X + param.ScreenWidth, r.Pos.Y},
+// 			Size:      Vec32{-r.Pos.X, r.Size.Y},
+// 			PosInUnit: Vec32{0, 0},
+// 		}.Split(dst)
 
-		RectF32{ // part in the screen
-			Pos:       Vec32{0, r.Pos.Y},
-			Size:      Vec32{rightX, r.Size.Y},
-			PosInUnit: Vec32{-r.Pos.X, 0},
-		}.Split(dst)
+// 		RectF32{ // part in the screen
+// 			Pos:       Vec32{0, r.Pos.Y},
+// 			Size:      Vec32{rightX, r.Size.Y},
+// 			PosInUnit: Vec32{-r.Pos.X, 0},
+// 		}.Split(dst)
 
-		return
-	} else if rightX > param.ScreenWidth { // right part is off-screen
-		RectF32{ // teleported right part
-			Pos:       Vec32{0, r.Pos.Y},
-			Size:      Vec32{rightX - param.ScreenWidth, r.Size.Y},
-			PosInUnit: Vec32{param.ScreenWidth - r.Pos.X, 0},
-		}.Split(dst)
+// 		return
+// 	} else if rightX > param.ScreenWidth { // right part is off-screen
+// 		RectF32{ // teleported right part
+// 			Pos:       Vec32{0, r.Pos.Y},
+// 			Size:      Vec32{rightX - param.ScreenWidth, r.Size.Y},
+// 			PosInUnit: Vec32{param.ScreenWidth - r.Pos.X, 0},
+// 		}.Split(dst)
 
-		RectF32{ // part in the screen
-			Pos:       Vec32{r.Pos.X, r.Pos.Y},
-			Size:      Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y},
-			PosInUnit: Vec32{0, 0},
-		}.Split(dst)
+// 		RectF32{ // part in the screen
+// 			Pos:       Vec32{r.Pos.X, r.Pos.Y},
+// 			Size:      Vec32{param.ScreenWidth - r.Pos.X, r.Size.Y},
+// 			PosInUnit: Vec32{0, 0},
+// 		}.Split(dst)
 
-		return
-	}
+// 		return
+// 	}
 
-	if r.Pos.Y < 0 { // upper part is off-screen
-		RectF32{ // teleported upper part
-			Pos:       Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y},
-			Size:      Vec32{r.Size.X, -r.Pos.Y},
-			PosInUnit: Vec32{r.PosInUnit.X, 0},
-		}.Split(dst)
+// 	if r.Pos.Y < 0 { // upper part is off-screen
+// 		RectF32{ // teleported upper part
+// 			Pos:       Vec32{r.Pos.X, param.ScreenHeight + r.Pos.Y},
+// 			Size:      Vec32{r.Size.X, -r.Pos.Y},
+// 			PosInUnit: Vec32{r.PosInUnit.X, 0},
+// 		}.Split(dst)
 
-		RectF32{ // part in the screen
-			Pos:       Vec32{r.Pos.X, 0},
-			Size:      Vec32{r.Size.X, bottomY},
-			PosInUnit: Vec32{r.PosInUnit.X, -r.Pos.Y},
-		}.Split(dst)
+// 		RectF32{ // part in the screen
+// 			Pos:       Vec32{r.Pos.X, 0},
+// 			Size:      Vec32{r.Size.X, bottomY},
+// 			PosInUnit: Vec32{r.PosInUnit.X, -r.Pos.Y},
+// 		}.Split(dst)
 
-		return
-	} else if bottomY > param.ScreenHeight { // bottom part is off-screen
-		RectF32{ // teleported bottom part
-			Pos:       Vec32{r.Pos.X, 0},
-			Size:      Vec32{r.Size.X, bottomY - param.ScreenHeight},
-			PosInUnit: Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y},
-		}.Split(dst)
+// 		return
+// 	} else if bottomY > param.ScreenHeight { // bottom part is off-screen
+// 		RectF32{ // teleported bottom part
+// 			Pos:       Vec32{r.Pos.X, 0},
+// 			Size:      Vec32{r.Size.X, bottomY - param.ScreenHeight},
+// 			PosInUnit: Vec32{r.PosInUnit.X, param.ScreenHeight - r.Pos.Y},
+// 		}.Split(dst)
 
-		RectF32{ // part in the screen
-			Pos:       Vec32{r.Pos.X, r.Pos.Y},
-			Size:      Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y},
-			PosInUnit: Vec32{r.PosInUnit.X, 0},
-		}.Split(dst)
+// 		RectF32{ // part in the screen
+// 			Pos:       Vec32{r.Pos.X, r.Pos.Y},
+// 			Size:      Vec32{r.Size.X, param.ScreenHeight - r.Pos.Y},
+// 			PosInUnit: Vec32{r.PosInUnit.X, 0},
+// 		}.Split(dst)
 
-		return
-	}
+// 		return
+// 	}
 
-	// Add the split rectangle to the rects slice.
-	*dst = append(*dst, r)
-}
+// 	// Add the split rectangle to the rects slice.
+// 	*dst = append(*dst, r)
+// }
 
 func Intersects(rectA, rectB *RectF32, tolerance float32) bool {
 	aRightX := rectA.Pos.X + rectA.Size.X
