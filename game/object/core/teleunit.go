@@ -27,15 +27,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var indices = [24]uint16{
-	1, 0, 2,
-	2, 3, 1,
-	5, 4, 6,
-	6, 7, 5,
-	9, 8, 10,
-	10, 11, 9,
-	13, 12, 14,
-	14, 15, 13,
+var indices [24]uint16
+
+func init() {
+	for iRect := uint16(0); iRect < 4; iRect++ {
+		indices[iRect*6] = iRect * 4
+		indices[iRect*6+1] = iRect*4 + 2
+		indices[iRect*6+2] = iRect*4 + 1
+		indices[iRect*6+3] = iRect*4 + 1
+		indices[iRect*6+4] = iRect*4 + 2
+		indices[iRect*6+5] = iRect*4 + 3
+	}
 }
 
 // Teleportable/Teleport unit
@@ -44,13 +46,7 @@ type TeleUnit struct {
 	NumRects uint8
 }
 
-// func newTeleUnit(pureRect *t.RectF32) *TeleUnit {
-// 	tUnit := new(TeleUnit)
-// 	tUnit.split(pureRect)
-// 	return tUnit
-// }
-
-func (t TeleUnit) Init(pureRect *t.RectF32) {
+func (t *TeleUnit) Init(pureRect *t.RectF32) {
 	t.NumRects = 0
 	t.split(pureRect)
 }
@@ -145,15 +141,8 @@ func (tu *TeleUnit) split(rect *t.RectF32) {
 //  Teleport unit to be drawn on the screen.
 type TeleUnitScreen struct {
 	TeleUnit
-	Vertices [16]ebiten.Vertex
-	Indices  [24]uint16
+	vertices [16]ebiten.Vertex
 }
-
-// func newTeleDrawUnit(pureRect *t.RectF32, clr *color.RGBA) *TeleUnitScreen {
-// 	unit := new(TeleUnitScreen)
-// 	unit.Init(pureRect, clr)
-// 	return unit
-// }
 
 func (t *TeleUnitScreen) Init(pureRect *t.RectF32, clr *color.RGBA) {
 	t.TeleUnit.Init(pureRect)
@@ -166,7 +155,7 @@ func (t *TeleUnitScreen) updateVertices(clr *color.RGBA) {
 	var offset uint16
 	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
 		rect := &t.Rects[iRect]
-		t.Vertices[offset] = ebiten.Vertex{ // Top Left corner
+		t.vertices[offset] = ebiten.Vertex{ // Top Left corner
 			DstX:   rect.Pos.X,
 			DstY:   rect.Pos.Y,
 			SrcX:   rect.PosInUnit.X,
@@ -176,7 +165,7 @@ func (t *TeleUnitScreen) updateVertices(clr *color.RGBA) {
 			ColorB: fB,
 			ColorA: fA,
 		}
-		t.Vertices[offset+1] = ebiten.Vertex{ // Top Right Corner
+		t.vertices[offset+1] = ebiten.Vertex{ // Top Right Corner
 			DstX:   rect.Pos.X + rect.Size.X,
 			DstY:   rect.Pos.Y,
 			SrcX:   rect.PosInUnit.X + rect.Size.X,
@@ -186,7 +175,7 @@ func (t *TeleUnitScreen) updateVertices(clr *color.RGBA) {
 			ColorB: fB,
 			ColorA: fA,
 		}
-		t.Vertices[offset+2] = ebiten.Vertex{ // Bottom Left Corner
+		t.vertices[offset+2] = ebiten.Vertex{ // Bottom Left Corner
 			DstX:   rect.Pos.X,
 			DstY:   rect.Pos.Y + rect.Size.Y,
 			SrcX:   rect.PosInUnit.X,
@@ -196,7 +185,7 @@ func (t *TeleUnitScreen) updateVertices(clr *color.RGBA) {
 			ColorB: fB,
 			ColorA: fA,
 		}
-		t.Vertices[offset+3] = ebiten.Vertex{ // Bottom Right Corner
+		t.vertices[offset+3] = ebiten.Vertex{ // Bottom Right Corner
 			DstX:   rect.Pos.X + rect.Size.X,
 			DstY:   rect.Pos.Y + rect.Size.Y,
 			SrcX:   rect.PosInUnit.X + rect.Size.X,
@@ -211,6 +200,6 @@ func (t *TeleUnitScreen) updateVertices(clr *color.RGBA) {
 	}
 }
 
-// func (t *TeleUnitScreen) triangles(clr *color.RGBA) (vertices []ebiten.Vertex, indices []uint16) {
-// 	return t.Vertices[:], t.Indices[:t.NumRects*6]
-// }
+func (t *TeleUnitScreen) Triangles() ([]ebiten.Vertex, []uint16) {
+	return t.vertices[:t.NumRects*4], indices[:t.NumRects*6]
+}

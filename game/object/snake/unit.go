@@ -248,12 +248,8 @@ func (u *Unit) DrawEnabled() bool {
 	return true
 }
 
-func (u *Unit) DrawableRects() []t.RectF32 {
-	return u.UnitDrawable.Rects[:]
-}
-
-func (u *Unit) Color() *color.RGBA {
-	return u.color
+func (u *Unit) Triangles() ([]ebiten.Vertex, []uint16) {
+	return u.UnitDrawable.Triangles()
 }
 
 func (u *Unit) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
@@ -272,8 +268,4 @@ func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {
 	for iRect := uint8(0); iRect < u.UnitDrawable.NumRects; iRect++ {
 		u.UnitDrawable.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
 	}
-}
-
-func (u *Unit) Triangles() (vertices []ebiten.Vertex, indices []uint16) {
-	return u.UnitDrawable.Vertices[:], u.UnitDrawable.Indices[:]
 }

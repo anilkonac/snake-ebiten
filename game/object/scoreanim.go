@@ -127,12 +127,8 @@ func (s *ScoreAnim) DrawEnabled() bool {
 	return true
 }
 
-func (s *ScoreAnim) DrawableRects() []t.RectF32 {
-	return s.Rects[:]
-}
-
-func (s *ScoreAnim) Color() *color.RGBA {
-	return &param.ColorScore
+func (s *ScoreAnim) Triangles() ([]ebiten.Vertex, []uint16) {
+	return s.TeleUnitScreen.Triangles()
 }
 
 func (s *ScoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
@@ -145,8 +141,4 @@ func (s *ScoreAnim) Shader() *ebiten.Shader {
 
 func (s *ScoreAnim) DrawDebugInfo(dst *ebiten.Image) {
 
-}
-
-func (s *ScoreAnim) Triangles() ([]ebiten.Vertex, []uint16) {
-	return s.Vertices[:], s.Indices[:]
 }

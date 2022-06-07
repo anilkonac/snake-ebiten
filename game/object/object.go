@@ -20,8 +20,6 @@ along with snake-ebiten. If not, see <https://www.gnu.org/licenses/>.
 package object
 
 import (
-	"image/color"
-
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
@@ -39,12 +37,10 @@ type collidable interface {
 
 type drawable interface {
 	DrawEnabled() bool
-	DrawableRects() []t.RectF32
-	Color() *color.RGBA
+	Triangles() (vertices []ebiten.Vertex, indices []uint16)
 	DrawOptions() *ebiten.DrawTrianglesShaderOptions
 	Shader() *ebiten.Shader
 	DrawDebugInfo(dst *ebiten.Image)
-	Triangles() (vertices []ebiten.Vertex, indices []uint16)
 }
 
 func Draw(dst *ebiten.Image, src drawable) {

@@ -20,7 +20,6 @@ along with snake-ebiten. If not, see <https://www.gnu.org/licenses/>.
 package object
 
 import (
-	"image/color"
 	"math/rand"
 
 	"github.com/anilkonac/snake-ebiten/game/object/core"
@@ -38,7 +37,7 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 }
 
 type Food struct {
-	core.TeleUnit
+	core.TeleUnitScreen
 	IsActive bool
 	Center   t.Vec32
 }
@@ -57,7 +56,7 @@ func newFood(center t.Vec32) *Food {
 		Size: t.Vec32{X: param.FoodLength, Y: param.FoodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
-	newFood.Init(&pureRect)
+	newFood.Init(&pureRect, &param.ColorFood)
 
 	return newFood
 }
@@ -82,12 +81,8 @@ func (f Food) DrawEnabled() bool {
 	return f.IsActive
 }
 
-func (f Food) DrawableRects() []t.RectF32 {
-	return f.Rects[:]
-}
-
-func (f Food) Color() *color.RGBA {
-	return &param.ColorFood
+func (f Food) Triangles() ([]ebiten.Vertex, []uint16) {
+	return f.TeleUnitScreen.Triangles()
 }
 
 func (f Food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
@@ -103,8 +98,4 @@ func (f Food) DrawDebugInfo(dst *ebiten.Image) {
 	for iRect := uint8(0); iRect < f.NumRects; iRect++ {
 		f.Rects[iRect].DrawOuterRect(dst, param.ColorSnake1)
 	}
-}
-
-func (f Food) Triangles() ([]ebiten.Vertex, []uint16) {
-	return f.Triangles()
 }
