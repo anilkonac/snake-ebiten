@@ -29,7 +29,6 @@ import (
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -90,9 +89,9 @@ type titleScene struct {
 func newTitleScene(playerSnake *s.Snake) *titleScene {
 	// Create title rect model
 	titleRect := c.RectF32{
-		Pos:       t.Vec32{X: (param.ScreenWidth - titleRectWidth) / 2.0, Y: (param.ScreenHeight - titleRectHeight) / 2.0},
-		Size:      t.Vec32{X: titleRectWidth, Y: titleRectHeight},
-		PosInUnit: t.Vec32{X: 0, Y: 0},
+		Pos:       c.Vec32{X: (param.ScreenWidth - titleRectWidth) / 2.0, Y: (param.ScreenHeight - titleRectHeight) / 2.0},
+		Size:      c.Vec32{X: titleRectWidth, Y: titleRectHeight},
+		PosInUnit: c.Vec32{X: 0, Y: 0},
 	}
 
 	// Create scene
@@ -100,7 +99,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		titleRectAlpha: titleRectInitialAlpha,
 		snakes:         make([]*s.Snake, maxSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
-		shaderTitle:    t.NewShader(shader.Title),
+		shaderTitle:    c.NewShader(shader.Title),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"ShowKeyPrompt": float32(0.0),

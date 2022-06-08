@@ -24,7 +24,6 @@ import (
 
 	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -39,10 +38,10 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 type Food struct {
 	c.TeleCompScreen
 	IsActive bool
-	Center   t.Vec32
+	Center   c.Vec32
 }
 
-func newFood(center t.Vec32) *Food {
+func newFood(center c.Vec32) *Food {
 	newFood := &Food{
 		Center: center,
 	}
@@ -50,11 +49,11 @@ func newFood(center t.Vec32) *Food {
 
 	// Create a rectangle to use in drawing and eating logic.
 	pureRect := c.RectF32{
-		Pos: t.Vec32{
+		Pos: c.Vec32{
 			X: center.X - param.RadiusFood,
 			Y: center.Y - param.RadiusFood,
 		},
-		Size: t.Vec32{X: param.FoodLength, Y: param.FoodLength},
+		Size: c.Vec32{X: param.FoodLength, Y: param.FoodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
 	newFood.Update(&pureRect)
@@ -63,7 +62,7 @@ func newFood(center t.Vec32) *Food {
 }
 
 func NewFoodRandLoc() *Food {
-	return newFood(t.VecI{X: rand.Intn(param.ScreenWidth), Y: rand.Intn(param.ScreenHeight)}.To32())
+	return newFood(c.VecI{X: rand.Intn(param.ScreenWidth), Y: rand.Intn(param.ScreenHeight)}.To32())
 }
 
 // Implement collidable interface
@@ -95,7 +94,7 @@ func (f Food) Shader() *ebiten.Shader {
 }
 
 func (f Food) DrawDebugInfo(dst *ebiten.Image) {
-	t.MarkPoint(dst, f.Center.To64(), 4, param.ColorSnake1)
+	c.MarkPoint(dst, f.Center.To64(), 4, param.ColorSnake1)
 	for iRect := uint8(0); iRect < f.NumRects; iRect++ {
 		f.Rects[iRect].DrawOuterRect(dst, param.ColorSnake1)
 	}

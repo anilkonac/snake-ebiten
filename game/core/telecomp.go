@@ -23,7 +23,6 @@ import (
 	"image/color"
 
 	"github.com/anilkonac/snake-ebiten/game/param"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -68,32 +67,32 @@ func (tu *TeleComp) split(rect *RectF32) {
 	if rect.Pos.X < 0 { // left part is off-screen
 		tu.split(
 			&RectF32{ // teleported left part
-				Pos:       t.Vec32{X: rect.Pos.X + param.ScreenWidth, Y: rect.Pos.Y},
-				Size:      t.Vec32{X: -rect.Pos.X, Y: rect.Size.Y},
-				PosInUnit: t.Vec32{X: 0, Y: 0},
+				Pos:       Vec32{rect.Pos.X + param.ScreenWidth, rect.Pos.Y},
+				Size:      Vec32{-rect.Pos.X, rect.Size.Y},
+				PosInUnit: Vec32{0, 0},
 			})
 
 		tu.split(
 			&RectF32{ // part in the screen
-				Pos:       t.Vec32{X: 0, Y: rect.Pos.Y},
-				Size:      t.Vec32{X: rightX, Y: rect.Size.Y},
-				PosInUnit: t.Vec32{X: -rect.Pos.X, Y: 0},
+				Pos:       Vec32{0, rect.Pos.Y},
+				Size:      Vec32{rightX, rect.Size.Y},
+				PosInUnit: Vec32{-rect.Pos.X, 0},
 			})
 
 		return
 	} else if rightX > param.ScreenWidth { // right part is off-screen
 		tu.split(
 			&RectF32{ // teleported right part
-				Pos:       t.Vec32{X: 0, Y: rect.Pos.Y},
-				Size:      t.Vec32{X: rightX - param.ScreenWidth, Y: rect.Size.Y},
-				PosInUnit: t.Vec32{X: param.ScreenWidth - rect.Pos.X, Y: 0},
+				Pos:       Vec32{0, rect.Pos.Y},
+				Size:      Vec32{rightX - param.ScreenWidth, rect.Size.Y},
+				PosInUnit: Vec32{param.ScreenWidth - rect.Pos.X, 0},
 			})
 
 		tu.split(
 			&RectF32{ // part in the screen
-				Pos:       t.Vec32{X: rect.Pos.X, Y: rect.Pos.Y},
-				Size:      t.Vec32{X: param.ScreenWidth - rect.Pos.X, Y: rect.Size.Y},
-				PosInUnit: t.Vec32{X: 0, Y: 0},
+				Pos:       Vec32{rect.Pos.X, rect.Pos.Y},
+				Size:      Vec32{param.ScreenWidth - rect.Pos.X, rect.Size.Y},
+				PosInUnit: Vec32{0, 0},
 			})
 
 		return
@@ -102,32 +101,32 @@ func (tu *TeleComp) split(rect *RectF32) {
 	if rect.Pos.Y < 0 { // upper part is off-screen
 		tu.split(
 			&RectF32{ // teleported upper part
-				Pos:       t.Vec32{X: rect.Pos.X, Y: param.ScreenHeight + rect.Pos.Y},
-				Size:      t.Vec32{X: rect.Size.X, Y: -rect.Pos.Y},
-				PosInUnit: t.Vec32{X: rect.PosInUnit.X, Y: 0},
+				Pos:       Vec32{rect.Pos.X, param.ScreenHeight + rect.Pos.Y},
+				Size:      Vec32{rect.Size.X, -rect.Pos.Y},
+				PosInUnit: Vec32{rect.PosInUnit.X, 0},
 			})
 
 		tu.split(
 			&RectF32{ // part in the screen
-				Pos:       t.Vec32{X: rect.Pos.X, Y: 0},
-				Size:      t.Vec32{X: rect.Size.X, Y: bottomY},
-				PosInUnit: t.Vec32{X: rect.PosInUnit.X, Y: -rect.Pos.Y},
+				Pos:       Vec32{rect.Pos.X, 0},
+				Size:      Vec32{rect.Size.X, bottomY},
+				PosInUnit: Vec32{rect.PosInUnit.X, -rect.Pos.Y},
 			})
 
 		return
 	} else if bottomY > param.ScreenHeight { // bottom part is off-screen
 		tu.split(
 			&RectF32{ // teleported bottom part
-				Pos:       t.Vec32{X: rect.Pos.X, Y: 0},
-				Size:      t.Vec32{X: rect.Size.X, Y: bottomY - param.ScreenHeight},
-				PosInUnit: t.Vec32{X: rect.PosInUnit.X, Y: param.ScreenHeight - rect.Pos.Y},
+				Pos:       Vec32{rect.Pos.X, 0},
+				Size:      Vec32{rect.Size.X, bottomY - param.ScreenHeight},
+				PosInUnit: Vec32{rect.PosInUnit.X, param.ScreenHeight - rect.Pos.Y},
 			})
 
 		tu.split(
 			&RectF32{ // part in the screen
-				Pos:       t.Vec32{X: rect.Pos.X, Y: rect.Pos.Y},
-				Size:      t.Vec32{X: rect.Size.X, Y: param.ScreenHeight - rect.Pos.Y},
-				PosInUnit: t.Vec32{X: rect.PosInUnit.X, Y: 0},
+				Pos:       Vec32{rect.Pos.X, rect.Pos.Y},
+				Size:      Vec32{rect.Size.X, param.ScreenHeight - rect.Pos.Y},
+				PosInUnit: Vec32{rect.PosInUnit.X, 0},
 			})
 
 		return

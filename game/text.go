@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"image"
 
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/object"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/anilkonac/snake-ebiten/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -36,31 +36,31 @@ var (
 
 func init() {
 	tt, err := opentype.Parse(fonts.Rounded)
-	t.Panic(err)
+	c.Panic(err)
 
 	param.FontFaceScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeScore,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	t.Panic(err)
+	c.Panic(err)
 
 	fontFaceTitle, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeTitle,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	t.Panic(err)
+	c.Panic(err)
 
 	tt, err = opentype.Parse(fonts.Debug)
-	t.Panic(err)
+	c.Panic(err)
 
 	fontFaceDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeDebug,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	t.Panic(err)
+	c.Panic(err)
 
 	boundTextScore = text.BoundString(param.FontFaceScore, "Score: 55555")
 	boundTextTitle = text.BoundString(fontFaceTitle, textTitle)

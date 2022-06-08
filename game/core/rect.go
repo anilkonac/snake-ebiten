@@ -3,20 +3,19 @@ package core
 import (
 	"image/color"
 
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 // Rectangle compatible with float32 type parameters of the ebiten.DrawTriangleShader function.
 type RectF32 struct {
-	Pos       t.Vec32
-	Size      t.Vec32
-	PosInUnit t.Vec32
+	Pos       Vec32
+	Size      Vec32
+	PosInUnit Vec32
 }
 
-func NewRect(pos, size t.Vec32) *RectF32 {
-	return &RectF32{pos, size, t.Vec32{X: 0, Y: 0}}
+func NewRect(pos, size Vec32) *RectF32 {
+	return &RectF32{pos, size, Vec32{0, 0}}
 }
 
 func (r RectF32) DrawOuterRect(dst *ebiten.Image, clr color.Color) {

@@ -25,8 +25,8 @@ import (
 	"math/rand"
 	"time"
 
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 )
 
 type Snake struct {
@@ -46,7 +46,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func NewSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction DirectionT, color *color.RGBA) *Snake {
+func NewSnake(headCenter c.Vec64, initialLength uint16, speed float64, direction DirectionT, color *color.RGBA) *Snake {
 	if direction >= DirectionTotal {
 		panic("direction parameter is invalid.")
 	}
@@ -76,13 +76,13 @@ func NewSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction
 	return snake
 }
 
-func NewSnakeRandDir(headCenter t.Vec64, initialLength uint16, speed float64, color *color.RGBA) *Snake {
+func NewSnakeRandDir(headCenter c.Vec64, initialLength uint16, speed float64, color *color.RGBA) *Snake {
 	direction := DirectionT(rand.Intn(int(DirectionTotal)))
 	return NewSnake(headCenter, initialLength, speed, direction, color)
 }
 
 func NewSnakeRandDirLoc(initialLength uint16, speed float64, color *color.RGBA) *Snake {
-	headCenter := t.Vec64{
+	headCenter := c.Vec64{
 		X: float64(rand.Intn(param.ScreenWidth)),
 		Y: float64(rand.Intn(param.ScreenHeight)),
 	}

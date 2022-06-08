@@ -27,7 +27,6 @@ import (
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
@@ -40,7 +39,7 @@ const (
 
 var (
 	scoreAnimShiftY      float32
-	scoreAnimBoundSize   t.Vec32
+	scoreAnimBoundSize   c.Vec32
 	scoreAnimImage       *ebiten.Image
 	shaderScore          *ebiten.Shader
 	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
@@ -48,13 +47,13 @@ var (
 
 type ScoreAnim struct {
 	c.TeleCompScreen
-	pos       t.Vec32
+	pos       c.Vec32
 	alpha     float32
 	direction s.DirectionT
 }
 
 func InitScoreAnim() {
-	shaderScore = t.NewShader(shader.Score)
+	shaderScore = c.NewShader(shader.Score)
 
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(param.FoodScore)
@@ -78,9 +77,9 @@ func InitScoreAnim() {
 	drawOptionsScoreAnim.Images[0] = scoreAnimImage
 }
 
-func NewScoreAnim(pos t.Vec32) *ScoreAnim {
+func NewScoreAnim(pos c.Vec32) *ScoreAnim {
 	newAnim := &ScoreAnim{
-		pos: t.Vec32{
+		pos: c.Vec32{
 			X: pos.X,
 			Y: pos.Y - scoreAnimShiftY,
 		},
@@ -97,11 +96,11 @@ func NewScoreAnim(pos t.Vec32) *ScoreAnim {
 func (s *ScoreAnim) createRects() {
 	// Create a rectangle to be split
 	pureRect := c.RectF32{
-		Pos: t.Vec32{
+		Pos: c.Vec32{
 			X: s.pos.X - scoreAnimBoundSize.X/2.0,
 			Y: s.pos.Y - scoreAnimBoundSize.Y/2.0,
 		},
-		Size: t.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
+		Size: c.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
 	}
 	// Split this rectangle if it is on a screen edge.
 	s.TeleCompScreen.Update(&pureRect)
