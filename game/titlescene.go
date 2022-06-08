@@ -36,7 +36,7 @@ import (
 
 // Dumb snake parameters
 const (
-	snakeNum            = 30
+	numSnakes           = 30
 	turnTimeMin         = 0 // sec
 	turnTimeMax         = 2 // sec
 	turnTimeDiff        = turnTimeMax - turnTimeMin
@@ -67,7 +67,7 @@ const (
 )
 
 var (
-	titleSceenAlive = true
+	titleSceneAlive = true
 	colorTitleRect  = &param.ColorSnake2
 
 	snakeColors = map[int]*color.RGBA{
@@ -81,7 +81,7 @@ var (
 type titleScene struct {
 	titleRectComp     c.TeleCompScreen
 	titleRectAlpha    float32
-	turnTimers        [snakeNum]float32
+	turnTimers        [numSnakes]float32
 	sceneTime         float32
 	snakes            []*s.Snake
 	pressedKeys       []ebiten.Key
@@ -100,7 +100,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 	// Create scene
 	scene := &titleScene{
 		titleRectAlpha: titleRectInitialAlpha,
-		snakes:         make([]*s.Snake, snakeNum),
+		snakes:         make([]*s.Snake, numSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
 		shaderTitle:    c.NewShader(shader.Title),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
@@ -120,7 +120,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 
 	// Create temp snakes for the title screen
 	lenSnakeColors := len(snakeColors)
-	for iSnake := 0; iSnake < snakeNum-1; iSnake++ {
+	for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
 		length := dumbSnakeLengthMin + rand.Intn(dumbSnakeLengthDiff)
 		speed := dumbSnakeSpeedMin + rand.Float64()*dumbSnakeSpeedDiff
 		snake := s.NewSnakeRandDirLoc(uint16(length), speed, snakeColors[rand.Intn(lenSnakeColors)])
@@ -132,10 +132,10 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 	}
 
 	// Store playersnake pointer as an element of the snakes array
-	scene.snakes[snakeNum-1] = playerSnake
+	scene.snakes[numSnakes-1] = playerSnake
 
 	// Set rand turn time
-	scene.turnTimers[snakeNum-1] = turnTimeMin + rand.Float32()*turnTimeDiff
+	scene.turnTimers[numSnakes-1] = turnTimeMin + rand.Float32()*turnTimeDiff
 
 	return scene
 }
@@ -170,26 +170,27 @@ func (t *titleScene) prepareTitleRects() {
 }
 
 func (t *titleScene) update() bool {
-	if titleSceenAlive {
+	if titleSceneAlive {
 		for iSnake := range t.snakes {
 			t.updateSnake(iSnake)
 		}
 
 		t.handleKeyPress()
+
 	} else {
 		// Update dumb snakes
 		param.TeleportActive = false
-		for iSnake := 0; iSnake < snakeNum-1; iSnake++ {
+		for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
 			t.updateSnake(iSnake)
 
 		}
 
 		// Update player snake
 		param.TeleportActive = true
-		t.updateSnake(snakeNum - 1)
+		t.updateSnake(numSnakes - 1)
 
 		// Update transition process to the next scene
-		if !titleSceenAlive {
+		if !titleSceneAlive {
 			t.titleRectAlpha -= titleRectDissapearRate
 			t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
 			if t.titleRectAlpha <= 0.0 {
@@ -199,13 +200,12 @@ func (t *titleScene) update() bool {
 	}
 
 	t.sceneTime += param.DeltaTime
-
 	return false
 }
 
 func (t *titleScene) updateSnake(iSnake int) {
 	snake := t.snakes[iSnake]
-	if t.sceneTime >= t.turnTimers[iSnake] {
+	if titleSceneAlive && t.sceneTime >= t.turnTimers[iSnake] {
 		turnRandomly(snake)
 		t.turnTimers[iSnake] += turnTimeMin + rand.Float32()*turnTimeDiff
 	}
@@ -215,13 +215,13 @@ func (t *titleScene) updateSnake(iSnake int) {
 
 func (t *titleScene) handleKeyPress() {
 	t.pressedKeys = inpututil.AppendPressedKeys(t.pressedKeys[:0])
-	if len(t.pressedKeys) > 0 && titleSceenAlive {
+	if len(t.pressedKeys) > 0 && titleSceneAlive {
 		// Start transition process
-		titleSceenAlive = false
+		titleSceneAlive = false
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
 		// Increase speeds of snakes other than the player's snake
-		for iSnake := 0; iSnake < snakeNum-1; iSnake++ {
+		for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
 			t.snakes[iSnake].Speed *= dumbSnakeRunMultip
 		}
 	}
@@ -275,7 +275,7 @@ func (t *titleScene) keyPromptFlipFlop() {
 	const hideTimeMs = keyPromptHideTime * 1000
 
 	showPrompt := true
-	for titleSceenAlive {
+	for titleSceneAlive {
 		if showPrompt {
 			t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(1.0)
 			time.Sleep(time.Millisecond * time.Duration(showTimeMs))
