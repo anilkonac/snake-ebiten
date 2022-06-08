@@ -47,7 +47,7 @@ var (
 )
 
 type ScoreAnim struct {
-	core.TeleUnitScreen
+	core.TeleCompScreen
 	pos       t.Vec32
 	alpha     float32
 	direction s.DirectionT
@@ -75,7 +75,7 @@ func InitScoreAnim() {
 	drawOptionsScoreAnim.Uniforms = map[string]interface{}{
 		"Alpha": float32(1.0),
 	}
-	drawOptionsScoreAnim.Images = [4]*ebiten.Image{scoreAnimImage, nil, nil, nil}
+	drawOptionsScoreAnim.Images[0] = scoreAnimImage
 }
 
 func NewScoreAnim(pos t.Vec32) *ScoreAnim {
@@ -87,6 +87,7 @@ func NewScoreAnim(pos t.Vec32) *ScoreAnim {
 		alpha:     float32(param.ColorScore.A) / 255.0,
 		direction: s.DirectionUp,
 	}
+	newAnim.SetColor(&param.ColorScore)
 
 	newAnim.createRects()
 
@@ -103,7 +104,7 @@ func (s *ScoreAnim) createRects() {
 		Size: t.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
 	}
 	// Split this rectangle if it is on a screen edge.
-	s.Init(&pureRect, &param.ColorScore)
+	s.TeleCompScreen.Update(&pureRect)
 }
 
 // Returns true when the animation is finished
@@ -128,7 +129,7 @@ func (s *ScoreAnim) DrawEnabled() bool {
 }
 
 func (s *ScoreAnim) Triangles() ([]ebiten.Vertex, []uint16) {
-	return s.TeleUnitScreen.Triangles()
+	return s.TeleCompScreen.Triangles()
 }
 
 func (s *ScoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {

@@ -37,7 +37,7 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 }
 
 type Food struct {
-	core.TeleUnitScreen
+	core.TeleCompScreen
 	IsActive bool
 	Center   t.Vec32
 }
@@ -46,6 +46,7 @@ func newFood(center t.Vec32) *Food {
 	newFood := &Food{
 		Center: center,
 	}
+	newFood.SetColor(&param.ColorFood)
 
 	// Create a rectangle to use in drawing and eating logic.
 	pureRect := t.RectF32{
@@ -56,7 +57,7 @@ func newFood(center t.Vec32) *Food {
 		Size: t.Vec32{X: param.FoodLength, Y: param.FoodLength},
 	}
 	// Split this rectangle if it is on a screen edge.
-	newFood.Init(&pureRect, &param.ColorFood)
+	newFood.Update(&pureRect)
 
 	return newFood
 }
@@ -82,7 +83,7 @@ func (f Food) DrawEnabled() bool {
 }
 
 func (f Food) Triangles() ([]ebiten.Vertex, []uint16) {
-	return f.TeleUnitScreen.Triangles()
+	return f.TeleCompScreen.Triangles()
 }
 
 func (f Food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {

@@ -173,9 +173,9 @@ func (s *Snake) TurnTo(newTurn *Turn, isFromQueue bool) {
 
 	// Decide on the color of the new head unit.
 	newColor := s.color
-	if param.DebugUnits && (oldHead.color == s.color) {
-		newColor = &param.ColorSnake2
-	}
+	// if param.DebugUnits && (oldHead.color == s.color) {
+	// 	newColor = &param.ColorSnake2
+	// }
 
 	// Create a new head unit.
 	newHead := NewUnit(oldHead.HeadCenter, 0, newTurn.directionTo, newColor)

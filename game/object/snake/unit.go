@@ -40,9 +40,8 @@ type Unit struct {
 	HeadCenter   t.Vec64
 	length       float64
 	Direction    DirectionT
-	UnitColl     core.TeleUnit
-	UnitDrawable core.TeleUnitScreen
-	color        *color.RGBA
+	CompColl     core.TeleComp
+	CompDrawable core.TeleCompScreen
 	Next         *Unit
 	prev         *Unit
 	drawOpts     ebiten.DrawTrianglesShaderOptions
@@ -53,7 +52,6 @@ func NewUnit(headCenter t.Vec64, length float64, direction DirectionT, color *co
 		HeadCenter: headCenter,
 		length:     length,
 		Direction:  direction,
-		color:      color,
 		drawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"Radius":      float32(param.RadiusSnake),
@@ -61,6 +59,7 @@ func NewUnit(headCenter t.Vec64, length float64, direction DirectionT, color *co
 			},
 		},
 	}
+	newUnit.SetColor(color)
 	newUnit.update(param.MouthAnimStartDistance)
 
 	return newUnit
@@ -73,8 +72,8 @@ func (u *Unit) CreateRects() {
 	rectColl = u.createRectColl()
 	rectDraw = u.createRectDraw(rectColl)
 
-	u.UnitColl.Init(rectColl)
-	u.UnitDrawable.Init(rectDraw, u.color)
+	u.CompColl.Update(rectColl)
+	u.CompDrawable.Update(rectDraw)
 }
 
 func (u *Unit) createRectColl() (rectColl *t.RectF32) {
@@ -229,7 +228,7 @@ func (u *Unit) markHeadCenters(dst *ebiten.Image) {
 }
 
 func (u *Unit) SetColor(clr *color.RGBA) {
-	u.color = clr
+	u.CompDrawable.SetColor(clr)
 }
 
 // Implement collidable interface
@@ -239,7 +238,7 @@ func (u *Unit) CollEnabled() bool {
 }
 
 func (u *Unit) CollisionRects() []t.RectF32 {
-	return u.UnitColl.Rects[:]
+	return u.CompColl.Rects[:]
 }
 
 // Implement drawable interface
@@ -249,7 +248,7 @@ func (u *Unit) DrawEnabled() bool {
 }
 
 func (u *Unit) Triangles() ([]ebiten.Vertex, []uint16) {
-	return u.UnitDrawable.Triangles()
+	return u.CompDrawable.Triangles()
 }
 
 func (u *Unit) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
@@ -265,7 +264,7 @@ func (u *Unit) Shader() *ebiten.Shader {
 
 func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {
 	u.markHeadCenters(dst)
-	for iRect := uint8(0); iRect < u.UnitDrawable.NumRects; iRect++ {
-		u.UnitDrawable.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
+	for iRect := uint8(0); iRect < u.CompDrawable.NumRects; iRect++ {
+		u.CompDrawable.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
 	}
 }
