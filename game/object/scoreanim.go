@@ -23,7 +23,7 @@ import (
 	"image/color"
 	"strconv"
 
-	"github.com/anilkonac/snake-ebiten/game/object/core"
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
@@ -47,7 +47,7 @@ var (
 )
 
 type ScoreAnim struct {
-	core.TeleCompScreen
+	c.TeleCompScreen
 	pos       t.Vec32
 	alpha     float32
 	direction s.DirectionT
@@ -96,7 +96,7 @@ func NewScoreAnim(pos t.Vec32) *ScoreAnim {
 
 func (s *ScoreAnim) createRects() {
 	// Create a rectangle to be split
-	pureRect := t.RectF32{
+	pureRect := c.RectF32{
 		Pos: t.Vec32{
 			X: s.pos.X - scoreAnimBoundSize.X/2.0,
 			Y: s.pos.Y - scoreAnimBoundSize.Y/2.0,

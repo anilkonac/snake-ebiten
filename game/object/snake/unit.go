@@ -23,7 +23,7 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/anilkonac/snake-ebiten/game/object/core"
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
@@ -40,8 +40,8 @@ type Unit struct {
 	HeadCenter   t.Vec64
 	length       float64
 	Direction    DirectionT
-	CompColl     core.TeleComp
-	CompDrawable core.TeleCompScreen
+	CompColl     c.TeleComp
+	CompDrawable c.TeleCompScreen
 	Next         *Unit
 	prev         *Unit
 	drawOpts     ebiten.DrawTrianglesShaderOptions
@@ -67,7 +67,7 @@ func NewUnit(headCenter t.Vec64, length float64, direction DirectionT, color *co
 
 func (u *Unit) CreateRects() {
 	// Create rectangles for drawing and collision. They are going to split.
-	var rectDraw, rectColl *t.RectF32
+	var rectDraw, rectColl *c.RectF32
 
 	rectColl = u.createRectColl()
 	rectDraw = u.createRectDraw(rectColl)
@@ -76,13 +76,13 @@ func (u *Unit) CreateRects() {
 	u.CompDrawable.Update(rectDraw)
 }
 
-func (u *Unit) createRectColl() (rectColl *t.RectF32) {
+func (u *Unit) createRectColl() (rectColl *c.RectF32) {
 	length32 := float32(math.Floor(u.length))
 	flCenter := u.HeadCenter.Floor().To32()
 
 	switch u.Direction {
 	case DirectionRight:
-		rectColl = t.NewRect(
+		rectColl = c.NewRect(
 			t.Vec32{
 				X: flCenter.X - length32 + param.RadiusSnake,
 				Y: flCenter.Y - param.RadiusSnake,
@@ -90,7 +90,7 @@ func (u *Unit) createRectColl() (rectColl *t.RectF32) {
 			t.Vec32{X: length32, Y: param.SnakeWidth},
 		)
 	case DirectionLeft:
-		rectColl = t.NewRect(
+		rectColl = c.NewRect(
 			t.Vec32{
 				X: flCenter.X - param.RadiusSnake,
 				Y: flCenter.Y - param.RadiusSnake,
@@ -98,7 +98,7 @@ func (u *Unit) createRectColl() (rectColl *t.RectF32) {
 			t.Vec32{X: length32, Y: param.SnakeWidth},
 		)
 	case DirectionUp:
-		rectColl = t.NewRect(
+		rectColl = c.NewRect(
 			t.Vec32{
 				X: flCenter.X - param.RadiusSnake,
 				Y: flCenter.Y - param.RadiusSnake,
@@ -106,7 +106,7 @@ func (u *Unit) createRectColl() (rectColl *t.RectF32) {
 			t.Vec32{X: param.SnakeWidth, Y: length32},
 		)
 	case DirectionDown:
-		rectColl = t.NewRect(
+		rectColl = c.NewRect(
 			t.Vec32{
 				X: flCenter.X - param.RadiusSnake,
 				Y: flCenter.Y - length32 + param.RadiusSnake,
@@ -119,7 +119,7 @@ func (u *Unit) createRectColl() (rectColl *t.RectF32) {
 	return
 }
 
-func (u *Unit) createRectDraw(rectColl *t.RectF32) (rectDraw *t.RectF32) {
+func (u *Unit) createRectDraw(rectColl *c.RectF32) (rectDraw *c.RectF32) {
 	if u.Next == nil {
 		rectDraw = rectColl
 		return
@@ -127,13 +127,13 @@ func (u *Unit) createRectDraw(rectColl *t.RectF32) (rectDraw *t.RectF32) {
 
 	switch u.Direction {
 	case DirectionRight:
-		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X - param.SnakeWidth, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X + param.SnakeWidth, Y: rectColl.Size.Y})
+		rectDraw = c.NewRect(t.Vec32{X: rectColl.Pos.X - param.SnakeWidth, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X + param.SnakeWidth, Y: rectColl.Size.Y})
 	case DirectionLeft:
-		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X + param.SnakeWidth, Y: rectColl.Size.Y})
+		rectDraw = c.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X + param.SnakeWidth, Y: rectColl.Size.Y})
 	case DirectionUp:
-		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y + param.SnakeWidth})
+		rectDraw = c.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y}, t.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y + param.SnakeWidth})
 	case DirectionDown:
-		rectDraw = t.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y - param.SnakeWidth}, t.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y + param.SnakeWidth})
+		rectDraw = c.NewRect(t.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y - param.SnakeWidth}, t.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y + param.SnakeWidth})
 	default:
 		panic("Wrong unit direction!!")
 	}
@@ -237,7 +237,7 @@ func (u *Unit) CollEnabled() bool {
 	return true
 }
 
-func (u *Unit) CollisionRects() []t.RectF32 {
+func (u *Unit) CollisionRects() []c.RectF32 {
 	return u.CompColl.Rects[:]
 }
 

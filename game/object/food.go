@@ -22,7 +22,7 @@ package object
 import (
 	"math/rand"
 
-	"github.com/anilkonac/snake-ebiten/game/object/core"
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -37,7 +37,7 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 }
 
 type Food struct {
-	core.TeleCompScreen
+	c.TeleCompScreen
 	IsActive bool
 	Center   t.Vec32
 }
@@ -49,7 +49,7 @@ func newFood(center t.Vec32) *Food {
 	newFood.SetColor(&param.ColorFood)
 
 	// Create a rectangle to use in drawing and eating logic.
-	pureRect := t.RectF32{
+	pureRect := c.RectF32{
 		Pos: t.Vec32{
 			X: center.X - param.RadiusFood,
 			Y: center.Y - param.RadiusFood,
@@ -72,7 +72,7 @@ func (f Food) CollEnabled() bool {
 	return true
 }
 
-func (f Food) CollisionRects() []t.RectF32 {
+func (f Food) CollisionRects() []c.RectF32 {
 	return f.Rects[:]
 }
 

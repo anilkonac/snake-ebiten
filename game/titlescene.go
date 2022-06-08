@@ -24,8 +24,8 @@ import (
 	"math/rand"
 	"time"
 
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/object"
-	"github.com/anilkonac/snake-ebiten/game/object/core"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
@@ -67,12 +67,8 @@ const (
 )
 
 var (
-	titleSceenAlive        = true
-	colorTitleRect         = &param.ColorSnake2
-	titleBackgroundIndices = []uint16{
-		1, 0, 2,
-		2, 3, 1,
-	}
+	titleSceenAlive = true
+	colorTitleRect  = &param.ColorSnake2
 
 	snakeColors = map[int]*color.RGBA{
 		0: &param.ColorSnake1,
@@ -83,21 +79,17 @@ var (
 )
 
 type titleScene struct {
-	titleRectComp  core.TeleCompScreen
-	titleRectAlpha float32
-	snakes         []*s.Snake
-	pressedKeys    []ebiten.Key
-	// titleRectVertices   []ebiten.Vertex
-	// titleImage          *ebiten.Image
-	// titleImageKeyPrompt *ebiten.Image
-
+	titleRectComp     c.TeleCompScreen
+	titleRectAlpha    float32
+	snakes            []*s.Snake
+	pressedKeys       []ebiten.Key
 	shaderTitle       *ebiten.Shader
 	titleRectDrawOpts ebiten.DrawTrianglesShaderOptions
 }
 
 func newTitleScene(playerSnake *s.Snake) *titleScene {
 	// Create title rect model
-	titleRect := t.RectF32{
+	titleRect := c.RectF32{
 		Pos:       t.Vec32{X: (param.ScreenWidth - titleRectWidth) / 2.0, Y: (param.ScreenHeight - titleRectHeight) / 2.0},
 		Size:      t.Vec32{X: titleRectWidth, Y: titleRectHeight},
 		PosInUnit: t.Vec32{X: 0, Y: 0},
@@ -109,7 +101,6 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		snakes:         make([]*s.Snake, maxSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
 		shaderTitle:    t.NewShader(shader.Title),
-		// titleRectVertices: titleRect.Vertices(colorTitleRect),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"ShowKeyPrompt": float32(0.0),
@@ -234,9 +225,8 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 	drawFPS(screen)
 
 	// Draw Title Rect
-	// screen.DrawTrianglesShader(t.titleRectVertices, titleBackgroundIndices, t.shaderTitle, &t.titleRectDrawOpts)
-	object.Draw(screen, t.titleRectComp)
-
+	vertices, indices := t.titleRectComp.Triangles()
+	screen.DrawTrianglesShader(vertices, indices, t.shaderTitle, &t.titleRectDrawOpts)
 }
 
 // Goroutine
