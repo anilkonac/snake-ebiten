@@ -47,16 +47,16 @@ type TeleComp struct {
 
 func (t *TeleComp) Update(pureRect *RectF32) {
 	t.NumRects = 0
-	t.split(pureRect)
+	t.split(*pureRect)
 }
 
-func (tu *TeleComp) split(rect *RectF32) {
+func (tu *TeleComp) split(rect RectF32) {
 	if (rect.Size.X <= 0) || (rect.Size.Y <= 0) {
 		return
 	}
 
 	if !param.TeleportActive {
-		tu.Rects[tu.NumRects] = *rect
+		tu.Rects[tu.NumRects] = rect
 		tu.NumRects++
 		return
 	}
@@ -66,14 +66,14 @@ func (tu *TeleComp) split(rect *RectF32) {
 
 	if rect.Pos.X < 0 { // left part is off-screen
 		tu.split(
-			&RectF32{ // teleported left part
+			RectF32{ // teleported left part
 				Pos:       Vec32{rect.Pos.X + param.ScreenWidth, rect.Pos.Y},
 				Size:      Vec32{-rect.Pos.X, rect.Size.Y},
 				PosInUnit: Vec32{0, 0},
 			})
 
 		tu.split(
-			&RectF32{ // part in the screen
+			RectF32{ // part in the screen
 				Pos:       Vec32{0, rect.Pos.Y},
 				Size:      Vec32{rightX, rect.Size.Y},
 				PosInUnit: Vec32{-rect.Pos.X, 0},
@@ -82,14 +82,14 @@ func (tu *TeleComp) split(rect *RectF32) {
 		return
 	} else if rightX > param.ScreenWidth { // right part is off-screen
 		tu.split(
-			&RectF32{ // teleported right part
+			RectF32{ // teleported right part
 				Pos:       Vec32{0, rect.Pos.Y},
 				Size:      Vec32{rightX - param.ScreenWidth, rect.Size.Y},
 				PosInUnit: Vec32{param.ScreenWidth - rect.Pos.X, 0},
 			})
 
 		tu.split(
-			&RectF32{ // part in the screen
+			RectF32{ // part in the screen
 				Pos:       Vec32{rect.Pos.X, rect.Pos.Y},
 				Size:      Vec32{param.ScreenWidth - rect.Pos.X, rect.Size.Y},
 				PosInUnit: Vec32{0, 0},
@@ -100,14 +100,14 @@ func (tu *TeleComp) split(rect *RectF32) {
 
 	if rect.Pos.Y < 0 { // upper part is off-screen
 		tu.split(
-			&RectF32{ // teleported upper part
+			RectF32{ // teleported upper part
 				Pos:       Vec32{rect.Pos.X, param.ScreenHeight + rect.Pos.Y},
 				Size:      Vec32{rect.Size.X, -rect.Pos.Y},
 				PosInUnit: Vec32{rect.PosInUnit.X, 0},
 			})
 
 		tu.split(
-			&RectF32{ // part in the screen
+			RectF32{ // part in the screen
 				Pos:       Vec32{rect.Pos.X, 0},
 				Size:      Vec32{rect.Size.X, bottomY},
 				PosInUnit: Vec32{rect.PosInUnit.X, -rect.Pos.Y},
@@ -116,14 +116,14 @@ func (tu *TeleComp) split(rect *RectF32) {
 		return
 	} else if bottomY > param.ScreenHeight { // bottom part is off-screen
 		tu.split(
-			&RectF32{ // teleported bottom part
+			RectF32{ // teleported bottom part
 				Pos:       Vec32{rect.Pos.X, 0},
 				Size:      Vec32{rect.Size.X, bottomY - param.ScreenHeight},
 				PosInUnit: Vec32{rect.PosInUnit.X, param.ScreenHeight - rect.Pos.Y},
 			})
 
 		tu.split(
-			&RectF32{ // part in the screen
+			RectF32{ // part in the screen
 				Pos:       Vec32{rect.Pos.X, rect.Pos.Y},
 				Size:      Vec32{rect.Size.X, param.ScreenHeight - rect.Pos.Y},
 				PosInUnit: Vec32{rect.PosInUnit.X, 0},
@@ -133,7 +133,7 @@ func (tu *TeleComp) split(rect *RectF32) {
 	}
 
 	// Add the split rectangle to the rects array
-	tu.Rects[tu.NumRects] = *rect
+	tu.Rects[tu.NumRects] = rect
 	tu.NumRects++
 }
 
