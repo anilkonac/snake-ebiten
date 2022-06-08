@@ -20,27 +20,25 @@ along with snake-ebiten. If not, see <https://www.gnu.org/licenses/>.
 package object
 
 import (
-	"image/color"
-
+	"github.com/anilkonac/snake-ebiten/game/core"
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func init() {
-	param.ShaderRound = t.NewShader(shader.Round)
+	param.ShaderRound = c.NewShader(shader.Round)
 }
 
 type collidable interface {
 	CollEnabled() bool
-	CollisionRects() []t.RectF32
+	CollisionRects() []core.RectF32
 }
 
 type drawable interface {
 	DrawEnabled() bool
-	DrawableRects() []t.RectF32
-	Color() *color.RGBA
+	Triangles() (vertices []ebiten.Vertex, indices []uint16)
 	DrawOptions() *ebiten.DrawTrianglesShaderOptions
 	Shader() *ebiten.Shader
 	DrawDebugInfo(dst *ebiten.Image)
@@ -51,36 +49,12 @@ func Draw(dst *ebiten.Image, src drawable) {
 		return
 	}
 
-	vertices, indices := triangles(src)
+	vertices, indices := src.Triangles()
 	dst.DrawTrianglesShader(vertices, indices, src.Shader(), src.DrawOptions())
 
 	if param.DebugUnits {
 		src.DrawDebugInfo(dst)
 	}
-}
-
-func triangles(src drawable) (vertices []ebiten.Vertex, indices []uint16) {
-	vertices = make([]ebiten.Vertex, 0, 16)
-	indices = make([]uint16, 0, 24)
-	var offset uint16
-
-	rects := src.DrawableRects()
-	for iRect := range rects {
-		rect := &rects[iRect]
-
-		verticesRect := rect.Vertices(src.Color())
-		indicesRect := []uint16{
-			offset + 1, offset, offset + 2,
-			offset + 2, offset + 3, offset + 1,
-		}
-
-		vertices = append(vertices, verticesRect...)
-		indices = append(indices, indicesRect...)
-
-		offset += 4
-	}
-
-	return
 }
 
 func Collides(a, b collidable, tolerance float32) bool {
@@ -97,7 +71,7 @@ func Collides(a, b collidable, tolerance float32) bool {
 		for iRectB := range rectsB {
 			rectB := &rectsB[iRectB]
 
-			if !t.Intersects(rectA, rectB, tolerance) {
+			if !intersects(rectA, rectB, tolerance) {
 				continue
 			}
 
@@ -106,4 +80,29 @@ func Collides(a, b collidable, tolerance float32) bool {
 	}
 
 	return false
+}
+
+func intersects(rectA, rectB *core.RectF32, tolerance float32) bool {
+	aRightX := rectA.Pos.X + rectA.Size.X
+	bRightX := rectB.Pos.X + rectB.Size.X
+	aBottomY := rectA.Pos.Y + rectA.Size.Y
+	bBottomY := rectB.Pos.Y + rectB.Size.Y
+
+	if (rectA.Pos.X-rectB.Pos.X <= tolerance) && (aRightX-rectB.Pos.X <= tolerance) { // rectA is on the left side of rectB
+		return false
+	}
+
+	if (rectA.Pos.X-bRightX >= -tolerance) && (aRightX-bRightX >= -tolerance) { // rectA is on the right side of rectB
+		return false
+	}
+
+	if (rectA.Pos.Y-rectB.Pos.Y <= tolerance) && (aBottomY-rectB.Pos.Y <= tolerance) { // rectA is above rectB
+		return false
+	}
+
+	if (rectA.Pos.Y-bBottomY >= -tolerance) && (aBottomY-bBottomY >= -tolerance) { // rectA is under rectB
+		return false
+	}
+
+	return true
 }

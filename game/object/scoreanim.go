@@ -23,10 +23,10 @@ import (
 	"image/color"
 	"strconv"
 
+	c "github.com/anilkonac/snake-ebiten/game/core"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
-	t "github.com/anilkonac/snake-ebiten/game/tool"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
@@ -39,21 +39,21 @@ const (
 
 var (
 	scoreAnimShiftY      float32
-	scoreAnimBoundSize   t.Vec32
+	scoreAnimBoundSize   c.Vec32
 	scoreAnimImage       *ebiten.Image
 	shaderScore          *ebiten.Shader
 	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
 )
 
 type ScoreAnim struct {
-	pos       t.Vec32
+	c.TeleCompScreen
+	pos       c.Vec32
 	alpha     float32
 	direction s.DirectionT
-	rects     []t.RectF32
 }
 
 func InitScoreAnim() {
-	shaderScore = t.NewShader(shader.Score)
+	shaderScore = c.NewShader(shader.Score)
 
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(param.FoodScore)
@@ -74,18 +74,19 @@ func InitScoreAnim() {
 	drawOptionsScoreAnim.Uniforms = map[string]interface{}{
 		"Alpha": float32(1.0),
 	}
-	drawOptionsScoreAnim.Images = [4]*ebiten.Image{scoreAnimImage, nil, nil, nil}
+	drawOptionsScoreAnim.Images[0] = scoreAnimImage
 }
 
-func NewScoreAnim(pos t.Vec32) *ScoreAnim {
+func NewScoreAnim(pos c.Vec32) *ScoreAnim {
 	newAnim := &ScoreAnim{
-		pos: t.Vec32{
+		pos: c.Vec32{
 			X: pos.X,
 			Y: pos.Y - scoreAnimShiftY,
 		},
 		alpha:     float32(param.ColorScore.A) / 255.0,
 		direction: s.DirectionUp,
 	}
+	newAnim.SetColor(&param.ColorScore)
 
 	newAnim.createRects()
 
@@ -94,18 +95,15 @@ func NewScoreAnim(pos t.Vec32) *ScoreAnim {
 
 func (s *ScoreAnim) createRects() {
 	// Create a rectangle to be split
-	pureRect := t.RectF32{
-		Pos: t.Vec32{
+	pureRect := c.RectF32{
+		Pos: c.Vec32{
 			X: s.pos.X - scoreAnimBoundSize.X/2.0,
 			Y: s.pos.Y - scoreAnimBoundSize.Y/2.0,
 		},
-		Size: t.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
+		Size: c.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
 	}
-	// Init/Remove rects
-	s.rects = make([]t.RectF32, 0, 4) // Remove rects
-
 	// Split this rectangle if it is on a screen edge.
-	pureRect.Split(&s.rects)
+	s.TeleCompScreen.Update(&pureRect)
 }
 
 // Returns true when the animation is finished
@@ -129,12 +127,8 @@ func (s *ScoreAnim) DrawEnabled() bool {
 	return true
 }
 
-func (s *ScoreAnim) DrawableRects() []t.RectF32 {
-	return s.rects
-}
-
-func (s *ScoreAnim) Color() *color.RGBA {
-	return &param.ColorScore
+func (s *ScoreAnim) Triangles() ([]ebiten.Vertex, []uint16) {
+	return s.TeleCompScreen.Triangles()
 }
 
 func (s *ScoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
