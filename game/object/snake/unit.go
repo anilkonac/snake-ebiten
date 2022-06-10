@@ -53,7 +53,6 @@ func NewUnit(headCenter c.Vec64, length float64, direction DirectionT, color *co
 		Direction:  direction,
 		drawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
-				"Radius":      float32(param.RadiusSnake),
 				"RadiusMouth": float32(param.RadiusMouth),
 			},
 		},

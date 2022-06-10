@@ -29,7 +29,6 @@ import (
 
 var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 	Uniforms: map[string]interface{}{
-		"Radius":     float32(param.RadiusFood),
 		"IsVertical": float32(1.0),
 		"Size":       []float32{param.FoodLength, param.FoodLength},
 	},
