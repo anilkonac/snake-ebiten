@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
@@ -17,6 +18,7 @@ var leadSnake *snake.Snake
 const maxTicks = 500
 
 var (
+	measureTime    bool
 	NumTicks       uint16
 	FPSSum, TPSSum float64
 	TPSMin, FPSMin float64 = math.MaxFloat64, math.MaxFloat64
@@ -40,6 +42,11 @@ type Game struct {
 
 func NewGame() *Game {
 	param.ShaderRound = t.NewShader(shader.Round)
+
+	go func() {
+		time.Sleep(time.Second * 3)
+		measureTime = true
+	}()
 
 	return &Game{
 		curScene: newTitleScene(),
@@ -66,6 +73,11 @@ func (g *Game) Update() error {
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.curScene.draw(screen)
+
+	if !measureTime {
+		return
+	}
+
 	NumTicks++
 	tps, fps := ebiten.CurrentTPS(), ebiten.CurrentFPS()
 	TPSSum += tps
