@@ -4,7 +4,6 @@ import (
 	"errors"
 	"math"
 	"math/rand"
-	"time"
 
 	"github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
@@ -15,7 +14,10 @@ import (
 
 var leadSnake *snake.Snake
 
-const maxTicks = 500
+const (
+	ticksMax   = 500
+	ticksStart = 100
+)
 
 var (
 	measureTime    bool
@@ -43,11 +45,6 @@ type Game struct {
 func NewGame() *Game {
 	param.ShaderRound = t.NewShader(shader.Round)
 
-	go func() {
-		time.Sleep(time.Second * 3)
-		measureTime = true
-	}()
-
 	return &Game{
 		curScene: newTitleScene(),
 	}
@@ -56,7 +53,7 @@ func NewGame() *Game {
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
 
-	if NumTicks >= maxTicks {
+	if NumTicks >= ticksMax {
 		return errors.New("bitti")
 	}
 
@@ -74,11 +71,15 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.curScene.draw(screen)
 
+	NumTicks++
 	if !measureTime {
+		if NumTicks >= ticksStart {
+			measureTime = true
+			NumTicks = 0
+		}
 		return
 	}
 
-	NumTicks++
 	tps, fps := ebiten.CurrentTPS(), ebiten.CurrentFPS()
 	TPSSum += tps
 	FPSSum += fps
