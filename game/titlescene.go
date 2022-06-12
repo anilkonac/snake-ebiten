@@ -79,9 +79,6 @@ var (
 		2: &param.ColorFood,
 		3: &param.ColorDebug,
 	}
-	FPSSum float64
-	FPSMin float64
-	FPSMax float64
 )
 
 type titleScene struct {
@@ -230,7 +227,6 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 	}
 
 	// drawFPS(screen)
-	FPSSum += ebiten.CurrentFPS()
 
 	// Draw Title Rect
 	screen.DrawTrianglesShader(t.titleRectVertices, titleBackgroundIndices, t.shaderTitle, &t.titleRectDrawOpts)

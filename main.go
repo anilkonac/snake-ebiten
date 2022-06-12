@@ -12,7 +12,10 @@ func main() {
 	ebiten.SetWindowTitle("Ssnake")
 	ebiten.RunGame(g.NewGame())
 
-	fmt.Printf("TicksElapsed: %d, Mean FPS: %.2f", g.NumTicks, g.FPSSum/float64(g.NumTicks))
+	fTicks := float64(g.NumTicks)
+	fmt.Printf("TicksElapsed: %d\n", g.NumTicks)
+	fmt.Printf("TPS | Min: %.2f, Max: %.2f, Avg: %.2f\n", g.TPSMin, g.TPSMax, g.TPSSum/fTicks)
+	fmt.Printf("FPS | Min: %.2f, Max: %.2f, Avg: %.2f\n", g.FPSMin, g.FPSMax, g.FPSSum/fTicks)
 }
 
 //go:generate file2byteslice -input game/shader/basic.go -output game/shader/basic_go.go -package shader -var Basic

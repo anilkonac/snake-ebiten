@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"math"
 	"math/rand"
 
 	"github.com/anilkonac/snake-ebiten/game/object/snake"
@@ -15,7 +16,12 @@ var leadSnake *snake.Snake
 
 const maxTicks = 500
 
-var NumTicks uint16
+var (
+	NumTicks       uint16
+	FPSSum, TPSSum float64
+	TPSMin, FPSMin float64 = math.MaxFloat64, math.MaxFloat64
+	TPSMax, FPSMax float64
+)
 
 func init() {
 	// rand.Seed(time.Now().UnixNano())
@@ -61,6 +67,13 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.curScene.draw(screen)
 	NumTicks++
+	tps, fps := ebiten.CurrentTPS(), ebiten.CurrentFPS()
+	TPSSum += tps
+	FPSSum += fps
+	TPSMin = math.Min(TPSMin, tps)
+	TPSMax = math.Max(TPSMax, tps)
+	FPSMin = math.Min(FPSMin, fps)
+	FPSMax = math.Max(FPSMax, fps)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
