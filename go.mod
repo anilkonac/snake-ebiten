@@ -3,7 +3,7 @@ module github.com/anilkonac/snake-ebiten
 go 1.18
 
 require (
-	github.com/hajimehoshi/ebiten/v2 v2.3.3
+	github.com/hajimehoshi/ebiten/v2 v2.3.4
 	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd
 )
 
@@ -17,6 +17,6 @@ require (
 	golang.org/x/exp/shiny v0.0.0-20220609121020-a51bd0440498 // indirect
 	golang.org/x/mobile v0.0.0-20220518205345-8578da9835fd // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220608164250-635b8c9b7f68 // indirect
+	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
