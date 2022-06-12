@@ -36,7 +36,7 @@ var (
 
 var (
 	TeleportActive = true
-	PrintFPS       = true
+	PrintFPS       = false
 	DebugUnits     = false // Draw consecutive units with different colors
 	ShaderRound    *ebiten.Shader
 	FontFaceScore  font.Face

@@ -22,7 +22,6 @@ import (
 	"image/color"
 	"math"
 	"math/rand"
-	"time"
 
 	"github.com/anilkonac/snake-ebiten/game/param"
 	t "github.com/anilkonac/snake-ebiten/game/tool"
@@ -39,10 +38,6 @@ type Snake struct {
 	growthTarget    float64
 	FoodEaten       uint8
 	color           *color.RGBA
-}
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
 }
 
 func NewSnake(headCenter t.Vec64, initialLength uint16, speed float64, direction DirectionT, color *color.RGBA) *Snake {

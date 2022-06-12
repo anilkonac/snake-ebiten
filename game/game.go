@@ -1,6 +1,9 @@
 package game
 
 import (
+	"errors"
+	"math/rand"
+
 	"github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
@@ -9,6 +12,15 @@ import (
 )
 
 var leadSnake *snake.Snake
+
+const maxTicks = 500
+
+var numTicks uint16
+
+func init() {
+	// rand.Seed(time.Now().UnixNano())
+	rand.Seed(1)
+}
 
 type scene interface {
 	update() bool // Return true if the scene is finished
@@ -30,6 +42,11 @@ func NewGame() *Game {
 
 // Update is called every tick (1/60 [s] by default).
 func (g *Game) Update() error {
+
+	if numTicks >= maxTicks {
+		return errors.New("bitti")
+	}
+
 	if g.curScene.update() {
 		switch g.curScene.(type) {
 		case *titleScene:
@@ -43,6 +60,7 @@ func (g *Game) Update() error {
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.curScene.draw(screen)
+	numTicks++
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
