@@ -40,7 +40,8 @@ func NewGame() *Game {
 	playerSnake := snake.NewSnakeRandDirLoc(param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1)
 
 	return &Game{
-		curScene:    newTitleScene(playerSnake),
+		// curScene:    newTitleScene(playerSnake),
+		curScene:    newGameScene(playerSnake),
 		playerSnake: playerSnake,
 	}
 }
