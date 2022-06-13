@@ -45,6 +45,11 @@ func (t *TeleCompScreen) updateVertices() {
 	var offset uint16
 	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
 		rect := &t.Rects[iRect]
+		rightXDest := rect.Pos.X + rect.Size.X
+		rightXSrc := rect.PosInUnit.X + rect.Size.X
+		bottomYDest := rect.Pos.Y + rect.Size.Y
+		bottomYSrc := rect.PosInUnit.Y + rect.Size.Y
+
 		t.vertices[offset] = ebiten.Vertex{ // Top Left corner
 			DstX:   rect.Pos.X,
 			DstY:   rect.Pos.Y,
@@ -56,9 +61,9 @@ func (t *TeleCompScreen) updateVertices() {
 			ColorA: t.color[3],
 		}
 		t.vertices[offset+1] = ebiten.Vertex{ // Top Right Corner
-			DstX:   rect.Pos.X + rect.Size.X,
+			DstX:   rightXDest,
 			DstY:   rect.Pos.Y,
-			SrcX:   rect.PosInUnit.X + rect.Size.X,
+			SrcX:   rightXSrc,
 			SrcY:   rect.PosInUnit.Y,
 			ColorR: t.color[0],
 			ColorG: t.color[1],
@@ -67,19 +72,19 @@ func (t *TeleCompScreen) updateVertices() {
 		}
 		t.vertices[offset+2] = ebiten.Vertex{ // Bottom Left Corner
 			DstX:   rect.Pos.X,
-			DstY:   rect.Pos.Y + rect.Size.Y,
+			DstY:   bottomYDest,
 			SrcX:   rect.PosInUnit.X,
-			SrcY:   rect.PosInUnit.Y + rect.Size.Y,
+			SrcY:   bottomYSrc,
 			ColorR: t.color[0],
 			ColorG: t.color[1],
 			ColorB: t.color[2],
 			ColorA: t.color[3],
 		}
 		t.vertices[offset+3] = ebiten.Vertex{ // Bottom Right Corner
-			DstX:   rect.Pos.X + rect.Size.X,
-			DstY:   rect.Pos.Y + rect.Size.Y,
-			SrcX:   rect.PosInUnit.X + rect.Size.X,
-			SrcY:   rect.PosInUnit.Y + rect.Size.Y,
+			DstX:   rightXDest,
+			DstY:   bottomYDest,
+			SrcX:   rightXSrc,
+			SrcY:   bottomYSrc,
 			ColorR: t.color[0],
 			ColorG: t.color[1],
 			ColorB: t.color[2],

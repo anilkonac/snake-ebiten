@@ -271,8 +271,8 @@ func turnRandomly(snake *s.Snake) {
 
 // Goroutine
 func (t *titleScene) keyPromptFlipFlop() {
-	showTimeHalfSecs := int(keyPromptShowTime * 2)
-	hideTimeHalfSecs := int(keyPromptHideTime * 2)
+	const showTimeHalfSecs = keyPromptShowTime * 2
+	const hideTimeHalfSecs = keyPromptHideTime * 2
 	showPrompt := true
 
 	halfSecondTicker := time.NewTicker(time.Millisecond * 500)
