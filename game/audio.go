@@ -32,11 +32,12 @@ import (
 )
 
 const (
-	sampleRate   = 44100
-	volumeEating = 0.45
-	volumeMusic  = 0.4
-	volumeHit    = 1.0
-	probEatingA  = 0.74
+	sampleRate    = 44100
+	volumeEating  = 0.45
+	volumeMusic   = 0.4
+	volumeHit     = 1.0
+	probEatingA   = 0.74
+	musicCheckSec = 2
 )
 
 type stateMusic uint8
@@ -59,6 +60,7 @@ var (
 
 func init() {
 	prepareAudio()
+	playerMusic.Play()
 	go repeatMusic()
 }
 
@@ -120,12 +122,11 @@ func playSoundHit() {
 
 // Goroutine
 func repeatMusic() {
-	for {
+	ticker := time.NewTicker(time.Second * musicCheckSec)
+	for range ticker.C {
 		if (musicState == musicOn) && !playerMusic.IsPlaying() {
 			playerMusic.Rewind()
 			playerMusic.Play()
 		}
-
-		time.Sleep(time.Second * 2)
 	}
 }
