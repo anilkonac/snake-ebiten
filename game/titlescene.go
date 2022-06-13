@@ -271,18 +271,24 @@ func turnRandomly(snake *s.Snake) {
 
 // Goroutine
 func (t *titleScene) keyPromptFlipFlop() {
-	const showTimeMs = keyPromptShowTime * 1000
-	const hideTimeMs = keyPromptHideTime * 1000
-
+	showTimeHalfSecs := int(keyPromptShowTime * 2)
+	hideTimeHalfSecs := int(keyPromptHideTime * 2)
 	showPrompt := true
+
+	halfSecondTicker := time.NewTicker(time.Millisecond * 500)
 	for titleSceneAlive {
 		if showPrompt {
 			t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(1.0)
-			time.Sleep(time.Millisecond * time.Duration(showTimeMs))
+			for ihalfSecs := 0; ihalfSecs < showTimeHalfSecs; ihalfSecs++ {
+				<-halfSecondTicker.C
+			}
 		} else {
 			t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
-			time.Sleep(time.Millisecond * time.Duration(hideTimeMs))
+			for ihalfSecs := 0; ihalfSecs < hideTimeHalfSecs; ihalfSecs++ {
+				<-halfSecondTicker.C
+			}
 		}
 		showPrompt = !showPrompt
 	}
+	halfSecondTicker.Stop()
 }
