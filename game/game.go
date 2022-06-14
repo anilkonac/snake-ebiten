@@ -15,7 +15,7 @@ import (
 var leadSnake *snake.Snake
 
 const (
-	ticksMax   = 500
+	ticksMax   = 400
 	ticksStart = 100
 )
 
