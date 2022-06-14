@@ -41,7 +41,7 @@ const (
 
 type gameScene struct {
 	snake             *s.Snake
-	food              *object.Food
+	food              object.Food
 	gameOver          bool
 	paused            bool
 	timeAfterGameOver float32
@@ -53,14 +53,14 @@ func newGameScene(snake *s.Snake) *gameScene {
 
 	return &gameScene{
 		snake: snake,
-		food:  object.NewFoodRandLoc(),
+		food:  *object.NewFoodRandLoc(),
 	}
 }
 
 func (g *gameScene) restart() {
 	*g = gameScene{
 		snake: s.NewSnakeRandDir(c.Vec64{X: snakeHeadCenterX, Y: snakeHeadCenterY}, param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1),
-		food:  object.NewFoodRandLoc(),
+		food:  *object.NewFoodRandLoc(),
 	}
 }
 
@@ -241,7 +241,7 @@ func (g *gameScene) checkFood(distToFood float32) {
 		// If food has spawned on the snake, respawn it elsewhere.
 		for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
 			if object.Collides(unit, g.food, param.ToleranceDefault) {
-				g.food = object.NewFoodRandLoc()
+				g.food = *object.NewFoodRandLoc()
 				return
 			}
 		}
@@ -254,7 +254,7 @@ func (g *gameScene) checkFood(distToFood float32) {
 	if distToFood <= param.RadiusEating {
 		g.snake.Grow()
 		g.triggerScoreAnim()
-		g.food = object.NewFoodRandLoc()
+		g.food = *object.NewFoodRandLoc()
 		playSoundEating()
 	}
 }

@@ -29,10 +29,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var shaderSnakeHead *ebiten.Shader
+var shaderSnakeHead ebiten.Shader
 
 func init() {
-	shaderSnakeHead = c.NewShader(shader.SnakeHead)
+	shaderSnakeHead = *c.NewShader(shader.SnakeHead)
 }
 
 type Unit struct {
@@ -255,9 +255,9 @@ func (u *Unit) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 
 func (u *Unit) Shader() *ebiten.Shader {
 	if u.prev == nil {
-		return shaderSnakeHead
+		return &shaderSnakeHead
 	}
-	return param.ShaderRound
+	return &param.ShaderRound
 }
 
 func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {

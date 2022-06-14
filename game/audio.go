@@ -49,11 +49,11 @@ const (
 )
 
 var (
-	audioContext  *audio.Context
-	playerHit     *audio.Player
-	playerMusic   *audio.Player
-	playerEatingA *audio.Player
-	playerEatingB *audio.Player
+	audioContext  audio.Context
+	playerHit     audio.Player
+	playerMusic   audio.Player
+	playerEatingA audio.Player
+	playerEatingB audio.Player
 	musicState    stateMusic
 	playSounds    = true
 )
@@ -65,14 +65,14 @@ func init() {
 }
 
 func prepareAudio() {
-	audioContext = audio.NewContext(sampleRate)
+	audioContext = *audio.NewContext(sampleRate)
 
-	playerEatingA = createPlayer(sound.Eating, volumeEating)
-	playerEatingB = createPlayer(sound.Eating2, volumeEating)
+	playerEatingA = *createPlayer(sound.Eating, volumeEating)
+	playerEatingB = *createPlayer(sound.Eating2, volumeEating)
 
-	playerHit = createPlayer(sound.Hit, volumeHit)
+	playerHit = *createPlayer(sound.Hit, volumeHit)
 
-	playerMusic = createMusicPlayer(sound.Music)
+	playerMusic = *createMusicPlayer(sound.Music)
 	playerMusic.SetVolume(volumeMusic)
 }
 
@@ -104,9 +104,9 @@ func playSoundEating() {
 
 	var player *audio.Player
 	if rand.Float32() < probEatingA {
-		player = playerEatingA
+		player = &playerEatingA
 	} else {
-		player = playerEatingB
+		player = &playerEatingB
 	}
 	player.Rewind()
 	player.Play()

@@ -89,7 +89,7 @@ func (f Food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 }
 
 func (f Food) Shader() *ebiten.Shader {
-	return param.ShaderRound
+	return &param.ShaderRound
 }
 
 func (f Food) DrawDebugInfo(dst *ebiten.Image) {

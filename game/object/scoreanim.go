@@ -40,8 +40,8 @@ const (
 var (
 	scoreAnimShiftY      float32
 	scoreAnimBoundSize   c.Vec32
-	scoreAnimImage       *ebiten.Image
-	shaderScore          *ebiten.Shader
+	scoreAnimImage       ebiten.Image
+	shaderScore          ebiten.Shader
 	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
 )
 
@@ -53,7 +53,7 @@ type ScoreAnim struct {
 }
 
 func InitScoreAnim() {
-	shaderScore = c.NewShader(shader.Score)
+	shaderScore = *c.NewShader(shader.Score)
 
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(param.FoodScore)
@@ -64,17 +64,18 @@ func InitScoreAnim() {
 	scoreAnimShiftY = param.RadiusSnake + scoreAnimBoundSize.Y/2.0 + scoreAnimPadding
 
 	// Prepare score animation text image.
-	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
-	scoreAnimImage.Fill(color.Black)
-	text.Draw(scoreAnimImage, foodScoreMsg, param.FontFaceScore,
+	image := ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
+	image.Fill(color.Black)
+	text.Draw(image, foodScoreMsg, param.FontFaceScore,
 		-scoreAnimBound.Min.X, -scoreAnimBound.Min.Y,
 		color.RGBA{255, 0, 0, 255})
+	scoreAnimImage = *image
 
 	// Prepare draw options
 	drawOptionsScoreAnim.Uniforms = map[string]interface{}{
 		"Alpha": float32(1.0),
 	}
-	drawOptionsScoreAnim.Images[0] = scoreAnimImage
+	drawOptionsScoreAnim.Images[0] = &scoreAnimImage
 }
 
 func NewScoreAnim(pos c.Vec32) *ScoreAnim {
@@ -136,7 +137,7 @@ func (s *ScoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
 }
 
 func (s *ScoreAnim) Shader() *ebiten.Shader {
-	return shaderScore
+	return &shaderScore
 }
 
 func (s *ScoreAnim) DrawDebugInfo(dst *ebiten.Image) {

@@ -33,16 +33,15 @@ type scene interface {
 // Game implements ebiten.Game interface.
 type Game struct {
 	curScene    scene
-	playerSnake *snake.Snake
+	playerSnake snake.Snake
 }
 
 func NewGame() *Game {
-	playerSnake := snake.NewSnakeRandDirLoc(param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1)
+	game := new(Game)
+	game.playerSnake = *snake.NewSnakeRandDirLoc(param.SnakeLength, param.SnakeSpeedInitial, &param.ColorSnake1)
+	game.curScene = newTitleScene(&game.playerSnake)
 
-	return &Game{
-		curScene:    newTitleScene(playerSnake),
-		playerSnake: playerSnake,
-	}
+	return game
 }
 
 // Update is called every tick (1/60 [s] by default).
@@ -50,7 +49,7 @@ func (g *Game) Update() error {
 	if g.curScene.update() {
 		switch g.curScene.(type) {
 		case *titleScene:
-			g.curScene = newGameScene(g.playerSnake)
+			g.curScene = newGameScene(&g.playerSnake)
 		}
 	}
 
