@@ -7,11 +7,12 @@ import (
 	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/object"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/anilkonac/snake-ebiten/resources/fonts"
+	res "github.com/anilkonac/snake-ebiten/resource"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
+	"golang.org/x/image/font/sfnt"
 )
 
 const (
@@ -35,7 +36,17 @@ var (
 )
 
 func init() {
-	tt, err := opentype.Parse(fonts.Rounded)
+	var err error
+	var bytesFontRounded, bytesFontDebug []byte
+	var tt *sfnt.Font
+
+	// Read Font files
+	bytesFontRounded, err = res.FS.ReadFile(res.PathFontRounded)
+	c.Panic(err)
+	bytesFontDebug, err = res.FS.ReadFile(res.PathFontDebug)
+	c.Panic(err)
+
+	tt, err = opentype.Parse(bytesFontRounded)
 	c.Panic(err)
 
 	param.FontFaceScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
@@ -52,7 +63,7 @@ func init() {
 	})
 	c.Panic(err)
 
-	tt, err = opentype.Parse(fonts.Debug)
+	tt, err = opentype.Parse(bytesFontDebug)
 	c.Panic(err)
 
 	fontFaceDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{

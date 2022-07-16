@@ -25,7 +25,7 @@ import (
 	"time"
 
 	c "github.com/anilkonac/snake-ebiten/game/core"
-	sound "github.com/anilkonac/snake-ebiten/resources/audio"
+	res "github.com/anilkonac/snake-ebiten/resource"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
@@ -67,12 +67,15 @@ func init() {
 func prepareAudio() {
 	audioContext = audio.NewContext(sampleRate)
 
-	playerEatingA = createPlayer(sound.Eating, volumeEating)
-	playerEatingB = createPlayer(sound.Eating2, volumeEating)
+	// playerEatingA = createPlayer(sound.Eating, volumeEating)
+	// playerEatingB = createPlayer(sound.Eating2, volumeEating)
 
-	playerHit = createPlayer(sound.Hit, volumeHit)
+	// playerHit = createPlayer(sound.Hit, volumeHit)
 
-	playerMusic = createMusicPlayer(sound.Music)
+	bytesMusic, err := res.FS.ReadFile(res.PathMusic)
+	c.Panic(err)
+
+	playerMusic = createMusicPlayer(bytesMusic)
 	playerMusic.SetVolume(volumeMusic)
 }
 
