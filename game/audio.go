@@ -65,15 +65,24 @@ func init() {
 }
 
 func prepareAudio() {
-	audioContext = audio.NewContext(sampleRate)
-
-	// playerEatingA = createPlayer(sound.Eating, volumeEating)
-	// playerEatingB = createPlayer(sound.Eating2, volumeEating)
-
-	// playerHit = createPlayer(sound.Hit, volumeHit)
-
+	// Read audio files
 	bytesMusic, err := res.FS.ReadFile(res.PathMusic)
 	c.Panic(err)
+
+	bytesSoundEating1, err := res.FS.ReadFile(res.PathSoundEating1)
+	c.Panic(err)
+
+	bytesSoundEating2, err := res.FS.ReadFile(res.PathSoundEating2)
+	c.Panic(err)
+
+	bytesSoundHit, err := res.FS.ReadFile(res.PathSoundHit)
+	c.Panic(err)
+
+	// Create players
+	audioContext = audio.NewContext(sampleRate)
+	playerEatingA = createPlayer(bytesSoundEating1, volumeEating)
+	playerEatingB = createPlayer(bytesSoundEating2, volumeEating)
+	playerHit = createPlayer(bytesSoundHit, volumeHit)
 
 	playerMusic = createMusicPlayer(bytesMusic)
 	playerMusic.SetVolume(volumeMusic)
