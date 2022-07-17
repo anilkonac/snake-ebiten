@@ -194,6 +194,7 @@ func (t *titleScene) update() bool {
 			t.titleRectAlpha -= titleRectDissapearRate
 			t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
 			if t.titleRectAlpha <= 0.0 {
+				t.shaderTitle.Dispose()
 				return true
 			}
 		}

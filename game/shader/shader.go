@@ -30,14 +30,14 @@ var (
 
 func New(sh shaderE) *ebiten.Shader {
 	bytesShader, err := fs.ReadFile(mapShaderPath[sh])
-	panicErr(err)
-	shader, err := ebiten.NewShader(bytesShader)
-	panicErr(err)
-	return shader
-}
-
-func panicErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+
+	shader, err := ebiten.NewShader(bytesShader)
+	if err != nil {
+		panic(err)
+	}
+
+	return shader
 }
