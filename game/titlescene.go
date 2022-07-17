@@ -102,7 +102,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		titleRectAlpha: titleRectInitialAlpha,
 		snakes:         make([]*s.Snake, numSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
-		shaderTitle:    c.NewShader(shader.Title),
+		shaderTitle:    shader.New(shader.Title),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"ShowKeyPrompt": float32(0.0),
@@ -194,6 +194,7 @@ func (t *titleScene) update() bool {
 			t.titleRectAlpha -= titleRectDissapearRate
 			t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
 			if t.titleRectAlpha <= 0.0 {
+				t.shaderTitle.Dispose()
 				return true
 			}
 		}

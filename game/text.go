@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"image"
 
-	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/object"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/anilkonac/snake-ebiten/resources/fonts"
+	res "github.com/anilkonac/snake-ebiten/resource"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
+	"golang.org/x/image/font/sfnt"
 )
 
 const (
@@ -35,32 +35,42 @@ var (
 )
 
 func init() {
-	tt, err := opentype.Parse(fonts.Rounded)
-	c.Panic(err)
+	var err error
+	var bytesFontRounded, bytesFontDebug []byte
+	var tt *sfnt.Font
+
+	// Read Font files
+	bytesFontRounded, err = res.FS.ReadFile(res.PathFontRounded)
+	panicErr(err)
+	bytesFontDebug, err = res.FS.ReadFile(res.PathFontDebug)
+	panicErr(err)
+
+	tt, err = opentype.Parse(bytesFontRounded)
+	panicErr(err)
 
 	param.FontFaceScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeScore,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	c.Panic(err)
+	panicErr(err)
 
 	fontFaceTitle, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeTitle,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	c.Panic(err)
+	panicErr(err)
 
-	tt, err = opentype.Parse(fonts.Debug)
-	c.Panic(err)
+	tt, err = opentype.Parse(bytesFontDebug)
+	panicErr(err)
 
 	fontFaceDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeDebug,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	c.Panic(err)
+	panicErr(err)
 
 	boundTextScore = text.BoundString(param.FontFaceScore, "Score: 55555")
 	boundTextTitle = text.BoundString(fontFaceTitle, textTitle)
@@ -74,5 +84,11 @@ func drawFPS(screen *ebiten.Image) {
 	if param.PrintFPS {
 		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
 		text.Draw(screen, msg, fontFaceDebug, param.ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, param.ColorDebug)
+	}
+}
+
+func panicErr(err error) {
+	if err != nil {
+		panic(err)
 	}
 }
