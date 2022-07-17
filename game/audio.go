@@ -24,7 +24,6 @@ import (
 	"math/rand"
 	"time"
 
-	c "github.com/anilkonac/snake-ebiten/game/core"
 	res "github.com/anilkonac/snake-ebiten/resource"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
@@ -67,16 +66,16 @@ func init() {
 func prepareAudio() {
 	// Read audio files
 	bytesMusic, err := res.FS.ReadFile(res.PathMusic)
-	c.Panic(err)
+	panicErr(err)
 
 	bytesSoundEating1, err := res.FS.ReadFile(res.PathSoundEating1)
-	c.Panic(err)
+	panicErr(err)
 
 	bytesSoundEating2, err := res.FS.ReadFile(res.PathSoundEating2)
-	c.Panic(err)
+	panicErr(err)
 
 	bytesSoundHit, err := res.FS.ReadFile(res.PathSoundHit)
-	c.Panic(err)
+	panicErr(err)
 
 	// Create players
 	audioContext = audio.NewContext(sampleRate)
@@ -90,10 +89,10 @@ func prepareAudio() {
 
 func createPlayer(src []byte, volume float64) *audio.Player {
 	stream, err := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
-	c.Panic(err)
+	panicErr(err)
 
 	player, err := audioContext.NewPlayer(stream)
-	c.Panic(err)
+	panicErr(err)
 
 	player.SetVolume(volume)
 	return player
@@ -101,10 +100,10 @@ func createPlayer(src []byte, volume float64) *audio.Player {
 
 func createMusicPlayer(src []byte) *audio.Player {
 	stream, err := vorbis.DecodeWithSampleRate(sampleRate, bytes.NewReader(src))
-	c.Panic(err)
+	panicErr(err)
 
 	player, err := audioContext.NewPlayer(stream)
-	c.Panic(err)
+	panicErr(err)
 
 	return player
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 
-	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/object"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	res "github.com/anilkonac/snake-ebiten/resource"
@@ -42,36 +41,36 @@ func init() {
 
 	// Read Font files
 	bytesFontRounded, err = res.FS.ReadFile(res.PathFontRounded)
-	c.Panic(err)
+	panicErr(err)
 	bytesFontDebug, err = res.FS.ReadFile(res.PathFontDebug)
-	c.Panic(err)
+	panicErr(err)
 
 	tt, err = opentype.Parse(bytesFontRounded)
-	c.Panic(err)
+	panicErr(err)
 
 	param.FontFaceScore, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeScore,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	c.Panic(err)
+	panicErr(err)
 
 	fontFaceTitle, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeTitle,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	c.Panic(err)
+	panicErr(err)
 
 	tt, err = opentype.Parse(bytesFontDebug)
-	c.Panic(err)
+	panicErr(err)
 
 	fontFaceDebug, err = opentype.NewFace(tt, &opentype.FaceOptions{
 		Size:    fontSizeDebug,
 		DPI:     dpi,
 		Hinting: font.HintingFull,
 	})
-	c.Panic(err)
+	panicErr(err)
 
 	boundTextScore = text.BoundString(param.FontFaceScore, "Score: 55555")
 	boundTextTitle = text.BoundString(fontFaceTitle, textTitle)
@@ -85,5 +84,11 @@ func drawFPS(screen *ebiten.Image) {
 	if param.PrintFPS {
 		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
 		text.Draw(screen, msg, fontFaceDebug, param.ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, param.ColorDebug)
+	}
+}
+
+func panicErr(err error) {
+	if err != nil {
+		panic(err)
 	}
 }

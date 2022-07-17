@@ -16,4 +16,4 @@ A modern remake of the snake game. Written in Go using the [Ebitengine](https://
 - Download and run the executables from [itch.io page](https://anilkonac.itch.io/ssnake).
 
 ## Credits
-- [Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/main/resources/audio/Credits.md)
+- [Sounds & Music](https://github.com/anilkonac/snake-ebiten/blob/main/resource/audio/Credits.md)
