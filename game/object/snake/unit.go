@@ -36,14 +36,17 @@ func init() {
 }
 
 type Unit struct {
-	HeadCenter   c.Vec64
-	length       float64
-	Direction    DirectionT
-	CompColl     c.TeleComp
-	CompDrawable c.TeleCompScreen
-	Next         *Unit
-	prev         *Unit
-	drawOpts     ebiten.DrawTrianglesShaderOptions
+	HeadCenter       c.Vec64
+	length           float64
+	Direction        DirectionT
+	CompColl         c.TeleComp
+	CompDrawable     c.TeleCompScreen
+	CompDrawableHead c.TeleCompScreen
+	// CompDrawableBody c.TeleCompScreen
+	// CompDrawableHeadEnd c.TeleCompScreen
+	Next     *Unit
+	prev     *Unit
+	drawOpts ebiten.DrawTrianglesShaderOptions
 }
 
 func NewUnit(headCenter c.Vec64, length float64, direction DirectionT, color *color.RGBA) *Unit {
@@ -69,9 +72,11 @@ func (u *Unit) updateRects() {
 
 	rectColl = u.createRectColl()
 	rectDraw = u.createRectDraw(rectColl)
+	rectDrawHead := u.createRectHead()
 
 	u.CompColl.Update(rectColl)
 	u.CompDrawable.Update(rectDraw)
+	u.CompDrawableHead.Update(rectDrawHead)
 }
 
 func (u *Unit) createRectColl() (rectColl *c.RectF32) {
@@ -136,6 +141,12 @@ func (u *Unit) createRectDraw(rectColl *c.RectF32) (rectDraw *c.RectF32) {
 		panic("Wrong unit direction!!")
 	}
 
+	return
+}
+
+func (u *Unit) createRectHead() (rectHead *c.RectF32) {
+	headCenter32 := u.HeadCenter.To32()
+	rectHead = c.NewRect(c.Vec32{X: headCenter32.X - param.RadiusSnake, Y: headCenter32.Y - param.RadiusSnake}, c.Vec32{param.SnakeWidth, param.SnakeWidth})
 	return
 }
 
@@ -227,6 +238,7 @@ func (u *Unit) markHeadCenters(dst *ebiten.Image) {
 
 func (u *Unit) SetColor(clr *color.RGBA) {
 	u.CompDrawable.SetColor(clr)
+	u.CompDrawableHead.SetColor(clr)
 }
 
 // Implement collidable interface

@@ -284,10 +284,11 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 	// Draw food
 	object.Draw(screen, g.food)
 
-	// Draw the snake
-	for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
-		object.Draw(screen, unit)
-	}
+	// // Draw the snake
+	// for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
+	// 	object.Draw(screen, unit)
+	// }
+	g.snake.Draw(screen)
 
 	// Draw score anim
 	for _, scoreAnim := range g.scoreAnimList {

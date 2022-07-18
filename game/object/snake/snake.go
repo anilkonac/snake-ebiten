@@ -27,7 +27,26 @@ import (
 
 	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
+	"github.com/anilkonac/snake-ebiten/game/shader"
+	"github.com/hajimehoshi/ebiten/v2"
 )
+
+var (
+	imageCircle    = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
+	imageRectangle = ebiten.NewImage(1, 1)
+)
+
+func init() {
+	shaderCircle := shader.New(shader.Circle)
+
+	// imageCircle.Fill(param.ColorSnake1)
+	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, shaderCircle, &ebiten.DrawRectShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius": float32(param.RadiusSnake),
+			"Color":  []float32{float32(param.ColorSnake1.R) / 255.0, float32(param.ColorSnake1.G) / 255.0, float32(param.ColorSnake1.B) / 255.0, float32(param.ColorSnake1.A) / 255.0},
+		},
+	})
+}
 
 type Snake struct {
 	Speed           float64
@@ -210,4 +229,28 @@ func (s *Snake) LastDirection() DirectionT {
 
 	// return current head direction
 	return s.UnitHead.Direction
+}
+
+func (s *Snake) Draw(dst *ebiten.Image) {
+	// var opt ebiten.DrawImageOptions
+	var opt ebiten.DrawTrianglesOptions
+	for unit := s.UnitHead; unit != nil; unit = unit.Next {
+		// Draw circle centered on unit's head center
+		// opt.GeoM.Reset()
+		// opt.GeoM.Translate(unit.HeadCenter.X-param.RadiusSnake, unit.HeadCenter.Y-param.RadiusSnake)
+		// dst.DrawImage(imageCircle, &opt)
+
+		// for iRect := 0; iRect < unit.CompDrawable.NumRects; iRect++ {
+		// 	rect := &unit.CompDrawable.Rects[iRect]
+		// 	imageRect := imageCircle.SubImage(image.Rect())
+		// }
+		vertices, indices := unit.CompDrawableHead.Triangles()
+		dst.DrawTriangles(vertices, indices, imageCircle, &opt)
+
+		// Draw rectangle starts from unit's head center to the tail head center
+
+		if param.DebugUnits {
+			unit.DrawDebugInfo(dst)
+		}
+	}
 }

@@ -137,7 +137,7 @@ func (t *TeleComp) split(rect RectF32) {
 	t.NumRects++
 }
 
-//  Teleport component to be drawn on the screen.
+//  Teleportable component to be drawn on the screen.
 type TeleCompScreen struct {
 	TeleComp
 	vertices [16]ebiten.Vertex

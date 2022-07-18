@@ -8,6 +8,7 @@ import (
 
 const (
 	Basic     = "basic.kage.go"
+	Circle    = "circle.kage.go"
 	Round     = "round.kage.go"
 	Score     = "score.kage.go"
 	SnakeHead = "snakehead.kage.go"
