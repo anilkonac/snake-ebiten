@@ -170,7 +170,7 @@ func (u *Unit) moveUp(dist float64) {
 	u.HeadCenter.Y -= dist
 
 	// teleport if head center is offscreen.
-	if param.TeleportActive && (u.HeadCenter.Y < 0) {
+	if param.TeleportEnabled && (u.HeadCenter.Y < 0) {
 		u.HeadCenter.Y += param.ScreenHeight
 	}
 }
@@ -179,7 +179,7 @@ func (u *Unit) moveDown(dist float64) {
 	u.HeadCenter.Y += dist
 
 	// teleport if head center is offscreen.
-	if param.TeleportActive && (u.HeadCenter.Y > param.ScreenHeight) {
+	if param.TeleportEnabled && (u.HeadCenter.Y > param.ScreenHeight) {
 		u.HeadCenter.Y -= param.ScreenHeight
 	}
 }
@@ -188,7 +188,7 @@ func (u *Unit) moveRight(dist float64) {
 	u.HeadCenter.X += dist
 
 	// teleport if head center is offscreen.
-	if param.TeleportActive && (u.HeadCenter.X > param.ScreenWidth) {
+	if param.TeleportEnabled && (u.HeadCenter.X > param.ScreenWidth) {
 		u.HeadCenter.X -= param.ScreenWidth
 	}
 }
@@ -197,7 +197,7 @@ func (u *Unit) moveLeft(dist float64) {
 	u.HeadCenter.X -= dist
 
 	// teleport if head center is offscreen.
-	if param.TeleportActive && (u.HeadCenter.X < 0) {
+	if param.TeleportEnabled && (u.HeadCenter.X < 0) {
 		u.HeadCenter.X += param.ScreenWidth
 	}
 }

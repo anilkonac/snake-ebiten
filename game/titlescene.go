@@ -179,14 +179,14 @@ func (t *titleScene) update() bool {
 
 	} else {
 		// Update dumb snakes
-		param.TeleportActive = false
+		param.TeleportEnabled = false
 		for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
 			t.updateSnake(iSnake)
 
 		}
 
 		// Update player snake
-		param.TeleportActive = true
+		param.TeleportEnabled = true
 		t.updateSnake(numSnakes - 1)
 
 		// Update transition process to the next scene

@@ -49,7 +49,7 @@ type gameScene struct {
 }
 
 func newGameScene(snake *s.Snake) *gameScene {
-	param.TeleportActive = true
+	param.TeleportEnabled = true
 
 	return &gameScene{
 		snake: snake,

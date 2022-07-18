@@ -6,30 +6,21 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type shaderE uint8
-
 const (
-	Basic shaderE = iota
-	Round
-	Score
-	SnakeHead
-	Title
+	Basic     = "basic.kage.go"
+	Round     = "round.kage.go"
+	Score     = "score.kage.go"
+	SnakeHead = "snakehead.kage.go"
+	Title     = "title.kage.go"
 )
 
 var (
-	//go:embed *.kage
-	fs            embed.FS
-	mapShaderPath = map[shaderE]string{
-		Basic:     "basic.kage",
-		Round:     "round.kage",
-		Score:     "score.kage",
-		SnakeHead: "snakehead.kage",
-		Title:     "title.kage",
-	}
+	//go:embed *.kage.go
+	fs embed.FS
 )
 
-func New(sh shaderE) *ebiten.Shader {
-	bytesShader, err := fs.ReadFile(mapShaderPath[sh])
+func New(sh string) *ebiten.Shader {
+	bytesShader, err := fs.ReadFile(sh)
 	if err != nil {
 		panic(err)
 	}
