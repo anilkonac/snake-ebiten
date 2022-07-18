@@ -75,7 +75,7 @@ func init() {
 	boundTextScore = text.BoundString(param.FontFaceScore, "Score: 55555")
 	boundTextTitle = text.BoundString(fontFaceTitle, textTitle)
 	boundTextKeyPrompt = text.BoundString(param.FontFaceScore, textPressToPlay)
-	boundTextFPS = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 165.0")
+	boundTextFPS = text.BoundString(fontFaceDebug, "TPS: 60.0\tFPS: 5555.5")
 
 	object.InitScoreAnim()
 }

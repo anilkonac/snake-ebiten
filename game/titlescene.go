@@ -79,7 +79,7 @@ var (
 )
 
 type titleScene struct {
-	titleRectComp     c.TeleCompScreen
+	titleRectComp     c.TeleCompTriang
 	titleRectAlpha    float32
 	turnTimers        [numSnakes]float32
 	sceneTime         float32

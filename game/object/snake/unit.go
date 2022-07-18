@@ -36,17 +36,17 @@ func init() {
 }
 
 type Unit struct {
-	HeadCenter       c.Vec64
-	length           float64
-	Direction        DirectionT
-	CompColl         c.TeleComp
-	CompDrawable     c.TeleCompScreen
-	CompDrawableHead c.TeleCompScreen
-	// CompDrawableBody c.TeleCompScreen
-	// CompDrawableHeadEnd c.TeleCompScreen
-	Next     *Unit
-	prev     *Unit
-	drawOpts ebiten.DrawTrianglesShaderOptions
+	HeadCenter      c.Vec64
+	length          float64
+	Direction       DirectionT
+	CompCollision   c.TeleComp
+	CompBody        c.TeleComp
+	CompTriangDebug c.TeleCompTriang
+	CompTriangHead  c.TeleCompTriang
+	CompTriangTail  c.TeleCompTriang
+	Next            *Unit
+	prev            *Unit
+	drawOpts        ebiten.DrawTrianglesShaderOptions
 }
 
 func NewUnit(headCenter c.Vec64, length float64, direction DirectionT, color *color.RGBA) *Unit {
@@ -73,10 +73,18 @@ func (u *Unit) updateRects() {
 	rectColl = u.createRectColl()
 	rectDraw = u.createRectDraw(rectColl)
 	rectDrawHead := u.createRectHead()
+	rectDrawBody := u.createRectBody(rectColl)
 
-	u.CompColl.Update(rectColl)
-	u.CompDrawable.Update(rectDraw)
-	u.CompDrawableHead.Update(rectDrawHead)
+	u.CompCollision.Update(rectColl)
+	u.CompTriangDebug.Update(rectDraw)
+	u.CompTriangHead.Update(rectDrawHead)
+	u.CompBody.Update(rectDrawBody)
+
+	// If current unit is the tail unit
+	if u.Next == nil {
+		rectDrawTail := u.createRectTail(rectDrawHead)
+		u.CompTriangTail.Update(rectDrawTail)
+	}
 }
 
 func (u *Unit) createRectColl() (rectColl *c.RectF32) {
@@ -144,9 +152,64 @@ func (u *Unit) createRectDraw(rectColl *c.RectF32) (rectDraw *c.RectF32) {
 	return
 }
 
-func (u *Unit) createRectHead() (rectHead *c.RectF32) {
+func (u *Unit) createRectHead() *c.RectF32 {
 	headCenter32 := u.HeadCenter.To32()
-	rectHead = c.NewRect(c.Vec32{X: headCenter32.X - param.RadiusSnake, Y: headCenter32.Y - param.RadiusSnake}, c.Vec32{param.SnakeWidth, param.SnakeWidth})
+	return c.NewRect(c.Vec32{X: headCenter32.X - param.RadiusSnake, Y: headCenter32.Y - param.RadiusSnake}, c.Vec32{X: param.SnakeWidth, Y: param.SnakeWidth})
+}
+
+func (u *Unit) createRectTail(rectHead *c.RectF32) (rectTail *c.RectF32) {
+	size := c.Vec32{X: param.SnakeWidth, Y: param.SnakeWidth}
+	switch u.Direction {
+	case DirectionUp:
+		rectTail = c.NewRect(c.Vec32{X: rectHead.Pos.X, Y: rectHead.Pos.Y + float32(u.length) - param.SnakeWidth}, size)
+	case DirectionDown:
+		rectTail = c.NewRect(c.Vec32{X: rectHead.Pos.X, Y: rectHead.Pos.Y - float32(u.length) + param.SnakeWidth}, size)
+	case DirectionLeft:
+		rectTail = c.NewRect(c.Vec32{X: rectHead.Pos.X + float32(u.length) - param.SnakeWidth, Y: rectHead.Pos.Y}, size)
+	case DirectionRight:
+		rectTail = c.NewRect(c.Vec32{X: rectHead.Pos.X - float32(u.length) + param.SnakeWidth, Y: rectHead.Pos.Y}, size)
+	}
+	return
+}
+
+func (u *Unit) createRectBody(rectColl *c.RectF32) (rectBody *c.RectF32) {
+
+	switch u.Direction {
+	case DirectionUp:
+		rectBody = c.NewRect(
+			c.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y + param.RadiusSnake},
+			c.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y - param.SnakeWidth},
+		)
+		if u.Next != nil {
+			rectBody.Size.Y += param.SnakeWidth
+		}
+	case DirectionDown:
+		rectBody = c.NewRect(
+			c.Vec32{X: rectColl.Pos.X, Y: rectColl.Pos.Y + param.RadiusSnake},
+			c.Vec32{X: rectColl.Size.X, Y: rectColl.Size.Y - param.SnakeWidth},
+		)
+		if u.Next != nil {
+			rectBody.Pos.Y -= param.SnakeWidth
+			rectBody.Size.Y += param.SnakeWidth
+		}
+	case DirectionLeft:
+		rectBody = c.NewRect(
+			c.Vec32{X: rectColl.Pos.X + param.RadiusSnake, Y: rectColl.Pos.Y},
+			c.Vec32{X: rectColl.Size.X - param.SnakeWidth, Y: rectColl.Size.Y},
+		)
+		if u.Next != nil {
+			rectBody.Size.X += param.SnakeWidth
+		}
+	case DirectionRight:
+		rectBody = c.NewRect(
+			c.Vec32{X: rectColl.Pos.X + param.RadiusSnake, Y: rectColl.Pos.Y},
+			c.Vec32{X: rectColl.Size.X - param.SnakeWidth, Y: rectColl.Size.Y},
+		)
+		if u.Next != nil {
+			rectBody.Size.X += param.SnakeWidth
+			rectBody.Pos.X -= param.SnakeWidth
+		}
+	}
 	return
 }
 
@@ -237,8 +300,9 @@ func (u *Unit) markHeadCenters(dst *ebiten.Image) {
 }
 
 func (u *Unit) SetColor(clr *color.RGBA) {
-	u.CompDrawable.SetColor(clr)
-	u.CompDrawableHead.SetColor(clr)
+	u.CompTriangDebug.SetColor(clr)
+	u.CompTriangHead.SetColor(clr)
+	u.CompTriangTail.SetColor(clr)
 }
 
 // Implement collidable interface
@@ -248,7 +312,7 @@ func (u *Unit) CollEnabled() bool {
 }
 
 func (u *Unit) CollisionRects() []c.RectF32 {
-	return u.CompColl.Rects[:]
+	return u.CompCollision.Rects[:]
 }
 
 // Implement drawable interface
@@ -258,7 +322,7 @@ func (u *Unit) DrawEnabled() bool {
 }
 
 func (u *Unit) Triangles() ([]ebiten.Vertex, []uint16) {
-	return u.CompDrawable.Triangles()
+	return u.CompTriangDebug.Triangles()
 }
 
 func (u *Unit) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
@@ -274,7 +338,7 @@ func (u *Unit) Shader() *ebiten.Shader {
 
 func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {
 	u.markHeadCenters(dst)
-	for iRect := uint8(0); iRect < u.CompDrawable.NumRects; iRect++ {
-		u.CompDrawable.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
+	for iRect := uint8(0); iRect < u.CompTriangDebug.NumRects; iRect++ {
+		u.CompTriangDebug.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
 	}
 }

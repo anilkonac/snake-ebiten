@@ -35,7 +35,7 @@ var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 }
 
 type Food struct {
-	c.TeleCompScreen
+	c.TeleCompTriang
 	IsActive bool
 	Center   c.Vec32
 }
@@ -81,7 +81,7 @@ func (f Food) DrawEnabled() bool {
 }
 
 func (f Food) Triangles() ([]ebiten.Vertex, []uint16) {
-	return f.TeleCompScreen.Triangles()
+	return f.TeleCompTriang.Triangles()
 }
 
 func (f Food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {

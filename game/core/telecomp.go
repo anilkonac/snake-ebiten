@@ -137,23 +137,23 @@ func (t *TeleComp) split(rect RectF32) {
 	t.NumRects++
 }
 
-//  Teleportable component to be drawn on the screen.
-type TeleCompScreen struct {
+//  Teleportable component triangulated for DrawTriangles or DrawTriangleShader methods
+type TeleCompTriang struct {
 	TeleComp
 	vertices [16]ebiten.Vertex
 	color    [4]float32
 }
 
-func (t *TeleCompScreen) SetColor(clr *color.RGBA) {
+func (t *TeleCompTriang) SetColor(clr *color.RGBA) {
 	t.color = [4]float32{float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0, float32(clr.A) / 255.0}
 }
 
-func (t *TeleCompScreen) Update(pureRect *RectF32) {
+func (t *TeleCompTriang) Update(pureRect *RectF32) {
 	t.TeleComp.Update(pureRect)
 	t.updateVertices()
 }
 
-func (t *TeleCompScreen) updateVertices() {
+func (t *TeleCompTriang) updateVertices() {
 	var offset uint16
 	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
 		rect := &t.Rects[iRect]
@@ -202,6 +202,6 @@ func (t *TeleCompScreen) updateVertices() {
 	}
 }
 
-func (t *TeleCompScreen) Triangles() ([]ebiten.Vertex, []uint16) {
+func (t *TeleCompTriang) Triangles() ([]ebiten.Vertex, []uint16) {
 	return t.vertices[:t.NumRects*4], indices[:t.NumRects*6]
 }

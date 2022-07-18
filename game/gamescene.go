@@ -97,7 +97,7 @@ func (g *gameScene) checkIntersection() {
 	}
 
 	var tolerance float32 = param.ToleranceDefault
-	if len(curUnit.CompColl.Rects) > 1 { // If second unit is on an edge
+	if len(curUnit.CompCollision.Rects) > 1 { // If second unit is on an edge
 		tolerance = param.ToleranceScreenEdge // To avoid false collisions on screen edges
 	}
 

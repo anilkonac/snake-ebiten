@@ -46,7 +46,7 @@ var (
 )
 
 type ScoreAnim struct {
-	c.TeleCompScreen
+	c.TeleCompTriang
 	pos       c.Vec32
 	alpha     float32
 	direction s.DirectionT
@@ -103,7 +103,7 @@ func (s *ScoreAnim) createRects() {
 		Size: c.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
 	}
 	// Split this rectangle if it is on a screen edge.
-	s.TeleCompScreen.Update(&pureRect)
+	s.TeleCompTriang.Update(&pureRect)
 }
 
 // Returns true when the animation is finished
@@ -128,7 +128,7 @@ func (s *ScoreAnim) DrawEnabled() bool {
 }
 
 func (s *ScoreAnim) Triangles() ([]ebiten.Vertex, []uint16) {
-	return s.TeleCompScreen.Triangles()
+	return s.TeleCompTriang.Triangles()
 }
 
 func (s *ScoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {

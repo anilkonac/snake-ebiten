@@ -38,12 +38,13 @@ var (
 
 func init() {
 	shaderCircle := shader.New(shader.Circle)
+	imageRectangle.Fill(param.ColorSnake1)
 
 	// imageCircle.Fill(param.ColorSnake1)
 	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, shaderCircle, &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
 			"Radius": float32(param.RadiusSnake),
-			"Color":  []float32{float32(param.ColorSnake1.R) / 255.0, float32(param.ColorSnake1.G) / 255.0, float32(param.ColorSnake1.B) / 255.0, float32(param.ColorSnake1.A) / 255.0},
+			"Color":  []float32{float32(param.ColorSnake1.R / 0xf), float32(param.ColorSnake1.G / 0xf), float32(param.ColorSnake1.B / 0xf), float32(param.ColorSnake1.A / 0xf)},
 		},
 	})
 }
@@ -232,22 +233,30 @@ func (s *Snake) LastDirection() DirectionT {
 }
 
 func (s *Snake) Draw(dst *ebiten.Image) {
-	// var opt ebiten.DrawImageOptions
-	var opt ebiten.DrawTrianglesOptions
+	// var optTriang ebiten.DrawImageOptions
+	var optTriang ebiten.DrawTrianglesOptions
+	var optImage ebiten.DrawImageOptions
 	for unit := s.UnitHead; unit != nil; unit = unit.Next {
 		// Draw circle centered on unit's head center
-		// opt.GeoM.Reset()
-		// opt.GeoM.Translate(unit.HeadCenter.X-param.RadiusSnake, unit.HeadCenter.Y-param.RadiusSnake)
-		// dst.DrawImage(imageCircle, &opt)
-
-		// for iRect := 0; iRect < unit.CompDrawable.NumRects; iRect++ {
-		// 	rect := &unit.CompDrawable.Rects[iRect]
-		// 	imageRect := imageCircle.SubImage(image.Rect())
-		// }
-		vertices, indices := unit.CompDrawableHead.Triangles()
-		dst.DrawTriangles(vertices, indices, imageCircle, &opt)
+		vertices, indices := unit.CompTriangHead.Triangles()
+		dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
 
 		// Draw rectangle starts from unit's head center to the tail head center
+		for iRect := uint8(0); iRect < unit.CompBody.NumRects; iRect++ {
+			rect := &unit.CompBody.Rects[iRect]
+			pos64 := rect.Pos.To64()
+			size64 := rect.Size.To64()
+			optImage.GeoM.Reset()
+			optImage.GeoM.Scale(size64.X, size64.Y)
+			optImage.GeoM.Translate(pos64.X, pos64.Y)
+			dst.DrawImage(imageRectangle, &optImage)
+		}
+
+		if unit.Next == nil {
+			// Draw circle centered on unit's tail center
+			vertices, indices = unit.CompTriangTail.Triangles()
+			dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
+		}
 
 		if param.DebugUnits {
 			unit.DrawDebugInfo(dst)
