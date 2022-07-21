@@ -70,7 +70,7 @@ func (u *Unit) updateRects() {
 	// Create rectangles for drawing and collision. They are going to split.
 	var rectDraw, rectColl *c.RectF32
 
-	rectColl = u.createRectColl()
+	rectColl = u.createRectCollision()
 	rectDraw = u.createRectDraw(rectColl)
 	rectDrawHead := u.createRectHead()
 	rectDrawBody := u.createRectBody(rectColl)
@@ -87,7 +87,7 @@ func (u *Unit) updateRects() {
 	}
 }
 
-func (u *Unit) createRectColl() (rectColl *c.RectF32) {
+func (u *Unit) createRectCollision() (rectColl *c.RectF32) {
 	length32 := float32(math.Floor(u.length))
 	flCenter := u.HeadCenter.Floor().To32()
 
@@ -153,7 +153,7 @@ func (u *Unit) createRectDraw(rectColl *c.RectF32) (rectDraw *c.RectF32) {
 }
 
 func (u *Unit) createRectHead() *c.RectF32 {
-	headCenter32 := u.HeadCenter.To32()
+	headCenter32 := u.HeadCenter.Floor().To32()
 	return c.NewRect(c.Vec32{X: headCenter32.X - param.RadiusSnake, Y: headCenter32.Y - param.RadiusSnake}, c.Vec32{X: param.SnakeWidth, Y: param.SnakeWidth})
 }
 

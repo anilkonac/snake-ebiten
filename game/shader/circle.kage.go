@@ -14,6 +14,6 @@ func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
 		clr.a = 0.0
 	}
 
-	clr.rgb *= clr.a
+	clr.rgb *= (clr.a/0xff)
 	return clr
 }

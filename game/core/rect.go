@@ -7,7 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-// Rectangle compatible with float32 type parameters of the ebiten.DrawTriangleShader function.
+// Rectangle compatible with float32 type fields of ebiten.Vertex struct.
 type RectF32 struct {
 	Pos       Vec32
 	Size      Vec32

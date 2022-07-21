@@ -38,13 +38,15 @@ var (
 
 func init() {
 	shaderCircle := shader.New(shader.Circle)
+	// normAlpha := float32(param.ColorSnake1.A) / 255.0
+	// corrColor := color.RGBA{param.ColorSnake1.R / uint8(normAlpha)}
 	imageRectangle.Fill(param.ColorSnake1)
 
 	// imageCircle.Fill(param.ColorSnake1)
 	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, shaderCircle, &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
 			"Radius": float32(param.RadiusSnake),
-			"Color":  []float32{float32(param.ColorSnake1.R / 0xf), float32(param.ColorSnake1.G / 0xf), float32(param.ColorSnake1.B / 0xf), float32(param.ColorSnake1.A / 0xf)},
+			"Color":  []float32{float32(param.ColorSnake1.R), float32(param.ColorSnake1.G), float32(param.ColorSnake1.B), float32(param.ColorSnake1.A)},
 		},
 	})
 }
