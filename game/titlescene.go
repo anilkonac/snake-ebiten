@@ -102,7 +102,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		titleRectAlpha: titleRectInitialAlpha,
 		snakes:         make([]*s.Snake, numSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
-		shaderTitle:    shader.New(shader.Title),
+		shaderTitle:    shader.New(shader.PathTitle),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"ShowKeyPrompt": float32(0.0),

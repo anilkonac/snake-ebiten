@@ -32,7 +32,7 @@ import (
 var shaderSnakeHead *ebiten.Shader
 
 func init() {
-	shaderSnakeHead = shader.New(shader.SnakeHead)
+	shaderSnakeHead = shader.New(shader.PathSnakeHead)
 }
 
 type Unit struct {

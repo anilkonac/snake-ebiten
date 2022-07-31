@@ -24,8 +24,22 @@ import (
 
 	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
+	"github.com/anilkonac/snake-ebiten/game/shader"
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+var (
+	imageFood    = ebiten.NewImage(param.FoodLength, param.FoodLength)
+	foodDrawOpts ebiten.DrawTrianglesOptions
+)
+
+func init() {
+	imageFood.DrawRectShader(param.FoodLength, param.FoodLength, &shader.Circle, &ebiten.DrawRectShaderOptions{
+		Uniforms: map[string]interface{}{
+			"Radius": float32(param.RadiusFood),
+		},
+	})
+}
 
 var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
 	Uniforms: map[string]interface{}{
@@ -64,6 +78,11 @@ func NewFoodRandLoc() *Food {
 	return newFood(c.VecI{X: rand.Intn(param.ScreenWidth), Y: rand.Intn(param.ScreenHeight)}.To32())
 }
 
+func (f Food) Draw(dst *ebiten.Image) {
+	vertices, indices := f.TeleCompTriang.Triangles()
+	dst.DrawTriangles(vertices, indices, imageFood, &foodDrawOpts)
+}
+
 // Implement collidable interface
 // ------------------------------
 func (f Food) CollEnabled() bool {
@@ -72,29 +91,4 @@ func (f Food) CollEnabled() bool {
 
 func (f Food) CollisionRects() []c.RectF32 {
 	return f.Rects[:]
-}
-
-// Implement drawable interface
-// ----------------------------
-func (f Food) DrawEnabled() bool {
-	return f.IsActive
-}
-
-func (f Food) Triangles() ([]ebiten.Vertex, []uint16) {
-	return f.TeleCompTriang.Triangles()
-}
-
-func (f Food) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
-	return &drawOptionsFood
-}
-
-func (f Food) Shader() *ebiten.Shader {
-	return param.ShaderRound
-}
-
-func (f Food) DrawDebugInfo(dst *ebiten.Image) {
-	c.MarkPoint(dst, f.Center.To64(), 4, param.ColorSnake1)
-	for iRect := uint8(0); iRect < f.NumRects; iRect++ {
-		f.Rects[iRect].DrawOuterRect(dst, param.ColorSnake1)
-	}
 }

@@ -37,11 +37,10 @@ var (
 )
 
 func init() {
-	shaderCircle := shader.New(shader.Circle)
 	imageRectangle.Fill(param.ColorSnake1)
 
-	// imageCircle.Fill(param.ColorSnake1)
-	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, shaderCircle, &ebiten.DrawRectShaderOptions{
+	// Prepare cirle image whose radius is snake's half width
+	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, &shader.Circle, &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
 			"Radius": float32(param.RadiusSnake),
 		},

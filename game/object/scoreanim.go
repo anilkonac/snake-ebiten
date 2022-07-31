@@ -53,7 +53,7 @@ type ScoreAnim struct {
 }
 
 func InitScoreAnim() {
-	shaderScore = shader.New(shader.Score)
+	shaderScore = shader.New(shader.PathScore)
 
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(param.FoodScore)

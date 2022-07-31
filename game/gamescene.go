@@ -282,12 +282,9 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 	screen.Fill(param.ColorBackground)
 
 	// Draw food
-	object.Draw(screen, g.food)
+	g.food.Draw(screen)
 
-	// // Draw the snake
-	// for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
-	// 	object.Draw(screen, unit)
-	// }
+	// Draw the snake
 	g.snake.Draw(screen)
 
 	// Draw score anim
