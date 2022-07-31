@@ -10,7 +10,6 @@ const (
 	PathBasic       = "basic.kage.go"
 	PathCircle      = "circle.kage.go"
 	PathCircleMouth = "circlemouth.kage.go"
-	PathScore       = "score.kage.go"
 	PathTitle       = "title.kage.go"
 )
 

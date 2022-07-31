@@ -290,7 +290,7 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 
 	// Draw score anim
 	for _, scoreAnim := range g.scoreAnimList {
-		object.Draw(screen, scoreAnim)
+		scoreAnim.Draw(screen)
 	}
 
 	// Draw score text
