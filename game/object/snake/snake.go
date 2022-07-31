@@ -32,14 +32,14 @@ import (
 )
 
 var (
-	imageCircle    = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
-	imageRectangle = ebiten.NewImage(1, 1)
-	shaderMouth    = shader.New(shader.PathCircleMouth)
-	MouthEnabled   = false
+	imageCircle  = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
+	imagePixel   = ebiten.NewImage(1, 1)
+	shaderMouth  = shader.New(shader.PathCircleMouth)
+	MouthEnabled = false
 )
 
 func init() {
-	imageRectangle.Fill(param.ColorSnake1)
+	imagePixel.Fill(color.White)
 
 	// Prepare cirle image whose radius is snake's half width
 	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, &shader.Circle, &ebiten.DrawRectShaderOptions{
@@ -61,6 +61,7 @@ type Snake struct {
 	FoodEaten       uint8
 	color           *color.RGBA
 	drawOptsHead    ebiten.DrawTrianglesShaderOptions
+	drawOptsBody    ebiten.DrawImageOptions
 }
 
 func init() {
@@ -99,6 +100,7 @@ func NewSnake(headCenter c.Vec64, initialLength uint16, speed float64, direction
 			},
 		},
 	}
+	snake.drawOptsBody.ColorM.ScaleWithColor(color)
 
 	return snake
 }
@@ -249,7 +251,6 @@ func (s *Snake) LastDirection() DirectionT {
 func (s *Snake) Draw(dst *ebiten.Image) {
 	// var optTriang ebiten.DrawImageOptions
 	var optTriang ebiten.DrawTrianglesOptions
-	var optImage ebiten.DrawImageOptions
 
 	for unit := s.UnitHead; unit != nil; unit = unit.Next {
 		// Draw circle centered on unit's head center
@@ -265,10 +266,10 @@ func (s *Snake) Draw(dst *ebiten.Image) {
 			rect := &unit.CompBody.Rects[iRect]
 			pos64 := rect.Pos.To64()
 			size64 := rect.Size.To64()
-			optImage.GeoM.Reset()
-			optImage.GeoM.Scale(size64.X, size64.Y)
-			optImage.GeoM.Translate(pos64.X, pos64.Y)
-			dst.DrawImage(imageRectangle, &optImage)
+			s.drawOptsBody.GeoM.Reset()
+			s.drawOptsBody.GeoM.Scale(size64.X, size64.Y)
+			s.drawOptsBody.GeoM.Translate(pos64.X, pos64.Y)
+			dst.DrawImage(imagePixel, &s.drawOptsBody)
 		}
 
 		if unit.Next == nil {
