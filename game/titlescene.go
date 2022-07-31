@@ -25,7 +25,6 @@ import (
 	"time"
 
 	c "github.com/anilkonac/snake-ebiten/game/core"
-	"github.com/anilkonac/snake-ebiten/game/object"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
@@ -233,10 +232,7 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 
 	// Draw snakes
 	for _, snake := range t.snakes {
-		for unit := snake.UnitHead; unit != nil; unit = unit.Next {
-			object.Draw(screen, unit)
-		}
-
+		snake.Draw(screen)
 	}
 
 	drawFPS(screen)

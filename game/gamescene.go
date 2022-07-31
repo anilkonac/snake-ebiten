@@ -50,6 +50,7 @@ type gameScene struct {
 
 func newGameScene(snake *s.Snake) *gameScene {
 	param.TeleportEnabled = true
+	s.MouthEnabled = true
 
 	return &gameScene{
 		snake: snake,

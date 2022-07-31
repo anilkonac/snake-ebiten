@@ -25,15 +25,8 @@ import (
 
 	c "github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/anilkonac/snake-ebiten/game/shader"
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-var shaderSnakeHead *ebiten.Shader
-
-func init() {
-	shaderSnakeHead = shader.New(shader.PathSnakeHead)
-}
 
 type Unit struct {
 	HeadCenter      c.Vec64
@@ -46,7 +39,6 @@ type Unit struct {
 	CompTriangTail  c.TeleCompTriang
 	Next            *Unit
 	prev            *Unit
-	drawOpts        ebiten.DrawTrianglesShaderOptions
 }
 
 func NewUnit(headCenter c.Vec64, length float64, direction DirectionT, color *color.RGBA) *Unit {
@@ -54,37 +46,11 @@ func NewUnit(headCenter c.Vec64, length float64, direction DirectionT, color *co
 		HeadCenter: headCenter,
 		length:     length,
 		Direction:  direction,
-		drawOpts: ebiten.DrawTrianglesShaderOptions{
-			Uniforms: map[string]interface{}{
-				"RadiusMouth": float32(param.RadiusMouth),
-			},
-		},
 	}
 	newUnit.SetColor(color)
 	newUnit.update(param.MouthAnimStartDistance)
 
 	return newUnit
-}
-
-func (u *Unit) updateRects() {
-	// Create rectangles for drawing and collision. They are going to split.
-	var rectDraw, rectColl *c.RectF32
-
-	rectColl = u.createRectCollision()
-	rectDraw = u.createRectDraw(rectColl)
-	rectDrawHead := u.createRectHead()
-	rectDrawBody := u.createRectBody(rectColl)
-
-	u.CompCollision.Update(rectColl)
-	u.CompTriangDebug.Update(rectDraw)
-	u.CompTriangHead.Update(rectDrawHead)
-	u.CompBody.Update(rectDrawBody)
-
-	// If current unit is the tail unit
-	if u.Next == nil {
-		rectDrawTail := u.createRectTail(rectDrawHead)
-		u.CompTriangTail.Update(rectDrawTail)
-	}
 }
 
 func (u *Unit) createRectCollision() (rectColl *c.RectF32) {
@@ -214,30 +180,24 @@ func (u *Unit) createRectBody(rectColl *c.RectF32) (rectBody *c.RectF32) {
 }
 
 func (u *Unit) update(distToFood float32) {
-	u.updateRects()
-	u.updateDrawOptions(distToFood)
-}
+	// Create rectangles for drawing and collision. They are going to split.
+	var rectDraw, rectColl *c.RectF32
 
-func (u *Unit) updateDrawOptions(distToFood float32) {
-	// Distance to food
-	proxToFood := 1.0 - distToFood/param.MouthAnimStartDistance
+	rectColl = u.createRectCollision()
+	rectDraw = u.createRectDraw(rectColl)
+	rectDrawHead := u.createRectHead()
+	rectDrawBody := u.createRectBody(rectColl)
 
-	// Specify Size uniform variable
-	var drawWidth, drawHeight float32
-	flooredLength := float32(math.Floor(u.length))
-	if u.Next != nil {
-		flooredLength += param.SnakeWidth
+	u.CompCollision.Update(rectColl)
+	u.CompTriangDebug.Update(rectDraw)
+	u.CompTriangHead.Update(rectDrawHead)
+	u.CompBody.Update(rectDrawBody)
+
+	// If current unit is the tail unit
+	if u.Next == nil {
+		rectDrawTail := u.createRectTail(rectDrawHead)
+		u.CompTriangTail.Update(rectDrawTail)
 	}
-	if u.Direction.IsVertical() {
-		drawWidth, drawHeight = param.SnakeWidth, flooredLength
-	} else {
-		drawWidth, drawHeight = flooredLength, param.SnakeWidth
-	}
-
-	// Update the options
-	u.drawOpts.Uniforms["Direction"] = float32(u.Direction)
-	u.drawOpts.Uniforms["Size"] = []float32{drawWidth, drawHeight}
-	u.drawOpts.Uniforms["ProxToFood"] = proxToFood
 }
 
 func (u *Unit) moveUp(dist float64) {
@@ -305,6 +265,13 @@ func (u *Unit) SetColor(clr *color.RGBA) {
 	u.CompTriangTail.SetColor(clr)
 }
 
+func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {
+	u.markHeadCenters(dst)
+	for iRect := uint8(0); iRect < u.CompTriangDebug.NumRects; iRect++ {
+		u.CompTriangDebug.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
+	}
+}
+
 // Implement collidable interface
 // ------------------------------
 func (u *Unit) CollEnabled() bool {
@@ -313,32 +280,4 @@ func (u *Unit) CollEnabled() bool {
 
 func (u *Unit) CollisionRects() []c.RectF32 {
 	return u.CompCollision.Rects[:]
-}
-
-// Implement drawable interface
-// ----------------------------
-func (u *Unit) DrawEnabled() bool {
-	return true
-}
-
-func (u *Unit) Triangles() ([]ebiten.Vertex, []uint16) {
-	return u.CompTriangDebug.Triangles()
-}
-
-func (u *Unit) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
-	return &u.drawOpts
-}
-
-func (u *Unit) Shader() *ebiten.Shader {
-	if u.prev == nil {
-		return shaderSnakeHead
-	}
-	return param.ShaderRound
-}
-
-func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {
-	u.markHeadCenters(dst)
-	for iRect := uint8(0); iRect < u.CompTriangDebug.NumRects; iRect++ {
-		u.CompTriangDebug.Rects[iRect].DrawOuterRect(dst, param.ColorFood)
-	}
 }
