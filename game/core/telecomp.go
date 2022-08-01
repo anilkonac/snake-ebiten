@@ -23,22 +23,6 @@ import (
 	"github.com/anilkonac/snake-ebiten/game/param"
 )
 
-var (
-	indices [24]uint16
-)
-
-func init() {
-	for iRect := uint16(0); iRect < 4; iRect++ {
-		indices[iRect*6] = iRect * 4
-		indices[iRect*6+1] = iRect*4 + 2
-		indices[iRect*6+2] = iRect*4 + 1
-		indices[iRect*6+3] = iRect*4 + 1
-		indices[iRect*6+4] = iRect*4 + 2
-		indices[iRect*6+5] = iRect*4 + 3
-	}
-
-}
-
 // Teleportable/Teleport component
 type TeleComp struct {
 	Rects    [4]RectF32
@@ -56,8 +40,8 @@ func (t *TeleComp) split(rect RectF32) {
 	}
 
 	if !param.TeleportEnabled {
-		t.Rects[t.NumRects] = rect
-		t.NumRects++
+		t.Rects[0] = rect
+		t.NumRects = 1
 		return
 	}
 

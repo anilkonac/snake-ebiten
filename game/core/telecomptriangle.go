@@ -25,6 +25,22 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var (
+	indices [24]uint16
+)
+
+func init() {
+	for iRect := uint16(0); iRect < 4; iRect++ {
+		indices[iRect*6] = iRect * 4
+		indices[iRect*6+1] = iRect*4 + 2
+		indices[iRect*6+2] = iRect*4 + 1
+		indices[iRect*6+3] = iRect*4 + 1
+		indices[iRect*6+4] = iRect*4 + 2
+		indices[iRect*6+5] = iRect*4 + 3
+	}
+
+}
+
 //  Teleportable component triangulated for DrawTriangles or DrawTriangleShader methods
 type TeleCompTriang struct {
 	TeleComp
