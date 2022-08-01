@@ -20,15 +20,11 @@ along with snake-ebiten. If not, see <https://www.gnu.org/licenses/>.
 package core
 
 import (
-	"image/color"
-
 	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
-	indices    [24]uint16
-	imagePixel = ebiten.NewImage(1, 1)
+	indices [24]uint16
 )
 
 func init() {
@@ -41,7 +37,6 @@ func init() {
 		indices[iRect*6+5] = iRect*4 + 3
 	}
 
-	imagePixel.Fill(color.White)
 }
 
 // Teleportable/Teleport component
@@ -140,110 +135,4 @@ func (t *TeleComp) split(rect RectF32) {
 	// Add the split rectangle to the rects array
 	t.Rects[t.NumRects] = rect
 	t.NumRects++
-}
-
-//  Teleportable component triangulated for DrawTriangles or DrawTriangleShader methods
-type TeleCompTriang struct {
-	TeleComp
-	vertices [16]ebiten.Vertex
-	color    [4]float32
-}
-
-func (t *TeleCompTriang) SetColor(clr *color.RGBA) {
-	t.color = [4]float32{float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0, float32(clr.A) / 255.0}
-}
-
-func (t *TeleCompTriang) Update(pureRect *RectF32) {
-	t.TeleComp.Update(pureRect)
-	t.updateVertices()
-}
-
-func (t *TeleCompTriang) updateVertices() {
-	var offset uint16
-	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
-		rect := &t.Rects[iRect]
-		t.vertices[offset] = ebiten.Vertex{ // Top Left corner
-			DstX:   rect.Pos.X,
-			DstY:   rect.Pos.Y,
-			SrcX:   rect.PosInUnit.X,
-			SrcY:   rect.PosInUnit.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-		t.vertices[offset+1] = ebiten.Vertex{ // Top Right Corner
-			DstX:   rect.Pos.X + rect.Size.X,
-			DstY:   rect.Pos.Y,
-			SrcX:   rect.PosInUnit.X + rect.Size.X,
-			SrcY:   rect.PosInUnit.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-		t.vertices[offset+2] = ebiten.Vertex{ // Bottom Left Corner
-			DstX:   rect.Pos.X,
-			DstY:   rect.Pos.Y + rect.Size.Y,
-			SrcX:   rect.PosInUnit.X,
-			SrcY:   rect.PosInUnit.Y + rect.Size.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-		t.vertices[offset+3] = ebiten.Vertex{ // Bottom Right Corner
-			DstX:   rect.Pos.X + rect.Size.X,
-			DstY:   rect.Pos.Y + rect.Size.Y,
-			SrcX:   rect.PosInUnit.X + rect.Size.X,
-			SrcY:   rect.PosInUnit.Y + rect.Size.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-
-		offset += 4
-	}
-}
-
-func (t *TeleCompTriang) Triangles() ([]ebiten.Vertex, []uint16) {
-	return t.vertices[:t.NumRects*4], indices[:t.NumRects*6]
-}
-
-// Teleportable component with draw options for each rect for the DrawImage method.
-type TeleCompImage struct {
-	TeleComp
-	DrawOpts [4]ebiten.DrawImageOptions
-}
-
-func (t *TeleCompImage) Update(pureRect *RectF32) {
-	t.TeleComp.Update(pureRect)
-
-	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
-		rect := &t.Rects[iRect]
-		drawOpt := &t.DrawOpts[iRect]
-
-		pos64 := rect.Pos.To64()
-		size64 := rect.Size.To64()
-
-		drawOpt.GeoM.Reset()
-		drawOpt.GeoM.Scale(size64.X, size64.Y)
-		drawOpt.GeoM.Translate(pos64.X, pos64.Y)
-	}
-}
-
-func (t *TeleCompImage) SetColor(clr color.Color) {
-	for iDrawOpt := 0; iDrawOpt < 4; iDrawOpt++ {
-		drawOpt := &t.DrawOpts[iDrawOpt]
-		drawOpt.ColorM.Reset()
-		drawOpt.ColorM.ScaleWithColor(clr)
-	}
-}
-
-func (t *TeleCompImage) Draw(dst *ebiten.Image) {
-	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
-		drawOpt := &t.DrawOpts[iRect]
-		dst.DrawImage(imagePixel, drawOpt)
-	}
 }
