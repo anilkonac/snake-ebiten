@@ -26,7 +26,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var indices [24]uint16
+var (
+	indices    [24]uint16
+	imagePixel = ebiten.NewImage(1, 1)
+)
 
 func init() {
 	for iRect := uint16(0); iRect < 4; iRect++ {
@@ -37,6 +40,8 @@ func init() {
 		indices[iRect*6+4] = iRect*4 + 2
 		indices[iRect*6+5] = iRect*4 + 3
 	}
+
+	imagePixel.Fill(color.White)
 }
 
 // Teleportable/Teleport component
@@ -204,4 +209,41 @@ func (t *TeleCompTriang) updateVertices() {
 
 func (t *TeleCompTriang) Triangles() ([]ebiten.Vertex, []uint16) {
 	return t.vertices[:t.NumRects*4], indices[:t.NumRects*6]
+}
+
+// Teleportable component with draw options for each rect for the DrawImage method.
+type TeleCompImage struct {
+	TeleComp
+	DrawOpts [4]ebiten.DrawImageOptions
+}
+
+func (t *TeleCompImage) Update(pureRect *RectF32) {
+	t.TeleComp.Update(pureRect)
+
+	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
+		rect := &t.Rects[iRect]
+		drawOpt := &t.DrawOpts[iRect]
+
+		pos64 := rect.Pos.To64()
+		size64 := rect.Size.To64()
+
+		drawOpt.GeoM.Reset()
+		drawOpt.GeoM.Scale(size64.X, size64.Y)
+		drawOpt.GeoM.Translate(pos64.X, pos64.Y)
+	}
+}
+
+func (t *TeleCompImage) SetColor(clr color.Color) {
+	for iDrawOpt := 0; iDrawOpt < 4; iDrawOpt++ {
+		drawOpt := &t.DrawOpts[iDrawOpt]
+		drawOpt.ColorM.Reset()
+		drawOpt.ColorM.ScaleWithColor(clr)
+	}
+}
+
+func (t *TeleCompImage) Draw(dst *ebiten.Image) {
+	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
+		drawOpt := &t.DrawOpts[iRect]
+		dst.DrawImage(imagePixel, drawOpt)
+	}
 }

@@ -33,7 +33,7 @@ type Unit struct {
 	length          float64
 	Direction       DirectionT
 	CompCollision   c.TeleComp
-	CompBody        c.TeleComp
+	CompBody        c.TeleCompImage
 	CompTriangDebug c.TeleCompTriang
 	CompTriangHead  c.TeleCompTriang
 	CompTriangTail  c.TeleCompTriang
@@ -263,6 +263,7 @@ func (u *Unit) SetColor(clr *color.RGBA) {
 	u.CompTriangDebug.SetColor(clr)
 	u.CompTriangHead.SetColor(clr)
 	u.CompTriangTail.SetColor(clr)
+	u.CompBody.SetColor(clr)
 }
 
 func (u *Unit) DrawDebugInfo(dst *ebiten.Image) {

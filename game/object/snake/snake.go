@@ -33,13 +33,11 @@ import (
 
 var (
 	imageCircle  = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
-	imagePixel   = ebiten.NewImage(1, 1)
 	shaderMouth  = shader.New(shader.PathCircleMouth)
 	MouthEnabled = false
 )
 
 func init() {
-	imagePixel.Fill(color.White)
 
 	// Prepare cirle image whose radius is snake's half width
 	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, &shader.Circle, &ebiten.DrawRectShaderOptions{
@@ -61,7 +59,6 @@ type Snake struct {
 	FoodEaten       uint8
 	color           *color.RGBA
 	drawOptsHead    ebiten.DrawTrianglesShaderOptions
-	drawOptsBody    ebiten.DrawImageOptions
 }
 
 func init() {
@@ -100,7 +97,6 @@ func NewSnake(headCenter c.Vec64, initialLength uint16, speed float64, direction
 			},
 		},
 	}
-	snake.drawOptsBody.ColorM.ScaleWithColor(color)
 
 	return snake
 }
@@ -262,15 +258,7 @@ func (s *Snake) Draw(dst *ebiten.Image) {
 		}
 
 		// Draw rectangle starts from unit's head center to the tail head center
-		for iRect := uint8(0); iRect < unit.CompBody.NumRects; iRect++ {
-			rect := &unit.CompBody.Rects[iRect]
-			pos64 := rect.Pos.To64()
-			size64 := rect.Size.To64()
-			s.drawOptsBody.GeoM.Reset()
-			s.drawOptsBody.GeoM.Scale(size64.X, size64.Y)
-			s.drawOptsBody.GeoM.Translate(pos64.X, pos64.Y)
-			dst.DrawImage(imagePixel, &s.drawOptsBody)
-		}
+		unit.CompBody.Draw(dst)
 
 		if unit.Next == nil {
 			// Draw circle centered on unit's tail center
