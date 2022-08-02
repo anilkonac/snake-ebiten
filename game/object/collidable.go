@@ -21,8 +21,6 @@ package object
 
 import (
 	"github.com/anilkonac/snake-ebiten/game/core"
-	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type collidable interface {
@@ -30,27 +28,7 @@ type collidable interface {
 	CollisionRects() []core.RectF32
 }
 
-type drawable interface {
-	DrawEnabled() bool
-	Triangles() (vertices []ebiten.Vertex, indices []uint16)
-	DrawOptions() *ebiten.DrawTrianglesShaderOptions
-	Shader() *ebiten.Shader
-	DrawDebugInfo(dst *ebiten.Image)
-}
-
-func Draw(dst *ebiten.Image, src drawable) {
-	if !src.DrawEnabled() {
-		return
-	}
-
-	vertices, indices := src.Triangles()
-	dst.DrawTrianglesShader(vertices, indices, src.Shader(), src.DrawOptions())
-
-	if param.DebugUnits {
-		src.DrawDebugInfo(dst)
-	}
-}
-
+// Collides returns true if two collidable a and b intersects with each other.
 func Collides(a, b collidable, tolerance float32) bool {
 	if !a.CollEnabled() || !b.CollEnabled() {
 		return false
@@ -76,6 +54,7 @@ func Collides(a, b collidable, tolerance float32) bool {
 	return false
 }
 
+// intersects returns true if to rectF32(rectA and rectB) intersects with each other.
 func intersects(rectA, rectB *core.RectF32, tolerance float32) bool {
 	aRightX := rectA.Pos.X + rectA.Size.X
 	bRightX := rectB.Pos.X + rectB.Size.X

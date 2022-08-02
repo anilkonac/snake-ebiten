@@ -23,7 +23,7 @@ import (
 	"github.com/anilkonac/snake-ebiten/game/param"
 )
 
-// Teleportable/Teleport component
+// A Telecomp contains rectangle information about teleported parts of a game object.
 type TeleComp struct {
 	Rects    [4]RectF32
 	NumRects uint8
