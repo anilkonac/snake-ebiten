@@ -31,7 +31,7 @@ func init() {
 	imagePixel.Fill(color.White)
 }
 
-// Teleportable component with draw options for each rect for the DrawImage method.
+// TeleCompImage is a TeleComp with drawing options for each rectangle for the DrawImage method.
 type TeleCompImage struct {
 	TeleComp
 	DrawOpts [4]ebiten.DrawImageOptions
