@@ -20,24 +20,8 @@ along with snake-ebiten. If not, see <https://www.gnu.org/licenses/>.
 package core
 
 import (
-	"image/color"
-
 	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/hajimehoshi/ebiten/v2"
 )
-
-var indices [24]uint16
-
-func init() {
-	for iRect := uint16(0); iRect < 4; iRect++ {
-		indices[iRect*6] = iRect * 4
-		indices[iRect*6+1] = iRect*4 + 2
-		indices[iRect*6+2] = iRect*4 + 1
-		indices[iRect*6+3] = iRect*4 + 1
-		indices[iRect*6+4] = iRect*4 + 2
-		indices[iRect*6+5] = iRect*4 + 3
-	}
-}
 
 // Teleportable/Teleport component
 type TeleComp struct {
@@ -56,8 +40,8 @@ func (t *TeleComp) split(rect RectF32) {
 	}
 
 	if !param.TeleportEnabled {
-		t.Rects[t.NumRects] = rect
-		t.NumRects++
+		t.Rects[0] = rect
+		t.NumRects = 1
 		return
 	}
 
@@ -135,73 +119,4 @@ func (t *TeleComp) split(rect RectF32) {
 	// Add the split rectangle to the rects array
 	t.Rects[t.NumRects] = rect
 	t.NumRects++
-}
-
-//  Teleport component to be drawn on the screen.
-type TeleCompScreen struct {
-	TeleComp
-	vertices [16]ebiten.Vertex
-	color    [4]float32
-}
-
-func (t *TeleCompScreen) SetColor(clr *color.RGBA) {
-	t.color = [4]float32{float32(clr.R) / 255.0, float32(clr.G) / 255.0, float32(clr.B) / 255.0, float32(clr.A) / 255.0}
-}
-
-func (t *TeleCompScreen) Update(pureRect *RectF32) {
-	t.TeleComp.Update(pureRect)
-	t.updateVertices()
-}
-
-func (t *TeleCompScreen) updateVertices() {
-	var offset uint16
-	for iRect := uint8(0); iRect < t.NumRects; iRect++ {
-		rect := &t.Rects[iRect]
-		t.vertices[offset] = ebiten.Vertex{ // Top Left corner
-			DstX:   rect.Pos.X,
-			DstY:   rect.Pos.Y,
-			SrcX:   rect.PosInUnit.X,
-			SrcY:   rect.PosInUnit.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-		t.vertices[offset+1] = ebiten.Vertex{ // Top Right Corner
-			DstX:   rect.Pos.X + rect.Size.X,
-			DstY:   rect.Pos.Y,
-			SrcX:   rect.PosInUnit.X + rect.Size.X,
-			SrcY:   rect.PosInUnit.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-		t.vertices[offset+2] = ebiten.Vertex{ // Bottom Left Corner
-			DstX:   rect.Pos.X,
-			DstY:   rect.Pos.Y + rect.Size.Y,
-			SrcX:   rect.PosInUnit.X,
-			SrcY:   rect.PosInUnit.Y + rect.Size.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-		t.vertices[offset+3] = ebiten.Vertex{ // Bottom Right Corner
-			DstX:   rect.Pos.X + rect.Size.X,
-			DstY:   rect.Pos.Y + rect.Size.Y,
-			SrcX:   rect.PosInUnit.X + rect.Size.X,
-			SrcY:   rect.PosInUnit.Y + rect.Size.Y,
-			ColorR: t.color[0],
-			ColorG: t.color[1],
-			ColorB: t.color[2],
-			ColorA: t.color[3],
-		}
-
-		offset += 4
-	}
-}
-
-func (t *TeleCompScreen) Triangles() ([]ebiten.Vertex, []uint16) {
-	return t.vertices[:t.NumRects*4], indices[:t.NumRects*6]
 }

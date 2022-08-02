@@ -7,17 +7,21 @@ import (
 )
 
 const (
-	Basic     = "basic.kage.go"
-	Round     = "round.kage.go"
-	Score     = "score.kage.go"
-	SnakeHead = "snakehead.kage.go"
-	Title     = "title.kage.go"
+	PathBasic       = "basic.kage.go"
+	PathCircle      = "circle.kage.go"
+	PathCircleMouth = "circlemouth.kage.go"
+	PathTitle       = "title.kage.go"
 )
 
 var (
 	//go:embed *.kage.go
-	fs embed.FS
+	fs     embed.FS
+	Circle ebiten.Shader
 )
+
+func init() {
+	Circle = *New(PathCircle)
+}
 
 func New(sh string) *ebiten.Shader {
 	bytesShader, err := fs.ReadFile(sh)

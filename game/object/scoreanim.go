@@ -26,35 +26,31 @@ import (
 	c "github.com/anilkonac/snake-ebiten/game/core"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/anilkonac/snake-ebiten/game/shader"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
 const (
-	decrementAlpha   = 8.0 / 255.0
+	decrementAlpha   = 8.0
 	scoreAnimSpeed   = 25
 	scoreAnimPadding = 8
 )
 
 var (
-	scoreAnimShiftY      float32
-	scoreAnimBoundSize   c.Vec32
-	scoreAnimImage       *ebiten.Image
-	shaderScore          *ebiten.Shader
-	drawOptionsScoreAnim ebiten.DrawTrianglesShaderOptions
+	scoreAnimShiftY    float32
+	scoreAnimBoundSize c.Vec32
+	scoreAnimImage     *ebiten.Image
 )
 
 type ScoreAnim struct {
-	c.TeleCompScreen
+	c.TeleCompTriang
 	pos       c.Vec32
-	alpha     float32
+	alpha     uint8
 	direction s.DirectionT
+	drawOpts  ebiten.DrawTrianglesOptions
 }
 
 func InitScoreAnim() {
-	shaderScore = shader.New(shader.Score)
-
 	// Init animation text bound variables
 	foodScoreMsg := strconv.Itoa(param.FoodScore)
 	scoreAnimBound := text.BoundString(param.FontFaceScore, foodScoreMsg)
@@ -65,16 +61,9 @@ func InitScoreAnim() {
 
 	// Prepare score animation text image.
 	scoreAnimImage = ebiten.NewImage(scoreAnimBoundSizeI.X, scoreAnimBoundSizeI.Y)
-	scoreAnimImage.Fill(color.Black)
 	text.Draw(scoreAnimImage, foodScoreMsg, param.FontFaceScore,
 		-scoreAnimBound.Min.X, -scoreAnimBound.Min.Y,
-		color.RGBA{255, 0, 0, 255})
-
-	// Prepare draw options
-	drawOptionsScoreAnim.Uniforms = map[string]interface{}{
-		"Alpha": float32(1.0),
-	}
-	drawOptionsScoreAnim.Images[0] = scoreAnimImage
+		color.White)
 }
 
 func NewScoreAnim(pos c.Vec32) *ScoreAnim {
@@ -83,7 +72,7 @@ func NewScoreAnim(pos c.Vec32) *ScoreAnim {
 			X: pos.X,
 			Y: pos.Y - scoreAnimShiftY,
 		},
-		alpha:     float32(param.ColorScore.A) / 255.0,
+		alpha:     param.ColorScore.A,
 		direction: s.DirectionUp,
 	}
 	newAnim.SetColor(&param.ColorScore)
@@ -103,7 +92,7 @@ func (s *ScoreAnim) createRects() {
 		Size: c.Vec32{X: scoreAnimBoundSize.X, Y: scoreAnimBoundSize.Y},
 	}
 	// Split this rectangle if it is on a screen edge.
-	s.TeleCompScreen.Update(&pureRect)
+	s.TeleCompTriang.Update(&pureRect)
 }
 
 // Returns true when the animation is finished
@@ -111,34 +100,22 @@ func (s *ScoreAnim) Update() bool {
 	// Move animation
 	s.pos.Y -= scoreAnimSpeed * param.DeltaTime
 
+	// Decrease alpha
+	if s.alpha < decrementAlpha {
+		return true
+	}
+
+	s.alpha -= decrementAlpha
+	color := color.RGBA{param.ColorScore.R, param.ColorScore.G, param.ColorScore.B, s.alpha}
+	s.SetColor(&color)
+
 	// Update rectangles of this anim
 	s.createRects()
 
-	// Decrease alpha
-	s.alpha -= decrementAlpha
-	drawOptionsScoreAnim.Uniforms["Alpha"] = s.alpha
-
-	return (s.alpha <= 0.0)
+	return false
 }
 
-// Implement drawable interface
-// ----------------------------
-func (s *ScoreAnim) DrawEnabled() bool {
-	return true
-}
-
-func (s *ScoreAnim) Triangles() ([]ebiten.Vertex, []uint16) {
-	return s.TeleCompScreen.Triangles()
-}
-
-func (s *ScoreAnim) DrawOptions() *ebiten.DrawTrianglesShaderOptions {
-	return &drawOptionsScoreAnim
-}
-
-func (s *ScoreAnim) Shader() *ebiten.Shader {
-	return shaderScore
-}
-
-func (s *ScoreAnim) DrawDebugInfo(dst *ebiten.Image) {
-
+func (s *ScoreAnim) Draw(dst *ebiten.Image) {
+	vertices, indices := s.Triangles()
+	dst.DrawTriangles(vertices, indices, scoreAnimImage, &s.drawOpts)
 }

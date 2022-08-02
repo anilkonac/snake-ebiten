@@ -22,13 +22,8 @@ package object
 import (
 	"github.com/anilkonac/snake-ebiten/game/core"
 	"github.com/anilkonac/snake-ebiten/game/param"
-	"github.com/anilkonac/snake-ebiten/game/shader"
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-func init() {
-	param.ShaderRound = shader.New(shader.Round)
-}
 
 type collidable interface {
 	CollEnabled() bool

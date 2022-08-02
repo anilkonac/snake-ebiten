@@ -50,6 +50,7 @@ type gameScene struct {
 
 func newGameScene(snake *s.Snake) *gameScene {
 	param.TeleportEnabled = true
+	s.MouthEnabled = true
 
 	return &gameScene{
 		snake: snake,
@@ -97,7 +98,7 @@ func (g *gameScene) checkIntersection() {
 	}
 
 	var tolerance float32 = param.ToleranceDefault
-	if len(curUnit.CompColl.Rects) > 1 { // If second unit is on an edge
+	if len(curUnit.CompCollision.Rects) > 1 { // If second unit is on an edge
 		tolerance = param.ToleranceScreenEdge // To avoid false collisions on screen edges
 	}
 
@@ -282,16 +283,14 @@ func (g *gameScene) draw(screen *ebiten.Image) {
 	screen.Fill(param.ColorBackground)
 
 	// Draw food
-	object.Draw(screen, g.food)
+	g.food.Draw(screen)
 
 	// Draw the snake
-	for unit := g.snake.UnitHead; unit != nil; unit = unit.Next {
-		object.Draw(screen, unit)
-	}
+	g.snake.Draw(screen)
 
 	// Draw score anim
 	for _, scoreAnim := range g.scoreAnimList {
-		object.Draw(screen, scoreAnim)
+		scoreAnim.Draw(screen)
 	}
 
 	// Draw score text

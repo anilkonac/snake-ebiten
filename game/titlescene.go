@@ -25,7 +25,6 @@ import (
 	"time"
 
 	c "github.com/anilkonac/snake-ebiten/game/core"
-	"github.com/anilkonac/snake-ebiten/game/object"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
@@ -79,7 +78,7 @@ var (
 )
 
 type titleScene struct {
-	titleRectComp     c.TeleCompScreen
+	titleRectComp     c.TeleCompTriang
 	titleRectAlpha    float32
 	turnTimers        [numSnakes]float32
 	sceneTime         float32
@@ -102,7 +101,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		titleRectAlpha: titleRectInitialAlpha,
 		snakes:         make([]*s.Snake, numSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
-		shaderTitle:    shader.New(shader.Title),
+		shaderTitle:    shader.New(shader.PathTitle),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
 			Uniforms: map[string]interface{}{
 				"ShowKeyPrompt": float32(0.0),
@@ -233,10 +232,7 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 
 	// Draw snakes
 	for _, snake := range t.snakes {
-		for unit := snake.UnitHead; unit != nil; unit = unit.Next {
-			object.Draw(screen, unit)
-		}
-
+		snake.Draw(screen)
 	}
 
 	drawFPS(screen)
