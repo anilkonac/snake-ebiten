@@ -22,9 +22,7 @@ package game
 import (
 	"image/color"
 	"math/rand"
-	"time"
 
-	c "github.com/anilkonac/snake-ebiten/game/core"
 	s "github.com/anilkonac/snake-ebiten/game/object/snake"
 	"github.com/anilkonac/snake-ebiten/game/param"
 	"github.com/anilkonac/snake-ebiten/game/shader"
@@ -50,13 +48,14 @@ const (
 
 // Title Rectangle parameters
 const (
-	titleRectWidth                 = 540
-	titleRectHeight                = 405
-	titleRectRatio                 = 1.0 * titleRectWidth / titleRectHeight
-	titleRectCornerRadiusX         = param.RadiusSnake
-	titleRectCornerRadiusY         = titleRectCornerRadiusX / titleRectRatio
-	titleRectInitialAlpha          = 230 / 255.0
-	titleRectDissapearRate float32 = (80 / 255.0) * param.DeltaTime
+	titleRectWidth         = 540
+	titleRectHeight        = 405
+	titleRectRatio         = 1.0 * titleRectWidth / titleRectHeight
+	titleRectCornerRadiusX = param.RadiusSnake
+	titleRectCornerRadiusY = titleRectCornerRadiusX / titleRectRatio
+	// titleRectInitialAlpha          = 230 / 255.0
+	titleRectInitialAlpha          = 255 / 255.0
+	titleRectDissapearRate float64 = 80 * param.DeltaTime
 	textTitle                      = "Ssnake"
 	textPressToPlay                = "Press any key to start"
 	textTitleShiftY                = -50
@@ -75,43 +74,28 @@ var (
 		2: &param.ColorFood,
 		3: &param.ColorDebug,
 	}
+	rectShader ebiten.Shader
 )
 
 type titleScene struct {
-	titleRectComp     c.TeleCompTriang
-	titleRectAlpha    float32
-	turnTimers        [numSnakes]float32
-	sceneTime         float32
-	snakes            []*s.Snake
-	pressedKeys       []ebiten.Key
-	shaderTitle       *ebiten.Shader
-	titleRectDrawOpts ebiten.DrawTrianglesShaderOptions
+	titleRectAlpha      float64
+	turnTimers          [numSnakes]float32
+	sceneTime           float32
+	snakes              []*s.Snake
+	pressedKeys         []ebiten.Key
+	titleImage          *ebiten.Image
+	titleImageKeyPrompt *ebiten.Image
+	titleRectDrawOpts   ebiten.DrawImageOptions
 }
 
 func newTitleScene(playerSnake *s.Snake) *titleScene {
-	// Create title rect model
-	titleRect := c.RectF32{
-		Pos:       c.Vec32{X: (param.ScreenWidth - titleRectWidth) / 2.0, Y: (param.ScreenHeight - titleRectHeight) / 2.0},
-		Size:      c.Vec32{X: titleRectWidth, Y: titleRectHeight},
-		PosInUnit: c.Vec32{X: 0, Y: 0},
-	}
 
 	// Create scene
 	scene := &titleScene{
 		titleRectAlpha: titleRectInitialAlpha,
 		snakes:         make([]*s.Snake, numSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
-		shaderTitle:    shader.New(shader.PathTitle),
-		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
-			Uniforms: map[string]interface{}{
-				"ShowKeyPrompt": float32(0.0),
-				"RadiusTex":     []float32{float32(titleRectCornerRadiusX / titleRectWidth), float32(titleRectCornerRadiusY / titleRectHeight)},
-				"Alpha":         float32(titleRectInitialAlpha),
-			},
-		},
 	}
-	scene.titleRectComp.SetColor(colorTitleRect)
-	scene.titleRectComp.Update(&titleRect)
 	scene.prepareTitleRects()
 
 	// Create snakes
@@ -143,29 +127,37 @@ func (t *titleScene) prepareTitleRects() {
 	boundTextTitleSize := boundTextTitle.Size()
 	boundTextKeyPromptSize := boundTextKeyPrompt.Size()
 
-	// Prepare title text image
-	titleImage := ebiten.NewImage(titleRectWidth, titleRectHeight)
-	titleImage.Fill(colorTitleRect)
+	rectShader = *shader.New(shader.PathTitleRect)
+
+	// Prepare title rect image
+	t.titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
+	t.titleImage.Fill(color.White)
+
+	t.titleImage.DrawRectShader(titleRectWidth, titleRectHeight, &rectShader, &ebiten.DrawRectShaderOptions{
+		Uniforms: map[string]interface{}{
+			"RadiusText": []float32{float32(titleRectCornerRadiusX / titleRectWidth), float32(titleRectCornerRadiusY / titleRectHeight)},
+		},
+	})
 
 	// Draw Title text to the image
-	text.Draw(titleImage, textTitle, fontFaceTitle,
+	text.Draw(t.titleImage, textTitle, fontFaceTitle,
 		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X,
 		(titleRectHeight-boundTextTitleSize.Y)/2.0-boundTextTitle.Min.Y+textTitleShiftY,
-		param.ColorBackground)
+		color.RGBA{0.0, 0.0, 0.0, 0.0})
 
 	// Prepare key prompt text image
-	titleImageKeyPrompt := ebiten.NewImageFromImage(titleImage)
+	t.titleImageKeyPrompt = ebiten.NewImageFromImage(t.titleImage)
 
 	// Draw key prompt text to the image
-	text.Draw(titleImageKeyPrompt, textPressToPlay, param.FontFaceScore,
+	text.Draw(t.titleImageKeyPrompt, textPressToPlay, param.FontFaceScore,
 		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
 		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, param.ColorBackground)
 
 	// Send images to the shader
-	t.titleRectDrawOpts.Images[0] = titleImage
-	t.titleRectDrawOpts.Images[1] = titleImageKeyPrompt
+	t.titleRectDrawOpts.ColorM.Reset()
+	t.titleRectDrawOpts.ColorM.Scale(float64(colorTitleRect.R), float64(colorTitleRect.G), float64(colorTitleRect.B), t.titleRectAlpha)
 
-	go t.keyPromptFlipFlop()
+	// go t.keyPromptFlipFlop()
 }
 
 func (t *titleScene) update() bool {
@@ -191,9 +183,12 @@ func (t *titleScene) update() bool {
 		// Update transition process to the next scene
 		if !titleSceneAlive {
 			t.titleRectAlpha -= titleRectDissapearRate
-			t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
+			// TODO: Find more efficient way
+			t.titleRectDrawOpts.ColorM.Reset()
+			t.titleRectDrawOpts.ColorM.Scale(float64(colorTitleRect.R), float64(colorTitleRect.G), float64(colorTitleRect.B), float64(t.titleRectAlpha))
 			if t.titleRectAlpha <= 0.0 {
-				t.shaderTitle.Dispose()
+				// t.shaderTitle.Dispose()
+				rectShader.Dispose()
 				return true
 			}
 		}
@@ -218,7 +213,7 @@ func (t *titleScene) handleKeyPress() {
 	if len(t.pressedKeys) > 0 && titleSceneAlive {
 		// Start transition process
 		titleSceneAlive = false
-		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
+		// t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
 		// Increase speeds of snakes other than the player's snake
 		for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
@@ -238,8 +233,7 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 	drawFPS(screen)
 
 	// Draw Title Rect
-	vertices, indices := t.titleRectComp.Triangles()
-	screen.DrawTrianglesShader(vertices, indices, t.shaderTitle, &t.titleRectDrawOpts)
+	screen.DrawImage(t.titleImage, &t.titleRectDrawOpts)
 }
 
 func turnRandomly(snake *s.Snake) {
@@ -266,26 +260,26 @@ func turnRandomly(snake *s.Snake) {
 	snake.TurnTo(newTurn, false)
 }
 
-// Goroutine
-func (t *titleScene) keyPromptFlipFlop() {
-	showTimeHalfSecs := int(keyPromptShowTime * 2)
-	hideTimeHalfSecs := int(keyPromptHideTime * 2)
-	showPrompt := true
+// // Goroutine
+// func (t *titleScene) keyPromptFlipFlop() {
+// 	showTimeHalfSecs := int(keyPromptShowTime * 2)
+// 	hideTimeHalfSecs := int(keyPromptHideTime * 2)
+// 	showPrompt := true
 
-	halfSecondTicker := time.NewTicker(time.Millisecond * 500)
-	for titleSceneAlive {
-		if showPrompt {
-			t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(1.0)
-			for ihalfSecs := 0; ihalfSecs < showTimeHalfSecs; ihalfSecs++ {
-				<-halfSecondTicker.C
-			}
-		} else {
-			t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
-			for ihalfSecs := 0; ihalfSecs < hideTimeHalfSecs; ihalfSecs++ {
-				<-halfSecondTicker.C
-			}
-		}
-		showPrompt = !showPrompt
-	}
-	halfSecondTicker.Stop()
-}
+// 	halfSecondTicker := time.NewTicker(time.Millisecond * 500)
+// 	for titleSceneAlive {
+// 		if showPrompt {
+// 			t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(1.0)
+// 			for ihalfSecs := 0; ihalfSecs < showTimeHalfSecs; ihalfSecs++ {
+// 				<-halfSecondTicker.C
+// 			}
+// 		} else {
+// 			t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
+// 			for ihalfSecs := 0; ihalfSecs < hideTimeHalfSecs; ihalfSecs++ {
+// 				<-halfSecondTicker.C
+// 			}
+// 		}
+// 		showPrompt = !showPrompt
+// 	}
+// 	halfSecondTicker.Stop()
+// }

@@ -10,7 +10,7 @@ const (
 	PathBasic       = "basic.kage.go"
 	PathCircle      = "circle.kage.go"
 	PathCircleMouth = "circlemouth.kage.go"
-	PathTitle       = "title.kage.go"
+	PathTitleRect   = "titlerect.kage.go"
 )
 
 var (
