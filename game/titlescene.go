@@ -48,14 +48,13 @@ const (
 
 // Title Rectangle parameters
 const (
-	titleRectWidth         = 540
-	titleRectHeight        = 405
-	titleRectRatio         = 1.0 * titleRectWidth / titleRectHeight
-	titleRectCornerRadiusX = param.RadiusSnake
-	titleRectCornerRadiusY = titleRectCornerRadiusX / titleRectRatio
-	// titleRectInitialAlpha          = 230 / 255.0
-	titleRectInitialAlpha          = 255 / 255.0
-	titleRectDissapearRate float64 = 80 * param.DeltaTime
+	titleRectWidth                 = 540
+	titleRectHeight                = 405
+	titleRectRatio                 = 1.0 * titleRectWidth / titleRectHeight
+	titleRectCornerRadiusX         = param.RadiusSnake
+	titleRectCornerRadiusY         = titleRectCornerRadiusX / titleRectRatio
+	titleRectInitialAlpha          = 230 / 255.0
+	titleRectDissapearRate float64 = (80.0 / 255.0) * param.DeltaTime
 	textTitle                      = "Ssnake"
 	textPressToPlay                = "Press any key to start"
 	textTitleShiftY                = -50
@@ -66,7 +65,7 @@ const (
 
 var (
 	titleSceneAlive = true
-	colorTitleRect  = &param.ColorSnake2
+	colorTitleRect  = []float64{float64(param.ColorSnake2.R) / 255.0, float64(param.ColorSnake2.G) / 255.0, float64(param.ColorSnake2.B) / 255.0, titleRectInitialAlpha}
 
 	snakeColors = map[int]*color.RGBA{
 		0: &param.ColorSnake1,
@@ -131,11 +130,11 @@ func (t *titleScene) prepareTitleRects() {
 
 	// Prepare title rect image
 	t.titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
-	t.titleImage.Fill(color.White)
 
 	t.titleImage.DrawRectShader(titleRectWidth, titleRectHeight, &rectShader, &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
-			"RadiusText": []float32{float32(titleRectCornerRadiusX / titleRectWidth), float32(titleRectCornerRadiusY / titleRectHeight)},
+			"CornerRadius": []float32{float32(titleRectCornerRadiusX), float32(titleRectCornerRadiusY)},
+			"Size":         []float32{titleRectWidth, titleRectHeight},
 		},
 	})
 
@@ -153,9 +152,9 @@ func (t *titleScene) prepareTitleRects() {
 		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
 		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, param.ColorBackground)
 
-	// Send images to the shader
-	t.titleRectDrawOpts.ColorM.Reset()
-	t.titleRectDrawOpts.ColorM.Scale(float64(colorTitleRect.R), float64(colorTitleRect.G), float64(colorTitleRect.B), t.titleRectAlpha)
+	// Initialize title rect draw options
+	t.titleRectDrawOpts.GeoM.Translate((param.ScreenWidth-titleRectWidth)/2.0, (param.ScreenHeight-titleRectHeight)/2.0)
+	t.titleRectDrawOpts.ColorM.Scale(colorTitleRect[0], colorTitleRect[1], colorTitleRect[2], colorTitleRect[3])
 
 	// go t.keyPromptFlipFlop()
 }
@@ -183,9 +182,10 @@ func (t *titleScene) update() bool {
 		// Update transition process to the next scene
 		if !titleSceneAlive {
 			t.titleRectAlpha -= titleRectDissapearRate
+			colorTitleRect[3] = t.titleRectAlpha
 			// TODO: Find more efficient way
 			t.titleRectDrawOpts.ColorM.Reset()
-			t.titleRectDrawOpts.ColorM.Scale(float64(colorTitleRect.R), float64(colorTitleRect.G), float64(colorTitleRect.B), float64(t.titleRectAlpha))
+			t.titleRectDrawOpts.ColorM.Scale(colorTitleRect[0], colorTitleRect[1], colorTitleRect[2], colorTitleRect[3])
 			if t.titleRectAlpha <= 0.0 {
 				// t.shaderTitle.Dispose()
 				rectShader.Dispose()

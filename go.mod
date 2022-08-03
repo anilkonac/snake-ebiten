@@ -1,6 +1,6 @@
 module github.com/anilkonac/snake-ebiten
 
-go 1.18
+go 1.19
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.3.7
