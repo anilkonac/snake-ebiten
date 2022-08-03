@@ -34,9 +34,9 @@ import (
 // Dumb snake parameters
 const (
 	numSnakes           = 30
-	turnTimeMin         = 0 // sec
-	turnTimeMax         = 2 // sec
-	turnTimeDiff        = turnTimeMax - turnTimeMin
+	turnTimeMinSec      = 0
+	turnTimeMaxSec      = 2
+	turnTimeDiff        = turnTimeMaxSec - turnTimeMinSec
 	dumbSnakeLengthMin  = 120
 	dumbSnakeLengthMax  = 480
 	dumbSnakeLengthDiff = dumbSnakeLengthMax - dumbSnakeLengthMin
@@ -59,19 +59,19 @@ const (
 	textPressToPlay                = "Press any key to start"
 	textTitleShiftY                = -50
 	textKeyPromptShiftY            = +100
-	keyPromptShowTime              = 1.0 //sec
-	keyPromptHideTime              = 0.5 // sec
+	keyPromptShowTimeSec           = 1.0
+	keyPromptHideTimeSec           = 0.5
 )
 
 var (
 	titleSceneAlive = true
 	colorTitleRect  = []float64{float64(param.ColorSnake2.R) / 255.0, float64(param.ColorSnake2.G) / 255.0, float64(param.ColorSnake2.B) / 255.0, titleRectInitialAlpha}
 
-	snakeColors = map[int]*color.RGBA{
-		0: &param.ColorSnake1,
-		1: &param.ColorSnake2,
-		2: &param.ColorFood,
-		3: &param.ColorDebug,
+	snakeColors = [...]*color.RGBA{
+		&param.ColorSnake1,
+		&param.ColorSnake2,
+		&param.ColorFood,
+		&param.ColorDebug,
 	}
 	rectShader ebiten.Shader
 )
@@ -109,7 +109,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		scene.snakes[iSnake] = snake
 
 		// Set rand turn time
-		scene.turnTimers[iSnake] = turnTimeMin + rand.Float32()*turnTimeDiff
+		scene.turnTimers[iSnake] = turnTimeMinSec + rand.Float32()*turnTimeDiff
 
 	}
 
@@ -117,7 +117,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 	scene.snakes[numSnakes-1] = playerSnake
 
 	// Set rand turn time
-	scene.turnTimers[numSnakes-1] = turnTimeMin + rand.Float32()*turnTimeDiff
+	scene.turnTimers[numSnakes-1] = turnTimeMinSec + rand.Float32()*turnTimeDiff
 
 	return scene
 }
@@ -130,27 +130,41 @@ func (t *titleScene) prepareTitleRects() {
 
 	// Prepare title rect image
 	t.titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
+	textImage := ebiten.NewImage(titleRectWidth, titleRectHeight)
+
+	// Draw Title text to the image
+	text.Draw(textImage, textTitle, fontFaceTitle,
+		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X,
+		(titleRectHeight-boundTextTitleSize.Y)/2.0-boundTextTitle.Min.Y+textTitleShiftY,
+		color.White)
+
+	textImageWPrompt := ebiten.NewImageFromImage(textImage)
 
 	t.titleImage.DrawRectShader(titleRectWidth, titleRectHeight, &rectShader, &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
-			"CornerRadius": []float32{float32(titleRectCornerRadiusX), float32(titleRectCornerRadiusY)},
-			"Size":         []float32{titleRectWidth, titleRectHeight},
+			"RadiusTex": []float32{float32(titleRectCornerRadiusX / titleRectWidth), float32(titleRectCornerRadiusY / titleRectHeight)},
+		},
+		Images: [4]*ebiten.Image{
+			textImage,
 		},
 	})
 
-	// Draw Title text to the image
-	text.Draw(t.titleImage, textTitle, fontFaceTitle,
-		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X,
-		(titleRectHeight-boundTextTitleSize.Y)/2.0-boundTextTitle.Min.Y+textTitleShiftY,
-		color.RGBA{0.0, 0.0, 0.0, 0.0})
-
 	// Prepare key prompt text image
-	t.titleImageKeyPrompt = ebiten.NewImageFromImage(t.titleImage)
+	t.titleImageKeyPrompt = ebiten.NewImage(titleRectWidth, titleRectHeight)
 
 	// Draw key prompt text to the image
-	text.Draw(t.titleImageKeyPrompt, textPressToPlay, param.FontFaceScore,
+	text.Draw(textImageWPrompt, textPressToPlay, param.FontFaceScore,
 		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
-		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, param.ColorBackground)
+		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, color.White)
+
+	t.titleImageKeyPrompt.DrawRectShader(titleRectWidth, titleRectHeight, &rectShader, &ebiten.DrawRectShaderOptions{
+		Uniforms: map[string]interface{}{
+			"RadiusTex": []float32{float32(titleRectCornerRadiusX / titleRectWidth), float32(titleRectCornerRadiusY / titleRectHeight)},
+		},
+		Images: [4]*ebiten.Image{
+			textImageWPrompt,
+		},
+	})
 
 	// Initialize title rect draw options
 	t.titleRectDrawOpts.GeoM.Translate((param.ScreenWidth-titleRectWidth)/2.0, (param.ScreenHeight-titleRectHeight)/2.0)
@@ -202,7 +216,7 @@ func (t *titleScene) updateSnake(iSnake int) {
 	snake := t.snakes[iSnake]
 	if titleSceneAlive && t.sceneTime >= t.turnTimers[iSnake] {
 		turnRandomly(snake)
-		t.turnTimers[iSnake] += turnTimeMin + rand.Float32()*turnTimeDiff
+		t.turnTimers[iSnake] += turnTimeMinSec + rand.Float32()*turnTimeDiff
 	}
 
 	snake.Update(param.MouthAnimStartDistance) // Make sure the snake's mouth is not open
