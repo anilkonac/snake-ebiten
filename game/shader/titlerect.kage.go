@@ -20,11 +20,7 @@ func Fragment(pos vec4, texCoord vec2, col vec4) vec4 {
 		return vec4(0.0)
 	}
 
-	// Crop text
-	if imageSrc0UnsafeAt(texCoord) == vec4(1.0) {
-		return vec4(0.1)
-	}
-
-	return vec4(1.0)
+	// Draw rectangle image with texts
+	return imageSrc0UnsafeAt(texCoord)
 
 }

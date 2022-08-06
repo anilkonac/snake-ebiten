@@ -65,7 +65,6 @@ const (
 
 var (
 	titleSceneAlive = true
-	colorTitleRect  = []float64{float64(param.ColorSnake2.R) / 255.0, float64(param.ColorSnake2.G) / 255.0, float64(param.ColorSnake2.B) / 255.0, titleRectInitialAlpha}
 
 	snakeColors = [...]*color.RGBA{
 		&param.ColorSnake1,
@@ -131,12 +130,13 @@ func (t *titleScene) prepareTitleRects() {
 	// Prepare title rect image
 	t.titleImage = ebiten.NewImage(titleRectWidth, titleRectHeight)
 	textImage := ebiten.NewImage(titleRectWidth, titleRectHeight)
+	textImage.Fill(param.ColorSnake2)
 
 	// Draw Title text to the image
 	text.Draw(textImage, textTitle, fontFaceTitle,
 		(titleRectWidth-boundTextTitleSize.X)/2.0-boundTextTitle.Min.X,
 		(titleRectHeight-boundTextTitleSize.Y)/2.0-boundTextTitle.Min.Y+textTitleShiftY,
-		color.White)
+		param.ColorBackground)
 
 	textImageWPrompt := ebiten.NewImageFromImage(textImage)
 
@@ -155,7 +155,7 @@ func (t *titleScene) prepareTitleRects() {
 	// Draw key prompt text to the image
 	text.Draw(textImageWPrompt, textPressToPlay, param.FontFaceScore,
 		(titleRectWidth-boundTextKeyPromptSize.X)/2.0-boundTextKeyPrompt.Min.X,
-		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, color.White)
+		(titleRectHeight-boundTextKeyPromptSize.Y)/2.0-boundTextKeyPrompt.Min.Y+textKeyPromptShiftY, param.ColorBackground)
 
 	t.titleImageKeyPrompt.DrawRectShader(titleRectWidth, titleRectHeight, &rectShader, &ebiten.DrawRectShaderOptions{
 		Uniforms: map[string]interface{}{
@@ -168,7 +168,7 @@ func (t *titleScene) prepareTitleRects() {
 
 	// Initialize title rect draw options
 	t.titleRectDrawOpts.GeoM.Translate((param.ScreenWidth-titleRectWidth)/2.0, (param.ScreenHeight-titleRectHeight)/2.0)
-	t.titleRectDrawOpts.ColorM.Scale(colorTitleRect[0], colorTitleRect[1], colorTitleRect[2], colorTitleRect[3])
+	t.titleRectDrawOpts.ColorM.Scale(1.0, 1.0, 1.0, t.titleRectAlpha)
 
 	// go t.keyPromptFlipFlop()
 }
@@ -196,10 +196,9 @@ func (t *titleScene) update() bool {
 		// Update transition process to the next scene
 		if !titleSceneAlive {
 			t.titleRectAlpha -= titleRectDissapearRate
-			colorTitleRect[3] = t.titleRectAlpha
 			// TODO: Find more efficient way
 			t.titleRectDrawOpts.ColorM.Reset()
-			t.titleRectDrawOpts.ColorM.Scale(colorTitleRect[0], colorTitleRect[1], colorTitleRect[2], colorTitleRect[3])
+			t.titleRectDrawOpts.ColorM.Scale(1.0, 1.0, 1.0, t.titleRectAlpha)
 			if t.titleRectAlpha <= 0.0 {
 				// t.shaderTitle.Dispose()
 				rectShader.Dispose()
@@ -276,8 +275,8 @@ func turnRandomly(snake *s.Snake) {
 
 // // Goroutine
 // func (t *titleScene) keyPromptFlipFlop() {
-// 	showTimeHalfSecs := int(keyPromptShowTime * 2)
-// 	hideTimeHalfSecs := int(keyPromptHideTime * 2)
+// 	const showTimeHalfSecs = keyPromptShowTimeSec * 2
+// 	const hideTimeHalfSecs = keyPromptHideTimeSec * 2
 // 	showPrompt := true
 
 // 	halfSecondTicker := time.NewTicker(time.Millisecond * 500)

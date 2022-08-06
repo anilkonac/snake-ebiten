@@ -32,9 +32,10 @@ import (
 )
 
 var (
-	imageCircle  = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
-	shaderMouth  = shader.New(shader.PathCircleMouth)
-	MouthEnabled = false
+	imageCircle    = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
+	shaderMouth    = shader.New(shader.PathCircleMouth)
+	MouthEnabled   = false
+	optTriangEmpty ebiten.DrawTrianglesOptions
 )
 
 func init() {
@@ -245,16 +246,13 @@ func (s *Snake) LastDirection() DirectionT {
 }
 
 func (s *Snake) Draw(dst *ebiten.Image) {
-	// var optTriang ebiten.DrawImageOptions
-	var optTriang ebiten.DrawTrianglesOptions
-
 	for unit := s.UnitHead; unit != nil; unit = unit.Next {
 		// Draw circle centered on unit's head center
 		vertices, indices := unit.CompTriangHead.Triangles()
 		if MouthEnabled && (unit == s.UnitHead) {
 			dst.DrawTrianglesShader(vertices, indices, shaderMouth, &s.drawOptsHead)
 		} else {
-			dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
+			dst.DrawTriangles(vertices, indices, imageCircle, &optTriangEmpty)
 		}
 
 		// Draw rectangle starts from unit's head center to the tail head center
@@ -263,7 +261,7 @@ func (s *Snake) Draw(dst *ebiten.Image) {
 		if unit.Next == nil {
 			// Draw circle centered on unit's tail center
 			vertices, indices = unit.CompTriangTail.Triangles()
-			dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
+			dst.DrawTriangles(vertices, indices, imageCircle, &optTriangEmpty)
 		}
 
 		if param.DebugUnits {
