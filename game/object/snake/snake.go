@@ -257,14 +257,14 @@ func (s *Snake) Draw(dst *ebiten.Image) {
 			dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
 		}
 
-		// Draw rectangle starts from unit's head center to the tail head center
-		unit.CompBody.Draw(dst)
-
 		if unit.Next == nil {
 			// Draw circle centered on unit's tail center
 			vertices, indices = unit.CompTriangTail.Triangles()
 			dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
 		}
+
+		// Draw rectangle starts from unit's head center to the tail head center
+		unit.CompBody.Draw(dst)
 
 		if param.DebugUnits {
 			unit.DrawDebugInfo(dst)
