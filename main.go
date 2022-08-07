@@ -8,6 +8,6 @@ import (
 func main() {
 	ebiten.SetWindowSize(g.ScreenSize())
 	ebiten.SetWindowTitle("Ssnake")
-	ebiten.SetFPSMode(ebiten.FPSModeVsyncOffMaximum)
+	// ebiten.SetFPSMode(ebiten.FPSModeVsyncOffMaximum)
 	ebiten.RunGame(g.NewGame())
 }

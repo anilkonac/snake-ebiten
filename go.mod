@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220712193148-63cf1f4ef61f // indirect
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220806181222-55e207c401ad // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/hajimehoshi/oto/v2 v2.2.0 // indirect
 	github.com/jezek/xgb v1.0.1 // indirect
