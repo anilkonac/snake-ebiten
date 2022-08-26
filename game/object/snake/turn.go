@@ -42,17 +42,11 @@ type Turn struct {
 }
 
 func NewTurn(directionFrom, directionTo DirectionT) *Turn {
-	newTurn := &Turn{
+	return &Turn{
 		directionTo: directionTo,
+		isTurningLeft: (directionFrom == DirectionUp && directionTo == DirectionLeft) ||
+			(directionFrom == DirectionLeft && directionTo == DirectionDown) ||
+			(directionFrom == DirectionDown && directionTo == DirectionRight) ||
+			(directionFrom == DirectionRight && directionTo == DirectionUp),
 	}
-
-	// Determine the direction of rotation.
-	if (directionFrom == DirectionUp && directionTo == DirectionLeft) ||
-		(directionFrom == DirectionLeft && directionTo == DirectionDown) ||
-		(directionFrom == DirectionDown && directionTo == DirectionRight) ||
-		(directionFrom == DirectionRight && directionTo == DirectionUp) {
-		newTurn.isTurningLeft = true
-	}
-
-	return newTurn
 }

@@ -36,9 +36,9 @@ import (
 // Dumb snake parameters
 const (
 	numSnakes           = 30
-	turnTimeMin         = 0 // sec
-	turnTimeMax         = 2 // sec
-	turnTimeDiff        = turnTimeMax - turnTimeMin
+	turnTimeMinSec      = 0
+	turnTimeMaxSec      = 2
+	turnTimeDiff        = turnTimeMaxSec - turnTimeMinSec
 	dumbSnakeLengthMin  = 120
 	dumbSnakeLengthMax  = 480
 	dumbSnakeLengthDiff = dumbSnakeLengthMax - dumbSnakeLengthMin
@@ -61,15 +61,15 @@ const (
 	textPressToPlay                = "Press any key to start"
 	textTitleShiftY                = -50
 	textKeyPromptShiftY            = +100
-	keyPromptShowTime              = 1.0 //sec
-	keyPromptHideTime              = 0.5 // sec
+	keyPromptShowTimeSec           = 1.0
+	keyPromptHideTimeSec           = 0.5
 )
 
 var (
 	titleSceneAlive = true
 	colorTitleRect  = &param.ColorSnake2
 
-	snakeColors = map[int]*color.RGBA{
+	snakeColors = [...]*color.RGBA{
 		0: &param.ColorSnake1,
 		1: &param.ColorSnake2,
 		2: &param.ColorFood,
@@ -126,7 +126,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 		scene.snakes[iSnake] = snake
 
 		// Set rand turn time
-		scene.turnTimers[iSnake] = turnTimeMin + rand.Float32()*turnTimeDiff
+		scene.turnTimers[iSnake] = turnTimeMinSec + rand.Float32()*turnTimeDiff
 
 	}
 
@@ -134,7 +134,7 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 	scene.snakes[numSnakes-1] = playerSnake
 
 	// Set rand turn time
-	scene.turnTimers[numSnakes-1] = turnTimeMin + rand.Float32()*turnTimeDiff
+	scene.turnTimers[numSnakes-1] = turnTimeMinSec + rand.Float32()*turnTimeDiff
 
 	return scene
 }
@@ -189,13 +189,11 @@ func (t *titleScene) update() bool {
 		t.updateSnake(numSnakes - 1)
 
 		// Update transition process to the next scene
-		if !titleSceneAlive {
-			t.titleRectAlpha -= titleRectDissapearRate
-			t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
-			if t.titleRectAlpha <= 0.0 {
-				t.shaderTitle.Dispose()
-				return true
-			}
+		t.titleRectAlpha -= titleRectDissapearRate
+		t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
+		if t.titleRectAlpha <= 0.0 {
+			t.shaderTitle.Dispose()
+			return true
 		}
 	}
 
@@ -207,7 +205,7 @@ func (t *titleScene) updateSnake(iSnake int) {
 	snake := t.snakes[iSnake]
 	if titleSceneAlive && t.sceneTime >= t.turnTimers[iSnake] {
 		turnRandomly(snake)
-		t.turnTimers[iSnake] += turnTimeMin + rand.Float32()*turnTimeDiff
+		t.turnTimers[iSnake] += turnTimeMinSec + rand.Float32()*turnTimeDiff
 	}
 
 	snake.Update(param.MouthAnimStartDistance) // Make sure the snake's mouth is not open
@@ -268,8 +266,8 @@ func turnRandomly(snake *s.Snake) {
 
 // Goroutine
 func (t *titleScene) keyPromptFlipFlop() {
-	showTimeHalfSecs := int(keyPromptShowTime * 2)
-	hideTimeHalfSecs := int(keyPromptHideTime * 2)
+	const showTimeHalfSecs = keyPromptShowTimeSec * 2
+	const hideTimeHalfSecs = keyPromptHideTimeSec * 2
 	showPrompt := true
 
 	halfSecondTicker := time.NewTicker(time.Millisecond * 500)

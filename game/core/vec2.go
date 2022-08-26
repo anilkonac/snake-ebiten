@@ -37,7 +37,5 @@ func (v Vec64) Floor() Vec64 {
 }
 
 func Distance(a, b Vec64) float64 {
-	distX := a.X - b.X
-	distY := a.Y - b.Y
-	return math.Hypot(distX, distY)
+	return math.Hypot(a.X-b.X, a.Y-b.Y)
 }

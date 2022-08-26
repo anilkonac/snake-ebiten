@@ -41,13 +41,6 @@ func init() {
 	})
 }
 
-var drawOptionsFood = ebiten.DrawTrianglesShaderOptions{
-	Uniforms: map[string]interface{}{
-		"IsVertical": float32(1.0),
-		"Size":       []float32{param.FoodLength, param.FoodLength},
-	},
-}
-
 type Food struct {
 	c.TeleCompTriang
 	IsActive bool

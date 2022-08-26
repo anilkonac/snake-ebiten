@@ -23,7 +23,8 @@ import (
 	"github.com/anilkonac/snake-ebiten/game/param"
 )
 
-// A Telecomp contains rectangle information about teleported parts of a game object.
+// TeleComp (Teleportable Component) holds information about the teleported parts of a game object.
+// This teleported parts are rectangles divided by screen edges.
 type TeleComp struct {
 	Rects    [4]RectF32
 	NumRects uint8
@@ -34,6 +35,7 @@ func (t *TeleComp) Update(pureRect *RectF32) {
 	t.split(*pureRect)
 }
 
+// split divides the rectangle of the game object at the screen edges.
 func (t *TeleComp) split(rect RectF32) {
 	if (rect.Size.X <= 0) || (rect.Size.Y <= 0) {
 		return

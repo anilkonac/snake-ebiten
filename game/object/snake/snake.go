@@ -32,12 +32,14 @@ import (
 )
 
 var (
-	imageCircle  = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
-	shaderMouth  = shader.New(shader.PathCircleMouth)
-	MouthEnabled = false
+	imageCircle    = ebiten.NewImage(param.SnakeWidth, param.SnakeWidth)
+	shaderMouth    = shader.New(shader.PathCircleMouth)
+	MouthEnabled   = false
+	optTriangEmpty ebiten.DrawTrianglesOptions
 )
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 
 	// Prepare cirle image whose radius is snake's half width
 	imageCircle.DrawRectShader(param.SnakeWidth, param.SnakeWidth, &shader.Circle, &ebiten.DrawRectShaderOptions{
@@ -45,6 +47,7 @@ func init() {
 			"Radius": float32(param.RadiusSnake),
 		},
 	})
+
 }
 
 type Snake struct {
@@ -59,10 +62,6 @@ type Snake struct {
 	FoodEaten       uint8
 	color           *color.RGBA
 	drawOptsHead    ebiten.DrawTrianglesShaderOptions
-}
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
 }
 
 func NewSnake(headCenter c.Vec64, initialLength uint16, speed float64, direction DirectionT, color *color.RGBA) *Snake {
@@ -245,22 +244,19 @@ func (s *Snake) LastDirection() DirectionT {
 }
 
 func (s *Snake) Draw(dst *ebiten.Image) {
-	// var optTriang ebiten.DrawImageOptions
-	var optTriang ebiten.DrawTrianglesOptions
-
 	for unit := s.UnitHead; unit != nil; unit = unit.Next {
 		// Draw circle centered on unit's head center
 		vertices, indices := unit.CompTriangHead.Triangles()
 		if MouthEnabled && (unit == s.UnitHead) {
 			dst.DrawTrianglesShader(vertices, indices, shaderMouth, &s.drawOptsHead)
 		} else {
-			dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
+			dst.DrawTriangles(vertices, indices, imageCircle, &optTriangEmpty)
 		}
 
 		if unit.Next == nil {
 			// Draw circle centered on unit's tail center
 			vertices, indices = unit.CompTriangTail.Triangles()
-			dst.DrawTriangles(vertices, indices, imageCircle, &optTriang)
+			dst.DrawTriangles(vertices, indices, imageCircle, &optTriangEmpty)
 		}
 
 		// Draw rectangle starts from unit's head center to the tail head center
