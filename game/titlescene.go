@@ -35,7 +35,7 @@ import (
 
 // Dumb snake parameters
 const (
-	numSnakes           = 30
+	numBotSnakes        = 29
 	turnTimeMinSec      = 0
 	turnTimeMaxSec      = 2
 	turnTimeDiff        = turnTimeMaxSec - turnTimeMinSec
@@ -80,9 +80,8 @@ var (
 type titleScene struct {
 	titleRectComp     c.TeleCompTriang
 	titleRectAlpha    float32
-	turnTimers        [numSnakes]float32
-	sceneTime         float32
-	snakes            []*s.Snake
+	playerSnake       *s.Snake
+	snakes            []s.Snake
 	pressedKeys       []ebiten.Key
 	shaderTitle       *ebiten.Shader
 	titleRectDrawOpts ebiten.DrawTrianglesShaderOptions
@@ -98,8 +97,9 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 
 	// Create scene
 	scene := &titleScene{
+		playerSnake:    playerSnake,
 		titleRectAlpha: titleRectInitialAlpha,
-		snakes:         make([]*s.Snake, numSnakes),
+		snakes:         make([]s.Snake, 0, numBotSnakes),
 		pressedKeys:    make([]ebiten.Key, 0, 10),
 		shaderTitle:    shader.New(shader.PathTitle),
 		titleRectDrawOpts: ebiten.DrawTrianglesShaderOptions{
@@ -119,22 +119,16 @@ func newTitleScene(playerSnake *s.Snake) *titleScene {
 
 	// Create temp snakes for the title screen
 	lenSnakeColors := len(snakeColors)
-	for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
+	for iSnake := 0; iSnake < numBotSnakes; iSnake++ {
 		length := dumbSnakeLengthMin + rand.Intn(dumbSnakeLengthDiff)
 		speed := dumbSnakeSpeedMin + rand.Float64()*dumbSnakeSpeedDiff
-		snake := s.NewSnakeRandDirLoc(uint16(length), speed, snakeColors[rand.Intn(lenSnakeColors)])
-		scene.snakes[iSnake] = snake
+		scene.snakes = append(scene.snakes, *s.NewSnakeRandDirLoc(uint16(length), speed, snakeColors[rand.Intn(lenSnakeColors)]))
 
-		// Set rand turn time
-		scene.turnTimers[iSnake] = turnTimeMinSec + rand.Float32()*turnTimeDiff
+		go control(&scene.snakes[iSnake])
 
 	}
 
-	// Store playersnake pointer as an element of the snakes array
-	scene.snakes[numSnakes-1] = playerSnake
-
-	// Set rand turn time
-	scene.turnTimers[numSnakes-1] = turnTimeMinSec + rand.Float32()*turnTimeDiff
+	go control(playerSnake)
 
 	return scene
 }
@@ -169,25 +163,20 @@ func (t *titleScene) prepareTitleRects() {
 }
 
 func (t *titleScene) update() bool {
-	if titleSceneAlive {
-		for iSnake := range t.snakes {
-			t.updateSnake(iSnake)
-		}
+	// Update bot snakes
+	param.TeleportEnabled = titleSceneAlive
+	for iSnake := 0; iSnake < numBotSnakes; iSnake++ {
+		t.snakes[iSnake].Update(param.MouthAnimStartDistance)
+	}
 
+	// Update player snake
+	param.TeleportEnabled = true
+	t.playerSnake.Update(param.MouthAnimStartDistance)
+
+	if titleSceneAlive {
 		t.handleKeyPress()
 
 	} else {
-		// Update dumb snakes
-		param.TeleportEnabled = false
-		for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
-			t.updateSnake(iSnake)
-
-		}
-
-		// Update player snake
-		param.TeleportEnabled = true
-		t.updateSnake(numSnakes - 1)
-
 		// Update transition process to the next scene
 		t.titleRectAlpha -= titleRectDissapearRate
 		t.titleRectDrawOpts.Uniforms["Alpha"] = t.titleRectAlpha
@@ -197,18 +186,7 @@ func (t *titleScene) update() bool {
 		}
 	}
 
-	t.sceneTime += param.DeltaTime
 	return false
-}
-
-func (t *titleScene) updateSnake(iSnake int) {
-	snake := t.snakes[iSnake]
-	if titleSceneAlive && t.sceneTime >= t.turnTimers[iSnake] {
-		turnRandomly(snake)
-		t.turnTimers[iSnake] += turnTimeMinSec + rand.Float32()*turnTimeDiff
-	}
-
-	snake.Update(param.MouthAnimStartDistance) // Make sure the snake's mouth is not open
 }
 
 func (t *titleScene) handleKeyPress() {
@@ -219,7 +197,7 @@ func (t *titleScene) handleKeyPress() {
 		t.titleRectDrawOpts.Uniforms["ShowKeyPrompt"] = float32(0.0)
 
 		// Increase speeds of snakes other than the player's snake
-		for iSnake := 0; iSnake < numSnakes-1; iSnake++ {
+		for iSnake := 0; iSnake < numBotSnakes; iSnake++ {
 			t.snakes[iSnake].Speed *= dumbSnakeRunMultip
 		}
 	}
@@ -228,10 +206,13 @@ func (t *titleScene) handleKeyPress() {
 func (t *titleScene) draw(screen *ebiten.Image) {
 	screen.Fill(param.ColorBackground)
 
-	// Draw snakes
-	for _, snake := range t.snakes {
-		snake.Draw(screen)
+	// Draw bot snakes
+	for iSnake := 0; iSnake < numBotSnakes; iSnake++ {
+		t.snakes[iSnake].Draw(screen)
 	}
+
+	// Draw player snake
+	t.playerSnake.Draw(screen)
 
 	drawFPS(screen)
 
@@ -240,31 +221,8 @@ func (t *titleScene) draw(screen *ebiten.Image) {
 	screen.DrawTrianglesShader(vertices, indices, t.shaderTitle, &t.titleRectDrawOpts)
 }
 
-func turnRandomly(snake *s.Snake) {
-	// Determine the new direction.
-	var dirNew s.DirectionT
-	dirCurrent := snake.LastDirection()
-
-	if randResult := rand.Float32(); dirCurrent.IsVertical() {
-		if randResult < 0.5 {
-			dirNew = s.DirectionLeft
-		} else {
-			dirNew = s.DirectionRight
-		}
-	} else {
-		if randResult < 0.5 {
-			dirNew = s.DirectionUp
-		} else {
-			dirNew = s.DirectionDown
-		}
-	}
-
-	// Create a new turn and take it
-	newTurn := s.NewTurn(dirCurrent, dirNew)
-	snake.TurnTo(newTurn, false)
-}
-
 // Goroutine
+// keyPromptFlipFlop switches title rectangle image within a specific time
 func (t *titleScene) keyPromptFlipFlop() {
 	const showTimeHalfSecs = keyPromptShowTimeSec * 2
 	const hideTimeHalfSecs = keyPromptHideTimeSec * 2
@@ -286,4 +244,39 @@ func (t *titleScene) keyPromptFlipFlop() {
 		showPrompt = !showPrompt
 	}
 	halfSecondTicker.Stop()
+}
+
+// Goroutine
+// control turns given snake at a given time
+func control(snake *s.Snake) {
+	const turnTimeMinMs = turnTimeMinSec * 1000
+	const turnTimeDiffMs = turnTimeMaxSec*1000 - turnTimeMinMs
+
+	var dirNew s.DirectionT
+	for titleSceneAlive {
+		// Determine the new direction.
+		dirCurrent := snake.LastDirection()
+
+		if randResult := rand.Float32(); dirCurrent.IsVertical() {
+			if randResult < 0.5 {
+				dirNew = s.DirectionLeft
+			} else {
+				dirNew = s.DirectionRight
+			}
+		} else {
+			if randResult < 0.5 {
+				dirNew = s.DirectionUp
+			} else {
+				dirNew = s.DirectionDown
+			}
+		}
+
+		// Create a new turn and take it
+		newTurn := s.NewTurn(dirCurrent, dirNew)
+		snake.TurnTo(newTurn, false)
+
+		// Sleep a random amount of time between turnTimeMin and turnTimeMax.
+		sleepTime := time.Duration(turnTimeMinMs + rand.Float32()*turnTimeDiffMs)
+		time.Sleep(time.Millisecond * sleepTime)
+	}
 }

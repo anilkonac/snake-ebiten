@@ -82,7 +82,7 @@ func init() {
 
 func drawFPS(screen *ebiten.Image) {
 	if param.PrintFPS {
-		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.CurrentTPS(), ebiten.CurrentFPS())
+		msg := fmt.Sprintf("TPS: %.1f\tFPS: %.1f", ebiten.ActualTPS(), ebiten.ActualFPS())
 		text.Draw(screen, msg, fontFaceDebug, param.ScreenWidth-boundTextFPS.Size().X-fpsTextShiftX, -boundTextFPS.Min.Y+fpsTextShiftY, param.ColorDebug)
 	}
 }
